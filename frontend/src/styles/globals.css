@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes countdown {
+  0% { width: 100%; }
+  100% { width: 0; }
+}
+
+.animate-countdown {
+  animation-name: countdown;
+  animation-timing-function: linear;
+}

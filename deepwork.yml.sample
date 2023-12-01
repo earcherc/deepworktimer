@@ -1,0 +1,26 @@
+# Move this into your .config/tmuxinator dir and run using `tmuxinator deepwork`
+
+name: deepwork
+root: ~/Documents/code/deepwork
+
+windows:
+  - deepwork-dev:
+      layout: main-horizontal
+      panes:
+        - pane1: # Docker Services
+            - docker-compose up
+            - clear
+
+        - pane2: # Git and System Monitoring
+            - git status
+            - watch -n 10 'docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
+            - clear
+
+        - pane3: # Code Editor
+            - code dashboard.code-workspace
+            - clear
+
+        - pane4: # Browser for Testing
+            - sleep 5 # Wait for server to start
+            - open http://localhost:3000/
+            - clear

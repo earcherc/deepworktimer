@@ -3,9 +3,7 @@ const nextConfig = {
   images: {
     domains: ['tailwindui.com', 'images.unsplash.com'],
   },
-  experimental: {
-    serverActions: true,
-  }
+  experimental: {}
 }
 
 module.exports = nextConfig

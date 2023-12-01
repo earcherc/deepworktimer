@@ -32,3 +32,36 @@ The Deep Work Companion App is designed to help users achieve optimal deep work 
 - **Metrics Tracking**: Insights into productivity patterns and focus sessions.
 - **Friend Connectivity**: Connect with friends, share progress, and stay motivated.
 - **Customizable Routines**: Tailor your deep work routine to fit your personal preferences and schedule.
+
+<br>
+<br>
+
+# Useful Docker Commands
+
+## Basic Docker Commands
+- `docker ps`: List all running containers.
+- `docker logs -f <container_id>`: Follow the log output of a container.
+- `docker exec -it <container_id> /bin/bash`: Execute an interactive bash shell on the container.
+- `docker exec -it <container_id> env`: Print environment variables of the container.
+- `docker image ls`: List all Docker images.
+- `docker image prune`: Remove unused images.
+- `docker image prune -a`: Remove all unused images (including dangling images).
+- `docker volume ls`: List all volumes.
+- `docker volume rm <volume_name>`: Remove a specific volume.
+
+## Docker Compose Commands
+- `docker-compose up`: Create and start containers as per the docker-compose.yml.
+- `docker-compose down`: Stop and remove containers and networks created by 'up'.
+- `docker-compose restart <service_name>`: Restart a specific service.
+- `docker-compose build <service_name>`: Build or rebuild a specific service.
+- `docker-compose up -d --no-deps --force-recreate <service_name>`: Recreate a specific service without affecting others.
+- `docker-compose logs <service_name>`: View output from services.
+
+## Database and Migration Related (For Backend Services)
+- `docker exec -it <postgres_db_container_id> psql -U <username> -d <db_name>`: Access PostgreSQL database.
+- `docker exec -it <container_id> alembic revision --autogenerate -m "Migration message goes here"`: Create a new Alembic migration.
+- `docker exec -it <container_id> alembic upgrade head`: Apply the latest Alembic migration.
+- `docker exec -it <container_id> alembic downgrade -1`: Revert the last Alembic migration.
+
+## Installing Tools in Containers
+- `docker exec -it <container_id> apt-get update && apt-get install curl`: Install curl in a container (for Debian-based images).
