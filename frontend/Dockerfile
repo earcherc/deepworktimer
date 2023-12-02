@@ -3,10 +3,10 @@
 FROM node:18
 
 # Create and change to the app directory.
-WORKDIR /app
+WORKDIR /frontend
 
 # Copy package.json and package-lock.json, and install dependencies.
-COPY package*.json ./
+COPY package*.json .
 
 RUN npm install --frozen-lockfile
 

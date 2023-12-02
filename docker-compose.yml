@@ -6,10 +6,33 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend:/frontend
+      - /frontend/node_modules
     ports:
       - '3000:3000'
     environment:
       - NODE_ENV=development
-    command: npm run dev
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/backend
+    ports:
+      - '8000:8000'
+
+  db:
+    image: postgres:15
+    env_file:
+      - .env
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+
+volumes:
+  db_data: {}
