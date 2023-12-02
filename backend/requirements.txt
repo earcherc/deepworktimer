@@ -1,6 +1,7 @@
 alembic==1.13.0
 fastapi==0.104.1
 psycopg2-binary==2.9.9
+redis==5.0.1
 strawberry-graphql[fastapi]==0.215.1
 sqlmodel==0.0.12
 uvicorn==0.24.0.post1
