@@ -1,1 +1,1 @@
-from .schemas.schema import schema
+from .queries import schema

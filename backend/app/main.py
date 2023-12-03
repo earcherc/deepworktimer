@@ -1,7 +1,8 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from redis.asyncio import Redis
 from strawberry.fastapi import GraphQLRouter
-from .graphql.schemas.schema import schema
+from .graphql.queries import schema
+from .database import get_session
 from .auth.auth_routes import router as auth_router
 from .auth.auth_utils import get_user_id_from_session
 from contextlib import asynccontextmanager
@@ -15,6 +16,16 @@ async def app_lifespan(app: FastAPI):
     await redis_client.close()
 
 
+async def get_graphql_context(request: Request):
+    session = Depends(get_session)
+    return {
+        "request": request,
+        "user_id": request.state.user_id,
+        "session": session,
+    }
+
+
+graphql_app = GraphQLRouter(schema, context_getter=get_graphql_context)
 app = FastAPI(lifespan=app_lifespan)
 
 
@@ -32,10 +43,6 @@ async def auth_middleware(request: Request, call_next):
     return response
 
 
-async def get_graphql_context(request: Request):
-    return {"request": request, "user_id": request.state.user_id}
-
-
 # Include routers
 app.include_router(auth_router, prefix="/auth")
-app.add_route("/graphql", GraphQLRouter(schema, context_getter=get_graphql_context))
+app.include_router(graphql_app, prefix="/graphql")

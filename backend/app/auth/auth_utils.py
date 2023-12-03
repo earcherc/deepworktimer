@@ -1,5 +1,4 @@
 import uuid
-from fastapi import HTTPException
 from passlib.context import CryptContext
 
 

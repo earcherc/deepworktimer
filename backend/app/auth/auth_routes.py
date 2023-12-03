@@ -4,14 +4,14 @@ from .auth_utils import create_session, pwd_context, delete_session
 from ..api_schemas import RegistrationRequest, LoginRequest
 from ..dependencies import get_redis
 from ..database import get_session
-from ..models import User as UserTable
+from ..models import User as UserModel
 from sqlmodel import Session, col, or_, select
 
 router = APIRouter()
 
 
 def authenticate_user(username: str, password: str, session: Session) -> int:
-    user_statement = select(UserTable).where(UserTable.username == username)
+    user_statement = select(UserModel).where(UserModel.username == username)
     user = session.exec(user_statement).first()
     if user and pwd_context.verify(password, user.hashed_password):
         return user.id
@@ -49,10 +49,10 @@ async def logout(response: Response, request: Request, redis=Depends(get_redis))
 def register(
     registration_request: RegistrationRequest, session: Session = Depends(get_session)
 ):
-    user_exists_statement = select(UserTable).where(
+    user_exists_statement = select(UserModel).where(
         or_(
-            col(UserTable.username) == registration_request.username,
-            col(UserTable.email) == registration_request.email,
+            col(UserModel.username) == registration_request.username,
+            col(UserModel.email) == registration_request.email,
         )
     )
 
@@ -62,7 +62,7 @@ def register(
         raise HTTPException(status_code=400, detail="Username or email already exists")
 
     hashed_password = pwd_context.hash(registration_request.password)
-    new_user = UserTable(
+    new_user = UserModel(
         username=registration_request.username,
         email=registration_request.email,
         hashed_password=hashed_password,
