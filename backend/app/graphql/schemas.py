@@ -1,10 +1,8 @@
 import strawberry
-from typing import Optional
+from ..models import User
 
 
-@strawberry.type
-class User:
-    id: strawberry.ID
-    username: str
-    email: str
-    bio: Optional[str]
+# Strawberry GraphQL type using SQLModel (Pydantic) class
+@strawberry.experimental.pydantic.type(model=User, all_fields=True)
+class UserType:
+    pass

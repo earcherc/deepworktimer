@@ -17,11 +17,9 @@ async def app_lifespan(app: FastAPI):
 
 
 async def get_graphql_context(request: Request):
-    session = Depends(get_session)
     return {
         "request": request,
         "user_id": request.state.user_id,
-        "session": session,
     }
 
 

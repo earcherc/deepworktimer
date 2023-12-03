@@ -1,8 +1,9 @@
 import strawberry
 from typing import Optional
-from sqlmodel import Session, select
+from sqlmodel import select
 from ..models import User as UserModel
-from .schemas import User
+from ..database import get_session
+from .schemas import UserType
 
 
 @strawberry.type
@@ -10,12 +11,11 @@ class Query:
     @strawberry.field
     def get_user(
         self, info: strawberry.types.Info, id: strawberry.ID
-    ) -> Optional[User]:
-        session: Session = info.context["session"]
+    ) -> Optional[UserType]:
+        session = next(get_session())
         statement = select(UserModel).where(UserModel.id == id)
-        user = session.exec(statement).first()
-
-        return User.from_orm(user) if user else None
+        db_user = session.exec(statement).first()
+        return UserModel.from_orm(db_user) if db_user else None
 
 
 schema = strawberry.Schema(query=Query)
