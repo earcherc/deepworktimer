@@ -1,5 +1,5 @@
 import strawberry
-from ..models import User, DailyGoal, StudyBlock, StudyCategory
+from ...models import User, DailyGoal, StudyBlock, StudyCategory
 
 
 # Strawberry GraphQL type using SQLModel (Pydantic) class

@@ -1,8 +1,14 @@
+import strawberry
 from fastapi import FastAPI, Request, Depends
 from redis.asyncio import Redis
 from strawberry.fastapi import GraphQLRouter
-from .graphql.queries import schema
-from .database import get_session
+from .graphql import (
+    Query,
+    DailyGoalMutations,
+    UserMutations,
+    StudyCategoryMutations,
+    StudyBlockMutations,
+)
 from .auth.auth_routes import router as auth_router
 from .auth.auth_utils import get_user_id_from_session
 from contextlib import asynccontextmanager
@@ -22,6 +28,15 @@ async def get_graphql_context(request: Request):
         "user_id": request.state.user_id,
     }
 
+
+@strawberry.type
+class CombinedMutation(
+    DailyGoalMutations, UserMutations, StudyBlockMutations, StudyCategoryMutations
+):
+    pass
+
+
+schema = strawberry.Schema(query=Query, mutation=CombinedMutation)
 
 graphql_app = GraphQLRouter(schema, context_getter=get_graphql_context)
 app = FastAPI(lifespan=app_lifespan)
