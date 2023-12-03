@@ -21,17 +21,21 @@ app = FastAPI(lifespan=app_lifespan)
 # Middleware for authentication
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
+    request.state.user_id = None  # Default to no user
     session_id = request.cookies.get("session_id")
     if session_id:
         redis = request.app.state.redis
         user_id = await get_user_id_from_session(redis, session_id)
         if user_id:
             request.state.user_id = int(user_id)
-            response = await call_next(request)
-            return response
-    return await call_next(request)
+    response = await call_next(request)
+    return response
+
+
+async def get_graphql_context(request: Request):
+    return {"request": request, "user_id": request.state.user_id}
 
 
 # Include routers
 app.include_router(auth_router, prefix="/auth")
-app.add_route("/graphql", GraphQLRouter(schema))
+app.add_route("/graphql", GraphQLRouter(schema, context_getter=get_graphql_context))

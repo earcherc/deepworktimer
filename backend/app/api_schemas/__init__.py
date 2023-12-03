@@ -1,1 +1,1 @@
-from .schemas import LoginRequest
+from .schemas import LoginRequest, RegistrationRequest

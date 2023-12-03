@@ -1,5 +1,6 @@
 from sqlmodel import Field, Relationship, SQLModel
 from typing import Optional, List, TYPE_CHECKING
+from .study_category import UserCategoryLink
 
 
 if TYPE_CHECKING:
@@ -18,7 +19,9 @@ class User(SQLModel, table=True):
     # Relationships
     study_blocks: List["StudyBlock"] = Relationship(back_populates="user")
     daily_goals: List["DailyGoal"] = Relationship(back_populates="user")
-    study_categories: List["StudyCategory"] = Relationship(back_populates="users")
+    study_categories: List["StudyCategory"] = Relationship(
+        back_populates="users", link_model=UserCategoryLink
+    )
 
 
 User.update_forward_refs()

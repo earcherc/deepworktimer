@@ -1,5 +1,5 @@
 from sqlmodel import create_engine, Session
-from config import Config
+from .config import Config
 
 # Construct the SQLALCHEMY_DATABASE_URL from configuration variables
 SQLALCHEMY_DATABASE_URL = (

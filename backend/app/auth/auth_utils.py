@@ -1,4 +1,13 @@
 import uuid
+from fastapi import HTTPException
+from passlib.context import CryptContext
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def hash_password(password: str):
+    return pwd_context.hash(password)
 
 
 async def create_session(redis, user_id: int):

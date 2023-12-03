@@ -1,18 +1,32 @@
 # /backend/app/auth/auth_routes.py
 from fastapi import APIRouter, Depends, Response, HTTPException, Request
-from .auth_utils import create_session
+from .auth_utils import create_session, pwd_context, delete_session
+from ..api_schemas import RegistrationRequest, LoginRequest
 from ..dependencies import get_redis
-from ..api_schemas import LoginRequest
+from ..database import get_session
+from ..models import User as UserTable
+from sqlmodel import Session, col, or_, select
 
 router = APIRouter()
 
 
+def authenticate_user(username: str, password: str, session: Session) -> int:
+    user_statement = select(UserTable).where(UserTable.username == username)
+    user = session.exec(user_statement).first()
+    if user and pwd_context.verify(password, user.hashed_password):
+        return user.id
+    return None
+
+
 @router.post("/login")
 async def login(
-    response: Response, login_request: LoginRequest, redis=Depends(get_redis)
+    response: Response,
+    login_request: LoginRequest,
+    redis=Depends(get_redis),
+    session: Session = Depends(get_session),
 ):
     # Dummy user authentication logic for testing
-    user_id = authenticate_user(login_request.username, login_request.password)
+    user_id = authenticate_user(login_request.username, login_request.password, session)
     if not user_id:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
 
@@ -22,11 +36,40 @@ async def login(
     return {"message": "Logged in"}
 
 
-@router.get("/hello")
-async def hello():
-    return {"message": "Logged in"}
+@router.post("/logout")
+async def logout(response: Response, request: Request, redis=Depends(get_redis)):
+    session_id = request.cookies.get("session_id")
+    if session_id:
+        await delete_session(redis, session_id)
+    response.delete_cookie(key="session_id")
+    return {"message": "Logged out"}
 
 
-def authenticate_user(username: str, password: str) -> int:
-    # Dummy authentication: always returns user ID 1
-    return "1"
+@router.post("/register")
+def register(
+    registration_request: RegistrationRequest, session: Session = Depends(get_session)
+):
+    user_exists_statement = select(UserTable).where(
+        or_(
+            col(UserTable.username) == registration_request.username,
+            col(UserTable.email) == registration_request.email,
+        )
+    )
+
+    existing_user = session.exec(user_exists_statement).first()
+
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username or email already exists")
+
+    hashed_password = pwd_context.hash(registration_request.password)
+    new_user = UserTable(
+        username=registration_request.username,
+        email=registration_request.email,
+        hashed_password=hashed_password,
+    )
+
+    session.add(new_user)
+    session.commit()
+    session.refresh(new_user)
+
+    return {"id": new_user.id}
