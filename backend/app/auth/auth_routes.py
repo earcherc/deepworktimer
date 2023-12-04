@@ -25,12 +25,10 @@ async def login(
     redis=Depends(get_redis),
     session: Session = Depends(get_session),
 ):
-    # Dummy user authentication logic for testing
     user_id = authenticate_user(login_request.username, login_request.password, session)
     if not user_id:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
 
-    # On successful authentication:
     session_id = await create_session(redis, user_id)
     response.set_cookie(key="session_id", value=session_id, httponly=True, secure=True)
     return {"message": "Logged in"}
