@@ -1,4 +1,5 @@
 import strawberry
+import dataclasses
 from sqlmodel import select
 from ...models import User
 from ...database import get_session
@@ -14,7 +15,8 @@ class UserMutations:
         db_user = session.exec(select(User).where(User.id == id)).first()
 
         if db_user:
-            for field, value in user.dict().items():
+            user_data = dataclasses.asdict(user)
+            for field, value in user_data.items():
                 setattr(db_user, field, value)
             session.commit()
             session.refresh(db_user)
