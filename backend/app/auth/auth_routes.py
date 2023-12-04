@@ -1,7 +1,7 @@
 # /backend/app/auth/auth_routes.py
 from fastapi import APIRouter, Depends, Response, HTTPException, Request
 from .auth_utils import create_session, pwd_context, delete_session
-from ..api_schemas import RegistrationRequest, LoginRequest
+from .auth_schemas import RegistrationRequest, LoginRequest
 from ..dependencies import get_redis
 from ..database import get_session
 from ..models import User as UserModel
