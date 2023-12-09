@@ -31,7 +31,7 @@ async def login(
 
     session_id = await create_session(redis, user_id)
     response.set_cookie(key="session_id", value=session_id, httponly=True, secure=True)
-    return {"message": "Logged in"}
+    return {"message": f"User Id '{user_id}' logged in"}
 
 
 @router.post("/logout")
