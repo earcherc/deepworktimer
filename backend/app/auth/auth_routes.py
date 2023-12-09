@@ -1,6 +1,11 @@
 # /backend/app/auth/auth_routes.py
 from fastapi import APIRouter, Depends, Response, HTTPException, Request
-from .auth_utils import create_session, pwd_context, delete_session
+from .auth_utils import (
+    create_session,
+    pwd_context,
+    delete_session,
+    get_user_id_from_session,
+)
 from .auth_schemas import RegistrationRequest, LoginRequest
 from ..dependencies import get_redis
 from ..database import get_session
@@ -71,3 +76,12 @@ def register(
     session.refresh(new_user)
 
     return {"id": new_user.id}
+
+
+@router.post("/validate-session")
+async def validate_session(session_id: str, redis=Depends(get_redis)):
+    if session_id:
+        user_id = await get_user_id_from_session(redis, session_id)
+        if user_id:
+            return {"isValid": True}
+    return {"isValid": False}

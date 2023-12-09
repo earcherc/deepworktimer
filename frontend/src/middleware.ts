@@ -1,28 +1,40 @@
+import { RequestCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyJwtToken } from '@libs/utils';
 
 const PUBLIC_ROUTES = ['/login', '/register', '/', '/logout'];
-const isPublicPage = (url: string) => PUBLIC_ROUTES.some((page) => page.startsWith(url));
+const isPublicPage = (url: string) => PUBLIC_ROUTES.some((page) => url.startsWith(page));
+const sessionValidationEndpoint = 'https://localhost/8000/auth/validate-session';
+
+async function validateSessionToken(sessionId: RequestCookie | undefined) {
+  try {
+    const response = await fetch(sessionValidationEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ session_id: sessionId }),
+    });
+    const data = await response.json();
+    return data.isValid;
+  } catch (error) {
+    console.error('Error validating session token:', error);
+    return false;
+  }
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const authCookie = request.cookies.get('jwt');
+  const sessionToken = request.cookies.get('session_id');
 
   const isPublicPageRequested = isPublicPage(pathname);
-  const hasVerifiedToken = await verifyJwtToken(authCookie?.value);
+  const isValidSession = sessionToken ? await validateSessionToken(sessionToken) : false;
 
-  // If unprotected route just continue
-  if (isPublicPageRequested) {
+  if (isPublicPageRequested || isValidSession) {
     return NextResponse.next();
   }
 
-  // If the path is protected, we check the auth token
-  if (!hasVerifiedToken) {
-    request.nextUrl.pathname = '/login';
-    return NextResponse.redirect(request.nextUrl);
-  }
-
-  return NextResponse.next();
+  const url = new URL('/login', request.nextUrl.origin);
+  return NextResponse.redirect(url);
 }
 
 export const config = {

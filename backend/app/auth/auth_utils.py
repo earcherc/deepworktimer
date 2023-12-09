@@ -17,7 +17,10 @@ async def create_session(redis, user_id: int):
 
 async def get_user_id_from_session(redis, session_id: str):
     user_id = await redis.get(f"session:{session_id}")
-    return user_id
+    if user_id:
+        await redis.expire(f"session:{session_id}", 3600)  # Reset the expiry to 1 hour
+        return int(user_id)
+    return None
 
 
 async def delete_session(redis, session_id: str):
