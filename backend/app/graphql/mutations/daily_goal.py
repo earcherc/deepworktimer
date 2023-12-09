@@ -12,12 +12,9 @@ class DailyGoalMutations:
     @strawberry.mutation
     def create_daily_goal(self, daily_goal: DailyGoalInput) -> DailyGoalType:
         session = next(get_session())
-        daily_goal_dict = {
-            "quantity": daily_goal.quantity,
-            "block_size": daily_goal.block_size,
-            "user_id": daily_goal.user_id,
-        }
-        db_daily_goal = DailyGoal(**daily_goal_dict)
+
+        daily_goal_data = strawberry.asdict(daily_goal)
+        db_daily_goal = DailyGoal(**daily_goal_data)
         session.add(db_daily_goal)
         session.commit()
         session.refresh(db_daily_goal)

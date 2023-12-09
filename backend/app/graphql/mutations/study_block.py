@@ -11,16 +11,10 @@ class StudyBlockMutations:
     @strawberry.mutation
     def create_study_block(self, study_block: StudyBlockInput) -> StudyBlockType:
         session = next(get_session())
-        study_block_dict = {
-            "start": study_block.start,
-            "end": study_block.end,
-            "title": study_block.title,
-            "rating": study_block.rating,
-            "user_id": study_block.user_id,
-            "daily_goal_id": study_block.daily_goal_id,
-            "study_category_id": study_block.study_category_id,
-        }
-        db_study_block = StudyBlock(**study_block_dict)
+
+        study_block_data = strawberry.asdict(study_block)
+        db_study_block = StudyBlock(**study_block_data)
+
         session.add(db_study_block)
         session.commit()
         session.refresh(db_study_block)
@@ -36,8 +30,9 @@ class StudyBlockMutations:
             select(StudyBlock).where(StudyBlock.id == id)
         ).first()
 
+        study_block_data = strawberry.asdict(study_block)
         if db_study_block:
-            for field, value in study_block.dict().items():
+            for field, value in study_block_data:
                 setattr(db_study_block, field, value)
             session.commit()
             session.refresh(db_study_block)

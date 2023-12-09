@@ -13,8 +13,10 @@ class StudyCategoryMutations:
         self, study_category: StudyCategoryInput
     ) -> StudyCategoryType:
         session = next(get_session())
-        study_category_data = {"title": study_category.title}
+
+        study_category_data = strawberry.asdict(study_category)
         db_study_category = StudyCategory(**study_category_data)
+
         session.add(db_study_category)
         session.commit()
         session.refresh(db_study_category)
@@ -30,8 +32,9 @@ class StudyCategoryMutations:
             select(StudyCategory).where(StudyCategory.id == id)
         ).first()
 
+        study_category_data = strawberry.asdict(study_category)
         if db_study_category:
-            for field, value in study_category.dict().items():
+            for field, value in study_category_data:
                 setattr(db_study_category, field, value)
             session.commit()
             session.refresh(db_study_category)
