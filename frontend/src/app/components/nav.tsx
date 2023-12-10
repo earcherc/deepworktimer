@@ -3,11 +3,12 @@
 import { Fragment } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import classNames from 'classnames';
-import useAuth from '@app/context/auth/auth-context';
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { userAtom } from '../store/atoms';
+import { useAtom } from 'jotai';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -15,7 +16,7 @@ const navigation = [
 ];
 
 export default function Nav() {
-  const { username, logout } = useAuth();
+  const [user, setUser] = useAtom(userAtom);
   const pathname = usePathname();
 
   return (
@@ -44,7 +45,8 @@ export default function Nav() {
                     <Image width={50} height={50} src="/images/logo.svg" alt="Your Company" />
                   </div>
                   <h1 className="ms-4 text-white">
-                    {(username && username.charAt(0).toUpperCase() + username?.slice(1)) || 'Unknown'}&apos;s Journal
+                    {(user.username && user.username.charAt(0).toUpperCase() + user.username?.slice(1)) || 'Unknown'}
+                    &apos;s Journal
                   </h1>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:items-center">

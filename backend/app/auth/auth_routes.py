@@ -35,8 +35,15 @@ async def login(
         raise HTTPException(status_code=401, detail="Incorrect username or password")
 
     session_id = await create_session(redis, user_id)
+    user = session.exec(select(UserModel).where(UserModel.id == user_id)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     response.set_cookie(key="session_id", value=session_id, httponly=True, secure=True)
-    return {"message": f"User Id '{user_id}' logged in"}
+
+    # Serialize user data and exclude sensitive field
+    user_data = user.dict(exclude={"hashed_password"})
+    return user_data
 
 
 @router.post("/logout")

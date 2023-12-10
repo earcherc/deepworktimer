@@ -3,36 +3,44 @@ import { useRouter } from 'next/navigation';
 import React, { FormEvent, useState } from 'react';
 import useToast from '../context/toasts/toast-context';
 import classNames from 'classnames';
-import useAuth from '@app/context/auth/auth-context';
+import { userAtom } from '../store/atoms';
+import { useAtom } from 'jotai';
 
 const LoginForm = () => {
+  const { addToast } = useToast();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const { addToast } = useToast();
-  const { setUser } = useAuth();
-
+  const [, setUser] = useAtom(userAtom);
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const res = await fetch('http://localhost:8000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-    const { body, status } = await res.json();
-    if (status == 200) {
-      setUser(body.user);
+      if (!res.ok) {
+        const errorData = await res.json();
+        setErrorMessage(errorData.detail);
+        addToast({ type: 'error', content: errorData.detail });
+        return;
+      }
+
+      const userData = await res.json();
+      // Assuming userData contains the user object
+      setUser({ isAuthenticated: true, user: userData });
       router.push('/dashboard');
-    } else {
-      setErrorMessage(body.detail);
-      addToast({ type: 'error', content: body.detail });
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrorMessage('An error occurred while logging in.');
+      addToast({ type: 'error', content: 'An error occurred while logging in.' });
     }
   };
 

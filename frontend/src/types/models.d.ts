@@ -67,6 +67,5 @@ type User = {
   id: number;
   username: string;
   email: string;
-  password: string;
-  disabled: boolean;
+  bio: string;
 };

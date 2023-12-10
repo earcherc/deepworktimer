@@ -21,24 +21,3 @@ interface ToastContext {
   pauseToast: (id: string) => void;
   resumeToast: (id: string) => void;
 }
-
-interface AuthContext {
-  isAuthenticated: boolean;
-  username: string | null;
-  userId: number | null;
-  isDisabled: boolean | null;
-  setUser: (user: TokenData) => void;
-  clearUser: () => void;
-  logout: () => void;
-}
-
-type TokenData = {
-  username: string;
-  userId: number;
-  isDisabled: boolean;
-};
-
-type AggregatedUserData = {
-  user: User;
-  profile: UserProfile;
-};

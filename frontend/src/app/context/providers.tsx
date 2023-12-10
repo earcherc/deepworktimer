@@ -1,12 +1,14 @@
 'use client';
 
-import AuthProvider from './auth/auth-provider';
+import { createStore, Provider } from 'jotai';
 import ToastProvider from './toasts/toast-provider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const myStore = createStore();
+
   return (
-    <ToastProvider>
-      <AuthProvider>{children}</AuthProvider>
-    </ToastProvider>
+    <Provider store={myStore}>
+      <ToastProvider>{children}</ToastProvider>
+    </Provider>
   );
 }
