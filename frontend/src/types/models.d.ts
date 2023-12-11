@@ -1,5 +1,3 @@
-// models.d.ts
-
 // Enum types
 enum Gender {
   MALE = 'MALE',

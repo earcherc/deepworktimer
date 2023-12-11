@@ -45,7 +45,9 @@ export default function Nav() {
                     <Image width={50} height={50} src="/images/logo.svg" alt="Your Company" />
                   </div>
                   <h1 className="ms-4 text-white">
-                    {(user.username && user.username.charAt(0).toUpperCase() + user.username?.slice(1)) || 'Unknown'}
+                    {(user.user?.username &&
+                      user.user?.username.charAt(0).toUpperCase() + user.user?.username.slice(1)) ||
+                      'Unknown'}
                     &apos;s Journal
                   </h1>
                 </div>
@@ -87,7 +89,9 @@ export default function Nav() {
                     >
                       <span className="sr-only">Open user menu</span>
                       <span className="text-white">
-                        {(username && username.charAt(0).toUpperCase() + username?.slice(1)) || 'Unknown'}
+                        {(user.user?.username &&
+                          user.user?.username.charAt(0).toUpperCase() + user.user?.username?.slice(1)) ||
+                          'Unknown'}
                       </span>
                     </Menu.Button>
                   </div>
@@ -104,7 +108,7 @@ export default function Nav() {
                       <Menu.Item>
                         {({ active }) => (
                           <button
-                            onClick={logout}
+                            // onClick={logout}
                             className={classNames(
                               active ? 'bg-gray-100' : '',
                               'block w-full px-4 py-2 text-left text-sm text-gray-700',

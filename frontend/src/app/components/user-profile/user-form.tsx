@@ -1,11 +1,10 @@
 'use client';
 
-import { updateUser } from '@app/actions/userActions';
 import Image from 'next/image';
 
 export default function UserForm({ initialData }: { initialData: User | undefined }) {
   return (
-    <form action={updateUser}>
+    <form>
       <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
         <div className="col-span-full flex items-center gap-x-8">
           <Image

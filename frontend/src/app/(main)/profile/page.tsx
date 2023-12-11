@@ -1,42 +1,12 @@
-import { changePassword, deleteAccount } from '@app/actions/userActions';
-import { fetchAggregatedProfile } from '@app/api/get-user-data';
+'use client';
 
-import { cookies } from 'next/headers';
 import UserForm from '@app/components/user-profile/user-form';
-import UserProfileForm from '@app/components/user-profile/user-profile-form';
+import { useAtom } from 'jotai';
+import { userAtom } from '@/app/store/atoms';
+import isAuth from '@/app/components/is-authenticated';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getAggregatedProfile(jwtToken: string): Promise<AggregatedUserData> {
-  // Decode the JWT token to get the user data
-
-  const res = await fetchAggregatedProfile(jwtToken);
-
-  if (!res.ok) {
-    throw new Error(`${res.status} Failed to fetch aggregated profile`);
-  }
-
-  return res.json();
-}
-
-export default async function Profile() {
-  // Accessing cookies using Next.js 13's cookies function
-  let aggregatedProfile: AggregatedUserData | undefined = undefined;
-  const cookieStore = cookies();
-  const jwtCookie = cookieStore.get('jwt');
-
-  if (!jwtCookie) {
-    // Handle the case where JWT is not present or invalid
-    throw new Error('JWT token is missing or invalid');
-  }
-
-  try {
-    aggregatedProfile = await getAggregatedProfile(jwtCookie.value);
-    // Your component logic here using aggregatedProfile
-  } catch (error) {
-    // Handle error
-    console.error('Error fetching aggregated profile:', error);
-  }
-
+const Profile = () => {
+  const [user, setUser] = useAtom(userAtom);
   return (
     <>
       <div>
@@ -54,9 +24,8 @@ export default async function Profile() {
 
                 <div className="md:col-span-2">
                   <div className="mb-8">
-                    <UserForm initialData={aggregatedProfile?.user}></UserForm>
+                    <UserForm initialData={user.user}></UserForm>
                   </div>
-                  <UserProfileForm initialData={aggregatedProfile?.profile}></UserProfileForm>
                 </div>
               </div>
 
@@ -68,7 +37,7 @@ export default async function Profile() {
                   </p>
                 </div>
 
-                <form className="md:col-span-2" action={changePassword}>
+                <form className="md:col-span-2">
                   <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
                     <div className="col-span-full">
                       <label htmlFor="current-password" className="block text-sm font-medium leading-6 text-white">
@@ -136,7 +105,7 @@ export default async function Profile() {
                   </p>
                 </div>
 
-                <form className="flex items-start md:col-span-2" action={deleteAccount}>
+                <form className="flex items-start md:col-span-2">
                   <button
                     type="submit"
                     className="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400"
@@ -151,4 +120,6 @@ export default async function Profile() {
       </div>
     </>
   );
-}
+};
+
+export default isAuth(Profile);
