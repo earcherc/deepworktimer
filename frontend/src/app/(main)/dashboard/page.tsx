@@ -1,5 +1,5 @@
 'use client';
-import isAuth from '@components/isAuth';
+import isAuth from '@components/is-authenticated';
 import React from 'react';
 
 const Dashboard = () => {
