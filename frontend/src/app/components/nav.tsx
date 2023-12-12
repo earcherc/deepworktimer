@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { userAtom } from '../store/atoms';
 import { useAtom } from 'jotai';
+import { useQuery } from 'urql';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -19,6 +20,29 @@ export default function Nav() {
   const [user, setUser] = useAtom(userAtom);
   const pathname = usePathname();
   const router = useRouter();
+
+  const [result] = useQuery({
+    query: `
+      query GetUser {
+        getUser {
+          id
+          username
+          email
+          bio
+        }
+      }
+    `,
+  });
+
+  const { data, fetching, error } = result;
+
+  if (fetching) return <p>Loading...</p>;
+  if (error) return <p>Oh no... {error.message}</p>;
+
+  // Update user atom only if the data is different from current state
+  if (data && data.getUser && JSON.stringify(user.user) !== JSON.stringify(data.getUser)) {
+    setUser({ user: data.getUser });
+  }
 
   const logout = async () => {
     try {
