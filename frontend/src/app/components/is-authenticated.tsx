@@ -39,10 +39,8 @@ export default function isAuth<P extends React.PropsWithChildren<{}>>(Component:
         }
       };
 
-      if (!user.user) {
-        validateSession();
-      }
-    }, [router]);
+      validateSession();
+    }, []);
 
     return <Component {...props} />;
   };

@@ -1,6 +1,3 @@
-'use client';
-
-import isAuth from '@/app/components/is-authenticated';
 import UserForm from '@app/components/user-profile/user-form';
 
 const Profile = () => {
@@ -119,4 +116,4 @@ const Profile = () => {
   );
 };
 
-export default isAuth(Profile);
+export default Profile;
