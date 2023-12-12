@@ -9,11 +9,13 @@ from .schemas.models import UserType, DailyGoalType, StudyBlockType, StudyCatego
 @strawberry.type
 class Query:
     @strawberry.field
-    def get_user(
-        self, info: strawberry.types.Info, id: strawberry.ID
-    ) -> Optional[UserType]:
+    def get_user(self, info: strawberry.types.Info) -> Optional[UserType]:
+        user_id = getattr(info.context["request"].state, "user_id", None)
+        if user_id is None:
+            return None  # or raise an error
+
         session = next(get_session())
-        statement = select(User).where(User.id == id)
+        statement = select(User).where(User.id == user_id)
         db_user = session.exec(statement).first()
         return User.from_orm(db_user) if db_user else None
 

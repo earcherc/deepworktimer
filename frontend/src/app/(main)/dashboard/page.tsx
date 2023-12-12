@@ -1,24 +1,19 @@
 'use client';
 
 import React from 'react';
-import { useAtom } from 'jotai';
 import { useQuery } from 'urql';
 
-import { userAtom } from '@/app/store/atoms';
-
 const Dashboard = () => {
-  const [user] = useAtom(userAtom);
   const [result] = useQuery({
     query: `
-      query GetUser($id: ID!) {
-        getUser(id: $id) {
+      query GetUser {
+        getUser {
           id
           username
           email
         }
       }
     `,
-    variables: { id: user.user?.id },
   });
 
   const { data, fetching, error } = result;
