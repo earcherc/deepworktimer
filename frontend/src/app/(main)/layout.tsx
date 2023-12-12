@@ -1,7 +1,4 @@
-'use client';
-
 import Nav from '@app/components/nav';
-import isAuth from '../components/is-authenticated';
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -12,4 +9,4 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default isAuth(RootLayout);
+export default RootLayout;
