@@ -39,7 +39,8 @@ async def login(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    response.set_cookie(key="session_id", value=session_id, httponly=True, secure=True)
+    # Secure False for local dev only (localhost)
+    response.set_cookie(key="session_id", value=session_id, httponly=True, secure=False)
 
     # Serialize user data and exclude sensitive field
     user_data = user.dict(exclude={"hashed_password"})
@@ -86,9 +87,16 @@ def register(
 
 
 @router.post("/validate-session")
-async def validate_session(session_id: str, redis=Depends(get_redis)):
-    if session_id:
-        user_id = await get_user_id_from_session(redis, session_id)
-        if user_id:
-            return {"isValid": True}
-    return {"isValid": False}
+async def validate_session(request: Request, session=Depends(get_session)):
+    user_id = getattr(request.state, "user_id", None)
+    print(f"User ID: {user_id} ")
+    print(f"Request: {request} ")
+    print(f"Session: {session} ")
+    if user_id:
+        statement = select(UserModel).where(UserModel.id == user_id)
+        db_user = session.exec(statement).first()
+        if db_user:
+            user_data = db_user.dict()
+            print(f"User data backend: {user_data} ")
+            return {"user": user_data}
+    return {"user": None}

@@ -1,6 +1,5 @@
 import strawberry
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
 from redis.asyncio import Redis
 from strawberry.fastapi import GraphQLRouter
 from .graphql import (
@@ -42,23 +41,11 @@ schema = strawberry.Schema(query=Query, mutation=CombinedMutation)
 graphql_app = GraphQLRouter(schema, context_getter=get_graphql_context)
 app = FastAPI(lifespan=app_lifespan)
 
-origins = [
-    "http://localhost:3000",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 
 # Middleware for authentication
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    request.state.user_id = None  # Default to no user
+    request.state.user_id = None
     session_id = request.cookies.get("session_id")
     if session_id:
         redis = request.app.state.redis

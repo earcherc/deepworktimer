@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAtom } from 'jotai';
 import { userAtom } from '../store/atoms';
 import { useRouter } from 'next/navigation';
@@ -14,46 +14,35 @@ export default function isAuth<P extends React.PropsWithChildren<{}>>(Component:
 
     useEffect(() => {
       const validateSession = async () => {
-        const sessionId = document.cookie.split('; ').find((row) => row.startsWith('session_id='));
-        if (!sessionId) {
-          setUser({ isAuthenticated: false });
-          router.push('/login');
-          return;
-        }
-
         try {
-          const response = await fetch('http://localhost:8000/auth/validate-session', {
+          const response = await fetch('http://localhost/api/auth/validate-session', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ session_id: sessionId.split('=')[1] }),
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           });
           const data = await response.json();
+          console.log('Session validation response:', data); // Add logging
 
-          if (data.isValid) {
-            setUser({ isAuthenticated: true });
+          if (data.user) {
+            setUser({ user: data.user });
           } else {
-            setUser({ isAuthenticated: false });
+            console.log('Redirecting to login - No user data'); // Add logging
+            setUser({ user: undefined });
             router.push('/login');
           }
         } catch (error) {
           console.error('Error validating session:', error);
-          setUser({ isAuthenticated: false });
+          setUser({ user: undefined });
           router.push('/login');
         }
       };
 
-      // Check authentication state only if it's undefined
-      if (user.isAuthenticated === undefined) {
+      if (!user.user) {
         validateSession();
       }
-    }, [user.isAuthenticated, setUser, router]);
-
-    // Conditional rendering based on authentication state
-    if (user.isAuthenticated === undefined) {
-      return null; // or a loading indicator
-    } else if (!user.isAuthenticated) {
-      return null; // User will be redirected to /login
-    }
+    }, [router]);
 
     return <Component {...props} />;
   };

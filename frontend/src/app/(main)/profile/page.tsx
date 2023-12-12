@@ -1,12 +1,9 @@
 'use client';
 
-import UserForm from '@app/components/user-profile/user-form';
-import { useAtom } from 'jotai';
-import { userAtom } from '@/app/store/atoms';
 import isAuth from '@/app/components/is-authenticated';
+import UserForm from '@app/components/user-profile/user-form';
 
 const Profile = () => {
-  const [user, setUser] = useAtom(userAtom);
   return (
     <>
       <div>
@@ -24,7 +21,7 @@ const Profile = () => {
 
                 <div className="md:col-span-2">
                   <div className="mb-8">
-                    <UserForm initialData={user.user}></UserForm>
+                    <UserForm></UserForm>
                   </div>
                 </div>
               </div>

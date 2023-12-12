@@ -1,4 +1,5 @@
 'use client';
+
 import isAuth from '@components/is-authenticated';
 import React from 'react';
 

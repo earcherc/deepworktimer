@@ -18,8 +18,9 @@ const LoginForm = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch('http://localhost:8000/auth/login', {
+      const res = await fetch('http://localhost/api/auth/login', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -35,7 +36,7 @@ const LoginForm = () => {
 
       const userData = await res.json();
       // Assuming userData contains the user object
-      setUser({ isAuthenticated: true, user: userData });
+      setUser({ user: userData });
       router.push('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
