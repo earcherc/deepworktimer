@@ -9,7 +9,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { userAtom } from '../store/atoms';
 import { useAtom } from 'jotai';
-import { useGetUserQuery } from '@/graphql/graphql-types';
+import { useCurrentUserQuery } from '@/graphql/graphql-types';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -33,17 +33,17 @@ export default function Nav() {
 
       router.push('/');
 
-      setUser({ user: undefined });
+      setUser(undefined);
     } catch (error) {
       console.error('Logout failed:', error);
     }
   };
 
-  const [{ data, fetching, error }] = useGetUserQuery();
+  const [{ data, fetching, error }] = useCurrentUserQuery();
 
   useEffect(() => {
-    if (data && data.getUser) {
-      setUser({ user: data.getUser });
+    if (data && data.currentUser) {
+      setUser(data.currentUser);
     }
   }, [data]);
 
@@ -73,9 +73,7 @@ export default function Nav() {
                     <Image width={50} height={50} src="/images/logo.svg" alt="Your Company" />
                   </div>
                   <h1 className="ms-4 text-white">
-                    {(user.user?.username &&
-                      user.user?.username.charAt(0).toUpperCase() + user.user?.username.slice(1)) ||
-                      'Unknown'}
+                    {(user?.username && user?.username.charAt(0).toUpperCase() + user?.username.slice(1)) || 'Unknown'}
                     &apos;s Journal
                   </h1>
                 </div>
@@ -117,8 +115,7 @@ export default function Nav() {
                     >
                       <span className="sr-only">Open user menu</span>
                       <span className="text-white">
-                        {(user.user?.username &&
-                          user.user?.username.charAt(0).toUpperCase() + user.user?.username?.slice(1)) ||
+                        {(user?.username && user?.username.charAt(0).toUpperCase() + user?.username?.slice(1)) ||
                           'Unknown'}
                       </span>
                     </Menu.Button>

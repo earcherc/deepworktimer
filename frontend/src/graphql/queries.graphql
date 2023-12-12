@@ -1,8 +1,37 @@
-query GetUser {
-  getUser {
+query CurrentUser {
+  currentUser {
     id
     username
     email
     bio
+  }
+}
+
+query UserDailyGoals {
+  userDailyGoals {
+    id
+    blockSize
+    quantity
+    userId
+  }
+}
+
+query UserStudyBlocks {
+  userStudyBlocks {
+    id
+    title
+    start
+    end
+    rating
+    studyCategoryId
+    dailyGoalId
+    userId
+  }
+}
+
+query AllStudyCategories {
+  allStudyCategories {
+    id
+    title
   }
 }

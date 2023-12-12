@@ -97,22 +97,10 @@ export type DailyGoalType = {
 
 export type Query = {
   __typename?: 'Query';
-  getDailyGoal?: Maybe<DailyGoalType>;
-  getStudyBlock?: Maybe<StudyBlockType>;
-  getStudyCategory?: Maybe<StudyCategoryType>;
-  getUser?: Maybe<UserType>;
-};
-
-export type QueryGetDailyGoalArgs = {
-  id: Scalars['ID']['input'];
-};
-
-export type QueryGetStudyBlockArgs = {
-  id: Scalars['ID']['input'];
-};
-
-export type QueryGetStudyCategoryArgs = {
-  id: Scalars['ID']['input'];
+  allStudyCategories: Array<StudyCategoryType>;
+  currentUser?: Maybe<UserType>;
+  userDailyGoals: Array<DailyGoalType>;
+  userStudyBlocks: Array<StudyBlockType>;
 };
 
 export type StudyBlockInput = {
@@ -157,16 +145,15 @@ export type UserType = {
   __typename?: 'UserType';
   bio?: Maybe<Scalars['String']['output']>;
   email: Scalars['String']['output'];
-  hashedPassword: Scalars['String']['output'];
   id?: Maybe<Scalars['Int']['output']>;
   username: Scalars['String']['output'];
 };
 
-export type GetUserQueryVariables = Exact<{ [key: string]: never }>;
+export type CurrentUserQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GetUserQuery = {
+export type CurrentUserQuery = {
   __typename?: 'Query';
-  getUser?: {
+  currentUser?: {
     __typename?: 'UserType';
     id?: number | null;
     username: string;
@@ -175,9 +162,46 @@ export type GetUserQuery = {
   } | null;
 };
 
-export const GetUserDocument = gql`
-  query GetUser {
-    getUser {
+export type UserDailyGoalsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type UserDailyGoalsQuery = {
+  __typename?: 'Query';
+  userDailyGoals: Array<{
+    __typename?: 'DailyGoalType';
+    id?: number | null;
+    blockSize: number;
+    quantity: number;
+    userId: number;
+  }>;
+};
+
+export type UserStudyBlocksQueryVariables = Exact<{ [key: string]: never }>;
+
+export type UserStudyBlocksQuery = {
+  __typename?: 'Query';
+  userStudyBlocks: Array<{
+    __typename?: 'StudyBlockType';
+    id?: number | null;
+    title: string;
+    start: any;
+    end: any;
+    rating: number;
+    studyCategoryId: number;
+    dailyGoalId: number;
+    userId: number;
+  }>;
+};
+
+export type AllStudyCategoriesQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AllStudyCategoriesQuery = {
+  __typename?: 'Query';
+  allStudyCategories: Array<{ __typename?: 'StudyCategoryType'; id?: number | null; title: string }>;
+};
+
+export const CurrentUserDocument = gql`
+  query CurrentUser {
+    currentUser {
       id
       username
       email
@@ -186,6 +210,61 @@ export const GetUserDocument = gql`
   }
 `;
 
-export function useGetUserQuery(options?: Omit<Urql.UseQueryArgs<GetUserQueryVariables>, 'query'>) {
-  return Urql.useQuery<GetUserQuery, GetUserQueryVariables>({ query: GetUserDocument, ...options });
+export function useCurrentUserQuery(options?: Omit<Urql.UseQueryArgs<CurrentUserQueryVariables>, 'query'>) {
+  return Urql.useQuery<CurrentUserQuery, CurrentUserQueryVariables>({ query: CurrentUserDocument, ...options });
+}
+export const UserDailyGoalsDocument = gql`
+  query UserDailyGoals {
+    userDailyGoals {
+      id
+      blockSize
+      quantity
+      userId
+    }
+  }
+`;
+
+export function useUserDailyGoalsQuery(options?: Omit<Urql.UseQueryArgs<UserDailyGoalsQueryVariables>, 'query'>) {
+  return Urql.useQuery<UserDailyGoalsQuery, UserDailyGoalsQueryVariables>({
+    query: UserDailyGoalsDocument,
+    ...options,
+  });
+}
+export const UserStudyBlocksDocument = gql`
+  query UserStudyBlocks {
+    userStudyBlocks {
+      id
+      title
+      start
+      end
+      rating
+      studyCategoryId
+      dailyGoalId
+      userId
+    }
+  }
+`;
+
+export function useUserStudyBlocksQuery(options?: Omit<Urql.UseQueryArgs<UserStudyBlocksQueryVariables>, 'query'>) {
+  return Urql.useQuery<UserStudyBlocksQuery, UserStudyBlocksQueryVariables>({
+    query: UserStudyBlocksDocument,
+    ...options,
+  });
+}
+export const AllStudyCategoriesDocument = gql`
+  query AllStudyCategories {
+    allStudyCategories {
+      id
+      title
+    }
+  }
+`;
+
+export function useAllStudyCategoriesQuery(
+  options?: Omit<Urql.UseQueryArgs<AllStudyCategoriesQueryVariables>, 'query'>,
+) {
+  return Urql.useQuery<AllStudyCategoriesQuery, AllStudyCategoriesQueryVariables>({
+    query: AllStudyCategoriesDocument,
+    ...options,
+  });
 }

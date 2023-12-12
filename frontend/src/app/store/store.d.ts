@@ -1,3 +1,0 @@
-interface UserStore {
-  user?: UserType;
-}

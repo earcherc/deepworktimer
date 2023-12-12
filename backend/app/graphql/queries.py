@@ -1,5 +1,5 @@
 import strawberry
-from typing import Optional
+from typing import List, Optional
 from sqlmodel import select
 from ..models import User, DailyGoal, StudyCategory, StudyBlock
 from ..database import get_session
@@ -9,10 +9,10 @@ from .schemas.models import UserType, DailyGoalType, StudyBlockType, StudyCatego
 @strawberry.type
 class Query:
     @strawberry.field
-    def get_user(self, info: strawberry.types.Info) -> Optional[UserType]:
+    def current_user(self, info: strawberry.types.Info) -> Optional[UserType]:
         user_id = getattr(info.context["request"].state, "user_id", None)
         if user_id is None:
-            return None  # or raise an error
+            return None
 
         session = next(get_session())
         statement = select(User).where(User.id == user_id)
@@ -20,25 +20,33 @@ class Query:
         return User.from_orm(db_user) if db_user else None
 
     @strawberry.field
-    def get_daily_goal(self, id: strawberry.ID) -> Optional[DailyGoalType]:
+    def user_daily_goals(self, info: strawberry.types.Info) -> List[DailyGoalType]:
+        user_id = getattr(info.context["request"].state, "user_id", None)
+        if user_id is None:
+            return []
+
         session = next(get_session())
-        statement = select(DailyGoal).where(DailyGoal.id == id)
-        db_daily_goal = session.exec(statement).first()
-        return DailyGoal.from_orm(db_daily_goal) if db_daily_goal else None
+        statement = select(DailyGoal).where(DailyGoal.user_id == user_id)
+        daily_goals = session.exec(statement).all()
+        return [DailyGoal.from_orm(goal) for goal in daily_goals]
 
     @strawberry.field
-    def get_study_block(self, id: strawberry.ID) -> Optional[StudyBlockType]:
+    def user_study_blocks(self, info: strawberry.types.Info) -> List[StudyBlockType]:
+        user_id = getattr(info.context["request"].state, "user_id", None)
+        if user_id is None:
+            return []
+
         session = next(get_session())
-        statement = select(StudyBlock).where(StudyBlock.id == id)
-        db_study_block = session.exec(statement).first()
-        return StudyBlock.from_orm(db_study_block) if db_study_block else None
+        statement = select(StudyBlock).where(StudyBlock.userId == user_id)
+        study_blocks = session.exec(statement).all()
+        return [StudyBlock.from_orm(block) for block in study_blocks]
 
     @strawberry.field
-    def get_study_category(self, id: strawberry.ID) -> Optional[StudyCategoryType]:
+    def all_study_categories(self) -> List[StudyCategoryType]:
         session = next(get_session())
-        statement = select(StudyCategory).where(StudyCategory.id == id)
-        db_study_category = session.exec(statement).first()
-        return StudyCategory.from_orm(db_study_category) if db_study_category else None
+        statement = select(StudyCategory)
+        study_categories = session.exec(statement).all()
+        return [StudyCategory.from_orm(category) for category in study_categories]
 
 
 schema = strawberry.Schema(query=Query)
