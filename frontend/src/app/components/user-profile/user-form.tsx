@@ -38,7 +38,7 @@ export default function UserForm() {
               id="email"
               name="email"
               type="email"
-              defaultValue={user.user?.email || ''}
+              defaultValue={user?.email || ''}
               autoComplete="email"
               className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
@@ -56,7 +56,7 @@ export default function UserForm() {
                 name="username"
                 id="username"
                 autoComplete="username"
-                defaultValue={user.user?.username || ''}
+                defaultValue={user?.username || ''}
                 className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
               />
             </div>
