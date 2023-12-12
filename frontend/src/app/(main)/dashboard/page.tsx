@@ -11,7 +11,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (data && data.userDailyGoals) {
-      console.log(data.userDailyGoals);
       setDailyGoals(data.userDailyGoals);
     }
   }, [data]);
