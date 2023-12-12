@@ -9,7 +9,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { userAtom } from '../store/atoms';
 import { useAtom } from 'jotai';
-import { useQuery } from 'urql';
+import { useGetUserQuery } from '@/graphql/graphql-types';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -39,20 +39,7 @@ export default function Nav() {
     }
   };
 
-  const [result] = useQuery({
-    query: `
-      query GetUser {
-        getUser {
-          id
-          username
-          email
-          bio
-        }
-      }
-    `,
-  });
-
-  const { data, fetching, error } = result;
+  const [{ data, fetching, error }] = useGetUserQuery();
 
   useEffect(() => {
     if (data && data.getUser) {

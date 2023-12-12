@@ -1,3 +1,3 @@
 interface UserStore {
-  user?: User;
+  user?: UserType;
 }
