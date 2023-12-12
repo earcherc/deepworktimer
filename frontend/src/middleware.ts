@@ -4,7 +4,6 @@ const sessionValidationEndpoint = 'http://host.docker.internal:8000/auth/validat
 
 async function validateSessionToken(request: NextRequest) {
   const sessionCookie = request.cookies.get('session_id');
-  console.log('Session Cookie:', sessionCookie);
 
   if (!sessionCookie) {
     return false;
@@ -19,7 +18,7 @@ async function validateSessionToken(request: NextRequest) {
       },
     });
     const data = await response.json();
-    return data.user != null;
+    return data.isValid;
   } catch (error) {
     console.error('Error validating session token:', error);
     return false;
@@ -37,5 +36,16 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/profile/:path*'],
+  matcher: [
+    '/dashboard/:path*',
+    '/profile/:path*',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 };

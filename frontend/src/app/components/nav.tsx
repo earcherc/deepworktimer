@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import classNames from 'classnames';
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/20/solid';
@@ -21,29 +21,6 @@ export default function Nav() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [result] = useQuery({
-    query: `
-      query GetUser {
-        getUser {
-          id
-          username
-          email
-          bio
-        }
-      }
-    `,
-  });
-
-  const { data, fetching, error } = result;
-
-  if (fetching) return <p>Loading...</p>;
-  if (error) return <p>Oh no... {error.message}</p>;
-
-  // Update user atom only if the data is different from current state
-  if (data && data.getUser && JSON.stringify(user.user) !== JSON.stringify(data.getUser)) {
-    setUser({ user: data.getUser });
-  }
-
   const logout = async () => {
     try {
       await fetch('http://localhost/api/auth/logout', {
@@ -61,6 +38,27 @@ export default function Nav() {
       console.error('Logout failed:', error);
     }
   };
+
+  const [result] = useQuery({
+    query: `
+      query GetUser {
+        getUser {
+          id
+          username
+          email
+          bio
+        }
+      }
+    `,
+  });
+
+  const { data, fetching, error } = result;
+
+  useEffect(() => {
+    if (data && data.getUser) {
+      setUser({ user: data.getUser });
+    }
+  }, [data]);
 
   return (
     <Disclosure as="nav" className="sticky top-0 bg-gray-800">

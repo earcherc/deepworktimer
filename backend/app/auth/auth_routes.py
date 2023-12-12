@@ -88,13 +88,6 @@ def register(
 
 @router.post("/validate-session")
 async def validate_session(request: Request, session=Depends(get_session)):
-    print(f"Entering the API route")
     user_id = getattr(request.state, "user_id", None)
-    if user_id:
-        statement = select(UserModel).where(UserModel.id == user_id)
-        db_user = session.exec(statement).first()
-        if db_user:
-            user_data = db_user.dict()
-            print(f"User data backend: {user_data} ")
-            return {"user": user_data}
-    return {"user": None}
+    is_valid = user_id is not None
+    return {"isValid": is_valid}
