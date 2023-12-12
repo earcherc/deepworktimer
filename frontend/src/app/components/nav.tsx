@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { userAtom } from '../store/atoms';
 import { useAtom } from 'jotai';
 
@@ -18,6 +18,25 @@ const navigation = [
 export default function Nav() {
   const [user, setUser] = useAtom(userAtom);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const logout = async () => {
+    try {
+      await fetch('http://localhost/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      router.push('/');
+
+      setUser({ user: undefined });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   return (
     <Disclosure as="nav" className="sticky top-0 bg-gray-800">
@@ -108,7 +127,7 @@ export default function Nav() {
                       <Menu.Item>
                         {({ active }) => (
                           <button
-                            // onClick={logout}
+                            onClick={logout}
                             className={classNames(
                               active ? 'bg-gray-100' : '',
                               'block w-full px-4 py-2 text-left text-sm text-gray-700',
