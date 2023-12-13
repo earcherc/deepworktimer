@@ -10,10 +10,16 @@ from ..schemas.inputs import DailyGoalInput
 @strawberry.type
 class DailyGoalMutations:
     @strawberry.mutation
-    def create_daily_goal(self, daily_goal: DailyGoalInput) -> DailyGoalType:
-        session = next(get_session())
+    def create_daily_goal(
+        self, daily_goal: DailyGoalInput, info: strawberry.types.Info
+    ) -> DailyGoalType:
+        user_id = getattr(info.context["request"].state, "user_id", None)
+        if user_id is None:
+            return None
 
+        session = next(get_session())
         daily_goal_data = strawberry.asdict(daily_goal)
+        daily_goal_data["user_id"] = user_id
         db_daily_goal = DailyGoal(**daily_goal_data)
         session.add(db_daily_goal)
         session.commit()

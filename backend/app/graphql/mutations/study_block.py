@@ -9,10 +9,16 @@ from ..schemas.inputs import StudyBlockInput
 @strawberry.type
 class StudyBlockMutations:
     @strawberry.mutation
-    def create_study_block(self, study_block: StudyBlockInput) -> StudyBlockType:
-        session = next(get_session())
+    def create_study_block(
+        self, study_block: StudyBlockInput, info: strawberry.types.Info
+    ) -> StudyBlockType:
+        user_id = getattr(info.context["request"].state, "user_id", None)
+        if user_id is None:
+            return None
 
+        session = next(get_session())
         study_block_data = strawberry.asdict(study_block)
+        study_block_data["user_id"] = user_id
         db_study_block = StudyBlock(**study_block_data)
 
         session.add(db_study_block)

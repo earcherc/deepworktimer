@@ -2,7 +2,6 @@ import enum
 import sqlalchemy as sa
 from sqlmodel import Field, Relationship, SQLModel
 from typing import Optional, List, TYPE_CHECKING
-from .study_category import UserCategoryLink
 from datetime import date, datetime
 
 
@@ -47,8 +46,7 @@ class User(SQLModel, table=True):
         back_populates="user", sa_relationship_kwargs={"cascade": "delete"}
     )
     study_categories: List["StudyCategory"] = Relationship(
-        back_populates="users",
-        link_model=UserCategoryLink,
+        back_populates="user",
         sa_relationship_kwargs={"cascade": "delete"},
     )
 

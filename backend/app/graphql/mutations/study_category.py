@@ -10,11 +10,15 @@ from ..schemas.inputs import StudyCategoryInput
 class StudyCategoryMutations:
     @strawberry.mutation
     def create_study_category(
-        self, study_category: StudyCategoryInput
+        self, study_category: StudyCategoryInput, info: strawberry.types.Info
     ) -> StudyCategoryType:
-        session = next(get_session())
+        user_id = getattr(info.context["request"].state, "user_id", None)
+        if user_id is None:
+            return None
 
+        session = next(get_session())
         study_category_data = strawberry.asdict(study_category)
+        study_category_data["user_id"] = user_id
         db_study_category = StudyCategory(**study_category_data)
 
         session.add(db_study_category)
@@ -32,9 +36,9 @@ class StudyCategoryMutations:
             select(StudyCategory).where(StudyCategory.id == id)
         ).first()
 
-        study_category_data = strawberry.asdict(study_category)
         if db_study_category:
-            for field, value in study_category_data:
+            study_category_data = strawberry.asdict(study_category)
+            for field, value in study_category_data.items():
                 setattr(db_study_category, field, value)
             session.commit()
             session.refresh(db_study_category)

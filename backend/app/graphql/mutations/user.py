@@ -9,9 +9,13 @@ from ..schemas.inputs import UserInput
 @strawberry.type
 class UserMutations:
     @strawberry.mutation
-    def update_user(self, id: int, user: UserInput) -> UserType:
+    def update_user(self, user: UserInput, info: strawberry.types.Info) -> UserType:
+        user_id = getattr(info.context["request"].state, "user_id", None)
+        if user_id is None:
+            return None
+
         session = next(get_session())
-        db_user = session.exec(select(User).where(User.id == id)).first()
+        db_user = session.exec(select(User).where(User.id == user_id)).first()
 
         if db_user:
             user_data = strawberry.asdict(user)
@@ -24,9 +28,13 @@ class UserMutations:
         return None
 
     @strawberry.mutation
-    def delete_user(self, id: int) -> bool:
+    def delete_user(self, info: strawberry.types.Info) -> bool:
+        user_id = getattr(info.context["request"].state, "user_id", None)
+        if user_id is None:
+            return False
+
         session = next(get_session())
-        db_user = session.exec(select(User).where(User.id == id)).first()
+        db_user = session.exec(select(User).where(User.id == user_id)).first()
 
         if db_user:
             session.delete(db_user)
