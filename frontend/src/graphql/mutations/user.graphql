@@ -1,0 +1,25 @@
+mutation UpdateCurrentUser($user: UserInput!) {
+  updateCurrentUser(user: $user) {
+    id
+    username
+    email
+    bio
+    jobTitle
+    personalTitle
+    dateOfBirth
+    latitude
+    longitude
+    firstName
+    lastName
+    gender
+    profilePhotoUrl
+    timezone
+    language
+    status
+    createdAt
+  }
+}
+
+mutation DeleteCurrentUser {
+  deleteCurrentUser
+}

@@ -4,8 +4,22 @@ query CurrentUser {
     username
     email
     bio
+    jobTitle
+    personalTitle
+    dateOfBirth
+    latitude
+    longitude
+    firstName
+    lastName
+    gender
+    profilePhotoUrl
+    timezone
+    language
+    status
+    createdAt
   }
 }
+
 
 query UserDailyGoals {
   userDailyGoals {

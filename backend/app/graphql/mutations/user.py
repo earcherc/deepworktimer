@@ -9,7 +9,9 @@ from ..schemas.inputs import UserInput
 @strawberry.type
 class UserMutations:
     @strawberry.mutation
-    def update_user(self, user: UserInput, info: strawberry.types.Info) -> UserType:
+    def update_current_user(
+        self, user: UserInput, info: strawberry.types.Info
+    ) -> UserType:
         user_id = getattr(info.context["request"].state, "user_id", None)
         if user_id is None:
             return None
@@ -28,7 +30,7 @@ class UserMutations:
         return None
 
     @strawberry.mutation
-    def delete_user(self, info: strawberry.types.Info) -> bool:
+    def delete_current_user(self, info: strawberry.types.Info) -> bool:
         user_id = getattr(info.context["request"].state, "user_id", None)
         if user_id is None:
             return False

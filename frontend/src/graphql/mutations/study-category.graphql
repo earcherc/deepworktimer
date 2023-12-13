@@ -1,0 +1,19 @@
+mutation CreateStudyCategory($studyCategory: StudyCategoryInput!) {
+  createStudyCategory(studyCategory: $studyCategory) {
+    id
+    title
+    userId
+  }
+}
+
+mutation UpdateStudyCategory($id: Int!, $studyCategory: StudyCategoryInput!) {
+  updateStudyCategory(id: $id, studyCategory: $studyCategory) {
+    id
+    title
+    userId
+  }
+}
+
+mutation DeleteStudyCategory($id: Int!) {
+  deleteStudyCategory(id: $id)
+}

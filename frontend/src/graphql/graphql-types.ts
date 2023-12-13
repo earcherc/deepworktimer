@@ -24,14 +24,14 @@ export type CombinedMutation = {
   createDailyGoal: DailyGoalType;
   createStudyBlock: StudyBlockType;
   createStudyCategory: StudyCategoryType;
+  deleteCurrentUser: Scalars['Boolean']['output'];
   deleteDailyGoal: Scalars['Boolean']['output'];
   deleteStudyBlock: Scalars['Boolean']['output'];
   deleteStudyCategory: Scalars['Boolean']['output'];
-  deleteUser: Scalars['Boolean']['output'];
+  updateCurrentUser: UserType;
   updateDailyGoal: DailyGoalType;
   updateStudyBlock: StudyBlockType;
   updateStudyCategory: StudyCategoryType;
-  updateUser: UserType;
 };
 
 export type CombinedMutationCreateDailyGoalArgs = {
@@ -58,8 +58,8 @@ export type CombinedMutationDeleteStudyCategoryArgs = {
   id: Scalars['Int']['input'];
 };
 
-export type CombinedMutationDeleteUserArgs = {
-  id: Scalars['Int']['input'];
+export type CombinedMutationUpdateCurrentUserArgs = {
+  user: UserInput;
 };
 
 export type CombinedMutationUpdateDailyGoalArgs = {
@@ -75,11 +75,6 @@ export type CombinedMutationUpdateStudyBlockArgs = {
 export type CombinedMutationUpdateStudyCategoryArgs = {
   id: Scalars['Int']['input'];
   studyCategory: StudyCategoryInput;
-};
-
-export type CombinedMutationUpdateUserArgs = {
-  id: Scalars['Int']['input'];
-  user: UserInput;
 };
 
 export type DailyGoalInput = {
@@ -143,6 +138,7 @@ export type StudyCategoryType = {
   __typename?: 'StudyCategoryType';
   id?: Maybe<Scalars['Int']['output']>;
   title: Scalars['String']['output'];
+  userId: Scalars['Int']['output'];
 };
 
 export type UserInput = {
@@ -173,6 +169,149 @@ export type UserType = {
   username: Scalars['String']['output'];
 };
 
+export type CreateDailyGoalMutationVariables = Exact<{
+  dailyGoal: DailyGoalInput;
+}>;
+
+export type CreateDailyGoalMutation = {
+  __typename?: 'CombinedMutation';
+  createDailyGoal: {
+    __typename?: 'DailyGoalType';
+    id?: number | null;
+    quantity: number;
+    blockSize: number;
+    createdAt: any;
+    isActive: boolean;
+    userId: number;
+  };
+};
+
+export type UpdateDailyGoalMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  dailyGoal: DailyGoalInput;
+}>;
+
+export type UpdateDailyGoalMutation = {
+  __typename?: 'CombinedMutation';
+  updateDailyGoal: {
+    __typename?: 'DailyGoalType';
+    id?: number | null;
+    quantity: number;
+    blockSize: number;
+    createdAt: any;
+    isActive: boolean;
+    userId: number;
+  };
+};
+
+export type DeleteDailyGoalMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+export type DeleteDailyGoalMutation = { __typename?: 'CombinedMutation'; deleteDailyGoal: boolean };
+
+export type CreateStudyBlockMutationVariables = Exact<{
+  studyBlock: StudyBlockInput;
+}>;
+
+export type CreateStudyBlockMutation = {
+  __typename?: 'CombinedMutation';
+  createStudyBlock: {
+    __typename?: 'StudyBlockType';
+    id?: number | null;
+    start: any;
+    end: any;
+    title: string;
+    rating: number;
+    userId: number;
+    dailyGoalId: number;
+    studyCategoryId: number;
+  };
+};
+
+export type UpdateStudyBlockMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  studyBlock: StudyBlockInput;
+}>;
+
+export type UpdateStudyBlockMutation = {
+  __typename?: 'CombinedMutation';
+  updateStudyBlock: {
+    __typename?: 'StudyBlockType';
+    id?: number | null;
+    start: any;
+    end: any;
+    title: string;
+    rating: number;
+    userId: number;
+    dailyGoalId: number;
+    studyCategoryId: number;
+  };
+};
+
+export type DeleteStudyBlockMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+export type DeleteStudyBlockMutation = { __typename?: 'CombinedMutation'; deleteStudyBlock: boolean };
+
+export type CreateStudyCategoryMutationVariables = Exact<{
+  studyCategory: StudyCategoryInput;
+}>;
+
+export type CreateStudyCategoryMutation = {
+  __typename?: 'CombinedMutation';
+  createStudyCategory: { __typename?: 'StudyCategoryType'; id?: number | null; title: string; userId: number };
+};
+
+export type UpdateStudyCategoryMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  studyCategory: StudyCategoryInput;
+}>;
+
+export type UpdateStudyCategoryMutation = {
+  __typename?: 'CombinedMutation';
+  updateStudyCategory: { __typename?: 'StudyCategoryType'; id?: number | null; title: string; userId: number };
+};
+
+export type DeleteStudyCategoryMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+export type DeleteStudyCategoryMutation = { __typename?: 'CombinedMutation'; deleteStudyCategory: boolean };
+
+export type UpdateCurrentUserMutationVariables = Exact<{
+  user: UserInput;
+}>;
+
+export type UpdateCurrentUserMutation = {
+  __typename?: 'CombinedMutation';
+  updateCurrentUser: {
+    __typename?: 'UserType';
+    id?: number | null;
+    username: string;
+    email: string;
+    bio?: string | null;
+    jobTitle?: string | null;
+    personalTitle?: string | null;
+    dateOfBirth?: any | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    gender?: Gender | null;
+    profilePhotoUrl?: string | null;
+    timezone?: string | null;
+    language?: string | null;
+    status?: string | null;
+    createdAt: any;
+  };
+};
+
+export type DeleteCurrentUserMutationVariables = Exact<{ [key: string]: never }>;
+
+export type DeleteCurrentUserMutation = { __typename?: 'CombinedMutation'; deleteCurrentUser: boolean };
+
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never }>;
 
 export type CurrentUserQuery = {
@@ -183,6 +322,19 @@ export type CurrentUserQuery = {
     username: string;
     email: string;
     bio?: string | null;
+    jobTitle?: string | null;
+    personalTitle?: string | null;
+    dateOfBirth?: any | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    gender?: Gender | null;
+    profilePhotoUrl?: string | null;
+    timezone?: string | null;
+    language?: string | null;
+    status?: string | null;
+    createdAt: any;
   } | null;
 };
 
@@ -223,6 +375,169 @@ export type AllStudyCategoriesQuery = {
   allStudyCategories: Array<{ __typename?: 'StudyCategoryType'; id?: number | null; title: string }>;
 };
 
+export const CreateDailyGoalDocument = gql`
+  mutation CreateDailyGoal($dailyGoal: DailyGoalInput!) {
+    createDailyGoal(dailyGoal: $dailyGoal) {
+      id
+      quantity
+      blockSize
+      createdAt
+      isActive
+      userId
+    }
+  }
+`;
+
+export function useCreateDailyGoalMutation() {
+  return Urql.useMutation<CreateDailyGoalMutation, CreateDailyGoalMutationVariables>(CreateDailyGoalDocument);
+}
+export const UpdateDailyGoalDocument = gql`
+  mutation UpdateDailyGoal($id: Int!, $dailyGoal: DailyGoalInput!) {
+    updateDailyGoal(id: $id, dailyGoal: $dailyGoal) {
+      id
+      quantity
+      blockSize
+      createdAt
+      isActive
+      userId
+    }
+  }
+`;
+
+export function useUpdateDailyGoalMutation() {
+  return Urql.useMutation<UpdateDailyGoalMutation, UpdateDailyGoalMutationVariables>(UpdateDailyGoalDocument);
+}
+export const DeleteDailyGoalDocument = gql`
+  mutation DeleteDailyGoal($id: Int!) {
+    deleteDailyGoal(id: $id)
+  }
+`;
+
+export function useDeleteDailyGoalMutation() {
+  return Urql.useMutation<DeleteDailyGoalMutation, DeleteDailyGoalMutationVariables>(DeleteDailyGoalDocument);
+}
+export const CreateStudyBlockDocument = gql`
+  mutation CreateStudyBlock($studyBlock: StudyBlockInput!) {
+    createStudyBlock(studyBlock: $studyBlock) {
+      id
+      start
+      end
+      title
+      rating
+      userId
+      dailyGoalId
+      studyCategoryId
+    }
+  }
+`;
+
+export function useCreateStudyBlockMutation() {
+  return Urql.useMutation<CreateStudyBlockMutation, CreateStudyBlockMutationVariables>(CreateStudyBlockDocument);
+}
+export const UpdateStudyBlockDocument = gql`
+  mutation UpdateStudyBlock($id: Int!, $studyBlock: StudyBlockInput!) {
+    updateStudyBlock(id: $id, studyBlock: $studyBlock) {
+      id
+      start
+      end
+      title
+      rating
+      userId
+      dailyGoalId
+      studyCategoryId
+    }
+  }
+`;
+
+export function useUpdateStudyBlockMutation() {
+  return Urql.useMutation<UpdateStudyBlockMutation, UpdateStudyBlockMutationVariables>(UpdateStudyBlockDocument);
+}
+export const DeleteStudyBlockDocument = gql`
+  mutation DeleteStudyBlock($id: Int!) {
+    deleteStudyBlock(id: $id)
+  }
+`;
+
+export function useDeleteStudyBlockMutation() {
+  return Urql.useMutation<DeleteStudyBlockMutation, DeleteStudyBlockMutationVariables>(DeleteStudyBlockDocument);
+}
+export const CreateStudyCategoryDocument = gql`
+  mutation CreateStudyCategory($studyCategory: StudyCategoryInput!) {
+    createStudyCategory(studyCategory: $studyCategory) {
+      id
+      title
+      userId
+    }
+  }
+`;
+
+export function useCreateStudyCategoryMutation() {
+  return Urql.useMutation<CreateStudyCategoryMutation, CreateStudyCategoryMutationVariables>(
+    CreateStudyCategoryDocument,
+  );
+}
+export const UpdateStudyCategoryDocument = gql`
+  mutation UpdateStudyCategory($id: Int!, $studyCategory: StudyCategoryInput!) {
+    updateStudyCategory(id: $id, studyCategory: $studyCategory) {
+      id
+      title
+      userId
+    }
+  }
+`;
+
+export function useUpdateStudyCategoryMutation() {
+  return Urql.useMutation<UpdateStudyCategoryMutation, UpdateStudyCategoryMutationVariables>(
+    UpdateStudyCategoryDocument,
+  );
+}
+export const DeleteStudyCategoryDocument = gql`
+  mutation DeleteStudyCategory($id: Int!) {
+    deleteStudyCategory(id: $id)
+  }
+`;
+
+export function useDeleteStudyCategoryMutation() {
+  return Urql.useMutation<DeleteStudyCategoryMutation, DeleteStudyCategoryMutationVariables>(
+    DeleteStudyCategoryDocument,
+  );
+}
+export const UpdateCurrentUserDocument = gql`
+  mutation UpdateCurrentUser($user: UserInput!) {
+    updateCurrentUser(user: $user) {
+      id
+      username
+      email
+      bio
+      jobTitle
+      personalTitle
+      dateOfBirth
+      latitude
+      longitude
+      firstName
+      lastName
+      gender
+      profilePhotoUrl
+      timezone
+      language
+      status
+      createdAt
+    }
+  }
+`;
+
+export function useUpdateCurrentUserMutation() {
+  return Urql.useMutation<UpdateCurrentUserMutation, UpdateCurrentUserMutationVariables>(UpdateCurrentUserDocument);
+}
+export const DeleteCurrentUserDocument = gql`
+  mutation DeleteCurrentUser {
+    deleteCurrentUser
+  }
+`;
+
+export function useDeleteCurrentUserMutation() {
+  return Urql.useMutation<DeleteCurrentUserMutation, DeleteCurrentUserMutationVariables>(DeleteCurrentUserDocument);
+}
 export const CurrentUserDocument = gql`
   query CurrentUser {
     currentUser {
@@ -230,6 +545,19 @@ export const CurrentUserDocument = gql`
       username
       email
       bio
+      jobTitle
+      personalTitle
+      dateOfBirth
+      latitude
+      longitude
+      firstName
+      lastName
+      gender
+      profilePhotoUrl
+      timezone
+      language
+      status
+      createdAt
     }
   }
 `;
