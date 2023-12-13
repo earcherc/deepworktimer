@@ -105,6 +105,34 @@ export default function UserForm() {
           </div>
         </div>
 
+        <div className="col-span-3">
+          <label htmlFor="firstName" className="block text-sm font-medium leading-6 text-white">
+            First Name
+          </label>
+          <div className="mt-2">
+            <input
+              type="text"
+              id="firstName"
+              {...register('firstName')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-3">
+          <label htmlFor="lastName" className="block text-sm font-medium leading-6 text-white">
+            Last Name
+          </label>
+          <div className="mt-2">
+            <input
+              type="text"
+              id="lastName"
+              {...register('lastName')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
         <div className="col-span-full">
           <label htmlFor="email" className="block text-sm font-medium leading-6 text-white">
             Email address
@@ -132,6 +160,25 @@ export default function UserForm() {
               autoComplete="username"
               className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
+          </div>
+        </div>
+
+        <div className="col-span-full">
+          <label htmlFor="gender" className="block text-sm font-medium leading-6 text-white">
+            Gender
+          </label>
+          <div className="mt-2">
+            <select
+              id="gender"
+              {...register('gender')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            >
+              <option value="">Select Gender</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+              <option value="NOT_SPECIFIED">Not Specified</option>
+            </select>
           </div>
         </div>
 
@@ -215,53 +262,6 @@ export default function UserForm() {
               {...register('longitude')}
               className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
-          </div>
-        </div>
-
-        <div className="col-span-3">
-          <label htmlFor="firstName" className="block text-sm font-medium leading-6 text-white">
-            First Name
-          </label>
-          <div className="mt-2">
-            <input
-              type="text"
-              id="firstName"
-              {...register('firstName')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-            />
-          </div>
-        </div>
-
-        <div className="col-span-3">
-          <label htmlFor="lastName" className="block text-sm font-medium leading-6 text-white">
-            Last Name
-          </label>
-          <div className="mt-2">
-            <input
-              type="text"
-              id="lastName"
-              {...register('lastName')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-            />
-          </div>
-        </div>
-
-        <div className="col-span-full">
-          <label htmlFor="gender" className="block text-sm font-medium leading-6 text-white">
-            Gender
-          </label>
-          <div className="mt-2">
-            <select
-              id="gender"
-              {...register('gender')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-            >
-              <option value="">Select Gender</option>
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
-              <option value="OTHER">Other</option>
-              <option value="NOT_SPECIFIED">Not Specified</option>
-            </select>
           </div>
         </div>
 

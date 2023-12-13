@@ -1,7 +1,6 @@
 import strawberry
 from ...models import User, DailyGoal, StudyBlock, StudyCategory, Gender
 
-
 strawberry.enum(Gender)
 
 

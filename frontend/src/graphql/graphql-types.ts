@@ -95,10 +95,10 @@ export type DailyGoalType = {
 };
 
 export enum Gender {
-  Female = 'FEMALE',
-  Male = 'MALE',
-  NotSpecified = 'NOT_SPECIFIED',
-  Other = 'OTHER',
+  FEMALE = 'FEMALE',
+  MALE = 'MALE',
+  NOT_SPECIFIED = 'NOT_SPECIFIED',
+  OTHER = 'OTHER',
 }
 
 export type Query = {

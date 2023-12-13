@@ -21,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 gender_enum = postgresql.ENUM(
-    "male", "female", "other", "not_specified", name="gender", create_type=True
+    "MALE", "FEMALE", "OTHER", "NOT_SPECIFIED", name="gender", create_type=True
 )
 
 

@@ -9,6 +9,9 @@ const config: CodegenConfig = {
       plugins: ['typescript', 'typescript-operations', 'typescript-urql'],
       config: {
         withHooks: true,
+        namingConvention: {
+          enumValues: 'keep',
+        },
       },
       hooks: {
         afterOneFileWrite: ['prettier --write'],

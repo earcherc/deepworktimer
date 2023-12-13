@@ -1,5 +1,4 @@
-import enum
-import sqlalchemy as sa
+from enum import Enum
 from sqlmodel import Field, Relationship, SQLModel
 from typing import Optional, List, TYPE_CHECKING
 from datetime import date, datetime
@@ -11,11 +10,11 @@ if TYPE_CHECKING:
     from .study_category import StudyCategory
 
 
-class Gender(enum.Enum):
-    MALE = "male"
-    FEMALE = "female"
-    OTHER = "other"
-    NOT_SPECIFIED = "not_specified"
+class Gender(Enum):
+    MALE = "MALE"
+    FEMALE = "FEMALE"
+    OTHER = "OTHER"
+    NOT_SPECIFIED = "NOT_SPECIFIED"
 
 
 class User(SQLModel, table=True):
