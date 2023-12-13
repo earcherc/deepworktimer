@@ -12,7 +12,6 @@ strawberry.enum(Gender)
         "id",
         "username",
         "email",
-        "hashed_password",
         "bio",
         "job_title",
         "personal_title",

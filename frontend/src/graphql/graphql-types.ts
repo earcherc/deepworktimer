@@ -79,6 +79,7 @@ export type CombinedMutationUpdateStudyCategoryArgs = {
 
 export type DailyGoalInput = {
   blockSize: Scalars['Int']['input'];
+  isActive?: Scalars['Boolean']['input'];
   quantity: Scalars['Int']['input'];
   userId: Scalars['Int']['input'];
 };
@@ -132,6 +133,7 @@ export type StudyBlockType = {
 
 export type StudyCategoryInput = {
   title: Scalars['String']['input'];
+  userId: Scalars['Int']['input'];
 };
 
 export type StudyCategoryType = {
@@ -143,7 +145,19 @@ export type StudyCategoryType = {
 
 export type UserInput = {
   bio?: InputMaybe<Scalars['String']['input']>;
+  dateOfBirth?: InputMaybe<Scalars['Date']['input']>;
   email: Scalars['String']['input'];
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  gender?: InputMaybe<Gender>;
+  jobTitle?: InputMaybe<Scalars['String']['input']>;
+  language?: InputMaybe<Scalars['String']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  latitude?: InputMaybe<Scalars['Float']['input']>;
+  longitude?: InputMaybe<Scalars['Float']['input']>;
+  personalTitle?: InputMaybe<Scalars['String']['input']>;
+  profilePhotoUrl?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   username: Scalars['String']['input'];
 };
 
@@ -155,7 +169,6 @@ export type UserType = {
   email: Scalars['String']['output'];
   firstName?: Maybe<Scalars['String']['output']>;
   gender?: Maybe<Gender>;
-  hashedPassword: Scalars['String']['output'];
   id?: Maybe<Scalars['Int']['output']>;
   jobTitle?: Maybe<Scalars['String']['output']>;
   language?: Maybe<Scalars['String']['output']>;

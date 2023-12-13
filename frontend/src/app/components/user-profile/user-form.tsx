@@ -1,14 +1,90 @@
 'use client';
 
 import { userAtom } from '@/app/store/atoms';
+import { UserInput, useUpdateCurrentUserMutation } from '@/graphql/graphql-types';
 import { useAtom } from 'jotai';
 import Image from 'next/image';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 
 export default function UserForm() {
   const [user, setUser] = useAtom(userAtom);
+  const [updateUserResult, updateUser] = useUpdateCurrentUserMutation();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<UserInput>({
+    defaultValues: {
+      email: '',
+      username: '',
+      bio: '',
+      jobTitle: '',
+      personalTitle: '',
+      dateOfBirth: '',
+      latitude: undefined,
+      longitude: undefined,
+      firstName: '',
+      lastName: '',
+      gender: undefined,
+      profilePhotoUrl: '',
+      timezone: '',
+      language: '',
+      status: '',
+    },
+  });
+
+  useEffect(() => {
+    reset({
+      email: user?.email || '',
+      username: user?.username || '',
+      bio: user?.bio || '',
+      jobTitle: user?.jobTitle || '',
+      personalTitle: user?.personalTitle || '',
+      dateOfBirth: user?.dateOfBirth || '',
+      latitude: user?.latitude,
+      longitude: user?.longitude,
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      gender: user?.gender,
+      profilePhotoUrl: user?.profilePhotoUrl || '',
+      timezone: user?.timezone || '',
+      language: user?.language || '',
+      status: user?.status || '',
+    });
+  }, [user, reset]);
+
+  const onSubmit = async (data: UserInput) => {
+    try {
+      let submitData = { ...data };
+
+      // Remove fields from submitData if they are empty or undefined
+      if (!submitData.dateOfBirth) {
+        delete submitData.dateOfBirth;
+      }
+      if (submitData.latitude === undefined) {
+        delete submitData.latitude;
+      }
+      if (submitData.longitude === undefined) {
+        delete submitData.longitude;
+      }
+      if (submitData.gender === undefined) {
+        delete submitData.gender;
+      }
+
+      const result = await updateUser({ user: submitData });
+      if (result.data) {
+        setUser(result.data.updateCurrentUser);
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
 
   return (
-    <form>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
         <div className="col-span-full flex items-center gap-x-8">
           <Image
@@ -36,11 +112,10 @@ export default function UserForm() {
           <div className="mt-2">
             <input
               id="email"
-              name="email"
+              {...register('email')}
               type="email"
-              defaultValue={user?.email || ''}
               autoComplete="email"
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 pl-2"
             />
           </div>
         </div>
@@ -50,16 +125,185 @@ export default function UserForm() {
             Username
           </label>
           <div className="mt-2">
-            <div className="flex rounded-md bg-white/5 ring-1 ring-inset ring-white/10 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500">
-              <input
-                type="text"
-                name="username"
-                id="username"
-                autoComplete="username"
-                defaultValue={user?.username || ''}
-                className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-              />
-            </div>
+            <input
+              type="text"
+              id="username"
+              {...register('username')}
+              autoComplete="username"
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-full">
+          <label htmlFor="bio" className="block text-sm font-medium leading-6 text-white">
+            Bio
+          </label>
+          <div className="mt-2">
+            <textarea
+              id="bio"
+              {...register('bio')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-full">
+          <label htmlFor="jobTitle" className="block text-sm font-medium leading-6 text-white">
+            Job Title
+          </label>
+          <div className="mt-2">
+            <input
+              type="text"
+              id="jobTitle"
+              {...register('jobTitle')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-full">
+          <label htmlFor="personalTitle" className="block text-sm font-medium leading-6 text-white">
+            Personal Title
+          </label>
+          <div className="mt-2">
+            <input
+              type="text"
+              id="personalTitle"
+              {...register('personalTitle')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-full">
+          <label htmlFor="dateOfBirth" className="block text-sm font-medium leading-6 text-white">
+            Date of Birth
+          </label>
+          <div className="mt-2">
+            <input
+              type="date"
+              id="dateOfBirth"
+              {...register('dateOfBirth')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-3">
+          <label htmlFor="latitude" className="block text-sm font-medium leading-6 text-white">
+            Latitude
+          </label>
+          <div className="mt-2">
+            <input
+              type="number"
+              id="latitude"
+              {...register('latitude')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-3">
+          <label htmlFor="longitude" className="block text-sm font-medium leading-6 text-white">
+            Longitude
+          </label>
+          <div className="mt-2">
+            <input
+              type="number"
+              id="longitude"
+              {...register('longitude')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-3">
+          <label htmlFor="firstName" className="block text-sm font-medium leading-6 text-white">
+            First Name
+          </label>
+          <div className="mt-2">
+            <input
+              type="text"
+              id="firstName"
+              {...register('firstName')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-3">
+          <label htmlFor="lastName" className="block text-sm font-medium leading-6 text-white">
+            Last Name
+          </label>
+          <div className="mt-2">
+            <input
+              type="text"
+              id="lastName"
+              {...register('lastName')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-full">
+          <label htmlFor="gender" className="block text-sm font-medium leading-6 text-white">
+            Gender
+          </label>
+          <div className="mt-2">
+            <select
+              id="gender"
+              {...register('gender')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            >
+              <option value="">Select Gender</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+              <option value="NOT_SPECIFIED">Not Specified</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="col-span-full">
+          <label htmlFor="timezone" className="block text-sm font-medium leading-6 text-white">
+            Timezone
+          </label>
+          <div className="mt-2">
+            <input
+              type="text"
+              id="timezone"
+              {...register('timezone')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-full">
+          <label htmlFor="language" className="block text-sm font-medium leading-6 text-white">
+            Language
+          </label>
+          <div className="mt-2">
+            <input
+              type="text"
+              id="language"
+              {...register('language')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
+          </div>
+        </div>
+
+        <div className="col-span-full">
+          <label htmlFor="status" className="block text-sm font-medium leading-6 text-white">
+            Status
+          </label>
+          <div className="mt-2">
+            <input
+              type="text"
+              id="status"
+              {...register('status')}
+              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            />
           </div>
         </div>
       </div>
