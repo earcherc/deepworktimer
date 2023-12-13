@@ -6,7 +6,7 @@ from .auth_utils import (
     delete_session,
     get_user_id_from_session,
 )
-from .auth_schemas import RegistrationRequest, LoginRequest
+from .auth_schemas import RegistrationRequest, LoginRequest, PasswordChangeRequest
 from ..dependencies import get_redis
 from ..database import get_session
 from ..models import User as UserModel
@@ -91,3 +91,32 @@ async def validate_session(request: Request, session=Depends(get_session)):
     user_id = getattr(request.state, "user_id", None)
     is_valid = user_id is not None
     return {"isValid": is_valid}
+
+
+@router.post("/change-password")
+async def change_password(
+    request: Request,
+    password_change: PasswordChangeRequest,
+    redis=Depends(get_redis),
+    session=Depends(get_session),
+):
+    session_id = request.cookies.get("session_id")
+    if not session_id:
+        raise HTTPException(status_code=401, detail="No session ID found")
+
+    user_id = await get_user_id_from_session(redis, session_id)
+    if not user_id:
+        raise HTTPException(
+            status_code=401, detail="Invalid session or session expired"
+        )
+
+    user = session.exec(select(UserModel).where(UserModel.id == user_id)).first()
+    if not user or not pwd_context.verify(
+        password_change.current_password, user.hashed_password
+    ):
+        raise HTTPException(status_code=403, detail="Current password is incorrect")
+
+    user.hashed_password = pwd_context.hash(password_change.new_password)
+    session.commit()
+
+    return {"message": "Password changed successfully"}
