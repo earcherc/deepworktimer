@@ -36,7 +36,7 @@ const LoginForm = () => {
 
       const userData = await res.json();
       // Assuming userData contains the user object
-      setUser({ user: userData });
+      setUser(userData);
       router.push('/dashboard');
     } catch (error) {
       console.error('Login error:', error);

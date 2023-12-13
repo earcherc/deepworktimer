@@ -1,11 +1,33 @@
-from typing import Optional
 import strawberry
-from ...models import User, DailyGoal, StudyBlock, StudyCategory
+from ...models import User, DailyGoal, StudyBlock, StudyCategory, Gender
+
+
+strawberry.enum(Gender)
 
 
 # Strawberry GraphQL type using SQLModel (Pydantic) class
 @strawberry.experimental.pydantic.type(
-    model=User, fields=["id", "username", "email", "bio"]
+    model=User,
+    fields=[
+        "id",
+        "username",
+        "email",
+        "hashed_password",
+        "bio",
+        "job_title",
+        "personal_title",
+        "date_of_birth",
+        "latitude",
+        "longitude",
+        "first_name",
+        "last_name",
+        "gender",
+        "profile_photo_url",
+        "timezone",
+        "language",
+        "status",
+        "created_at",
+    ],
 )
 class UserType:
     pass

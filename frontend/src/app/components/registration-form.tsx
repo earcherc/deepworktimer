@@ -3,8 +3,10 @@
 import React, { FormEvent, useState } from 'react';
 import classNames from 'classnames';
 import { useRouter } from 'next/navigation';
+import useToast from '../context/toasts/toast-context';
 
 const RegistrationForm = () => {
+  const { addToast } = useToast();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,19 +17,30 @@ const RegistrationForm = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, email, password }),
-    });
+    try {
+      const res = await fetch('http://localhost/api/auth/register', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
 
-    const { body, status } = await res.json();
-    if (status == 200) {
-      router.push('/login'); // Redirect to login page after successful registration
-    } else {
-      setErrorMessage(body.detail);
+      if (!res.ok) {
+        const errorData = await res.json();
+        setErrorMessage(errorData.detail);
+        addToast({ type: 'error', content: errorData.detail });
+        return;
+      }
+
+      const userData = await res.json();
+
+      router.push('/login');
+    } catch (error) {
+      console.error('Registration error:', error);
+      setErrorMessage('An error occurred while registering.');
+      addToast({ type: 'error', content: 'An error occurred while registering.' });
     }
   };
 

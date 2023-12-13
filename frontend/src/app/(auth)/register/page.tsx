@@ -10,7 +10,7 @@ export default function Register() {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <RegistrationForm />;
+        <RegistrationForm />
       </div>
     </div>
   );

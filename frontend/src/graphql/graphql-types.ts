@@ -15,6 +15,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  Date: { input: any; output: any };
   DateTime: { input: any; output: any };
 };
 
@@ -90,10 +91,19 @@ export type DailyGoalInput = {
 export type DailyGoalType = {
   __typename?: 'DailyGoalType';
   blockSize: Scalars['Int']['output'];
+  createdAt: Scalars['DateTime']['output'];
   id?: Maybe<Scalars['Int']['output']>;
+  isActive: Scalars['Boolean']['output'];
   quantity: Scalars['Int']['output'];
   userId: Scalars['Int']['output'];
 };
+
+export enum Gender {
+  Female = 'FEMALE',
+  Male = 'MALE',
+  NotSpecified = 'NOT_SPECIFIED',
+  Other = 'OTHER',
+}
 
 export type Query = {
   __typename?: 'Query';
@@ -144,8 +154,22 @@ export type UserInput = {
 export type UserType = {
   __typename?: 'UserType';
   bio?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  dateOfBirth?: Maybe<Scalars['Date']['output']>;
   email: Scalars['String']['output'];
+  firstName?: Maybe<Scalars['String']['output']>;
+  gender?: Maybe<Gender>;
+  hashedPassword: Scalars['String']['output'];
   id?: Maybe<Scalars['Int']['output']>;
+  jobTitle?: Maybe<Scalars['String']['output']>;
+  language?: Maybe<Scalars['String']['output']>;
+  lastName?: Maybe<Scalars['String']['output']>;
+  latitude?: Maybe<Scalars['Float']['output']>;
+  longitude?: Maybe<Scalars['Float']['output']>;
+  personalTitle?: Maybe<Scalars['String']['output']>;
+  profilePhotoUrl?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<Scalars['String']['output']>;
+  timezone?: Maybe<Scalars['String']['output']>;
   username: Scalars['String']['output'];
 };
 
