@@ -1,45 +1,50 @@
 'use client';
 
-import { userAtom } from '@/app/store/atoms';
-import { UserInput, useUpdateCurrentUserMutation } from '@/graphql/graphql-types';
+import { userAtom } from '@app/store/atoms';
 import { useAtom } from 'jotai';
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useDeleteCurrentUserMutation } from '@/graphql/graphql-types';
+import { useRouter } from 'next/navigation';
+import { useModalContext } from '@/app/context/modal/modal-context';
 
 export default function DeleteAccountForm() {
-  const [user, setUser] = useAtom(userAtom);
-  const [updateUserResult, updateUser] = useUpdateCurrentUserMutation();
+  const [, setUser] = useAtom(userAtom);
+  const [, deleteUser] = useDeleteCurrentUserMutation();
+  const Router = useRouter();
+  const { showModal, hideModal } = useModalContext(); // Use the context hook
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<UserInput>({
-    defaultValues: {
-      email: '',
-      username: '',
-      bio: '',
-    },
-  });
+  const { handleSubmit } = useForm();
 
-  useEffect(() => {
-    reset({
-      email: user?.email || '',
-      username: user?.username || '',
-      bio: user?.bio || '',
-    });
-  }, [user, reset]);
-
-  const onSubmit = async (data: UserInput) => {
+  const handleDelete = async () => {
     try {
-      const result = await updateUser({ user: data });
-      if (result.data) {
-        setUser(result.data.updateCurrentUser);
+      const result = await deleteUser({});
+      if (result.data && result.data.deleteCurrentUser) {
+        hideModal();
+        Router.push('/');
+        setUser(undefined);
       }
     } catch (error) {
-      console.error('Error updating user:', error);
+      console.error('Error deleting user:', error);
     }
+  };
+
+  const onSubmit = () => {
+    showModal({
+      type: 'danger',
+      title: 'Confirm Account Deletion',
+      message: 'Are you sure you want to delete your account? This action cannot be undone.',
+      buttons: [
+        {
+          text: 'Delete Account',
+          onClick: handleDelete,
+          isPrimary: true,
+        },
+        {
+          text: 'Dismiss',
+          onClick: hideModal,
+        },
+      ],
+    });
   };
 
   return (

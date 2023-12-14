@@ -13,7 +13,7 @@ The Deep Work Companion App is designed to help users achieve optimal deep work 
 - **Next.js**: Utilized within a development Docker container for a consistent development environment and seamless SSR/SSG capabilities.
 - **Jotai**: For efficient and straightforward state management.
 - **React Hook Form**: To manage form states with minimal re-rendering.
-- **React Query**: For handling server state and efficient data fetching and caching mechanisms.
+- **URQL**: For handling GraphQL data fetching and caching.
 - **TailwindCSS**: For a utility-first approach to styling.
 - **GraphQL**: Used as the querying language to communicate with the backend.
 
