@@ -3,7 +3,6 @@
 import { userAtom } from '@/app/store/atoms';
 import { UserInput, useUpdateCurrentUserMutation } from '@/graphql/graphql-types';
 import { useAtom } from 'jotai';
-import Image from 'next/image';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -86,25 +85,6 @@ export default function UserForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
-        <div className="col-span-full flex items-center gap-x-8">
-          <Image
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-            alt=""
-            className="h-24 w-24 flex-none rounded-lg bg-gray-800 object-cover"
-            width={96}
-            height={96}
-          />
-          <div>
-            <button
-              type="button"
-              className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/20"
-            >
-              Change avatar
-            </button>
-            <p className="mt-2 text-xs leading-5 text-gray-400">JPG, GIF or PNG. 1MB max.</p>
-          </div>
-        </div>
-
         <div className="col-span-3">
           <label htmlFor="firstName" className="block text-sm font-medium leading-6 text-white">
             First Name

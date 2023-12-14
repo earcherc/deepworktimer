@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from sqlmodel import select
 
 from ..models.user import User
@@ -18,11 +18,14 @@ def allowed_file(filename: str):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@router.post("/images/")
+@router.post("/image")
 async def upload_image(
-    file: UploadFile = File(...), redis=Depends(get_redis), session=Depends(get_session)
+    request: Request,
+    file: UploadFile = File(...),
+    redis=Depends(get_redis),
+    session=Depends(get_session),
 ):
-    session_id = session.get("session_id")
+    session_id = request.cookies.get("session_id")
     if not session_id:
         raise HTTPException(status_code=401, detail="No session ID found")
 
@@ -32,8 +35,8 @@ async def upload_image(
             status_code=401, detail="Invalid session or session expired"
         )
 
-    # Validate file size
-    if await file.read(MAX_FILE_SIZE + 1):
+    content_length = request.headers.get("content-length")
+    if content_length and int(content_length) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File too large")
 
     file.file.seek(0)  # Reset file pointer

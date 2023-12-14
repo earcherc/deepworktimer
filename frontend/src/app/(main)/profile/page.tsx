@@ -1,5 +1,6 @@
 import ChangePasswordForm from '@/app/components/user-profile/change-password';
 import DeleteAccountForm from '@/app/components/user-profile/delete-account';
+import ImageUploadForm from '@/app/components/user-profile/upload-image';
 import UserForm from '@app/components/user-profile/user-form';
 
 const Profile = () => {
@@ -8,7 +9,6 @@ const Profile = () => {
       <div>
         <div className="mx-auto max-w-screen-xl">
           <main>
-            {/* Settings forms */}
             <div className="divide-y divide-white/5">
               <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
                 <div>
@@ -20,6 +20,7 @@ const Profile = () => {
 
                 <div className="md:col-span-2">
                   <div className="mb-8">
+                    <ImageUploadForm></ImageUploadForm>
                     <UserForm></UserForm>
                   </div>
                 </div>
