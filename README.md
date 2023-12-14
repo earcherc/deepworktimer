@@ -25,6 +25,7 @@ The Deep Work Companion App is designed to help users achieve optimal deep work 
 - **Session-Based Authentication**: To securely manage user sessions.
 - **SQLModel (SQLAlchemy Abstraction)**: Simplifies interactions with the Postgres database.
 - **Postgres**: The primary database for storing application data.
+- **S3**: Amazon file storage service.
 
 ## Features
 

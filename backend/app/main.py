@@ -10,6 +10,7 @@ from .graphql import (
     StudyBlockMutations,
 )
 from .auth.auth_routes import router as auth_router
+from .uploads.upload_routes import router as upload_router
 from .auth.auth_utils import get_user_id_from_session
 from contextlib import asynccontextmanager
 
@@ -59,3 +60,4 @@ async def auth_middleware(request: Request, call_next):
 # Include routers
 app.include_router(auth_router, prefix="/auth")
 app.include_router(graphql_app, prefix="/graphql")
+app.include_router(upload_router, prefix="/upload")
