@@ -1,4 +1,5 @@
 import DailyGoal from './daily-goal';
+import StudyCategory from './study-category';
 
 export default function Sidebar() {
   return (
@@ -8,6 +9,9 @@ export default function Sidebar() {
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
             <li>
               <DailyGoal></DailyGoal>
+            </li>
+            <li>
+              <StudyCategory></StudyCategory>
             </li>
             <li>
               <DailyGoal></DailyGoal>
