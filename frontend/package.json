@@ -26,6 +26,7 @@
     "react-dom": "^18",
     "react-hook-form": "^7.48.2",
     "react-query": "^3.39.3",
+    "react-timer-hook": "^3.0.7",
     "urql": "^4.0.6",
     "uuid": "^9.0.1"
   },
@@ -44,6 +45,8 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.3",
     "postcss": "^8",
+    "prettier": "^3.1.1",
+    "prettier-plugin-tailwindcss": "^0.5.9",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }

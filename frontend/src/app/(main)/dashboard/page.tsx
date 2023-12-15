@@ -4,6 +4,8 @@ import { dailyGoalsAtom } from '@app/store/atoms';
 import { useUserDailyGoalsQuery } from '@/graphql/graphql-types';
 import { useAtom } from 'jotai';
 import React, { useEffect } from 'react';
+import PomodoroTimer from '@/app/components/timer/timer';
+import Sidebar from '@/app/components/sidebar/sidebar';
 
 const Dashboard = () => {
   const [, setDailyGoals] = useAtom(dailyGoalsAtom);
@@ -16,9 +18,9 @@ const Dashboard = () => {
   }, [data]);
 
   return (
-    <div className="flex h-screen flex-1 flex-col justify-center px-6 py-12 text-white lg:px-8">
-      {/* Render your daily goals here */}
-      Hello
+    <div className="flex">
+      <Sidebar></Sidebar>
+      <PomodoroTimer></PomodoroTimer>
     </div>
   );
 };
