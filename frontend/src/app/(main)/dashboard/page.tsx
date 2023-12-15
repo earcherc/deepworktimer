@@ -6,6 +6,7 @@ import { useAtom } from 'jotai';
 import React, { useEffect } from 'react';
 import PomodoroTimer from '@/app/components/timer/timer';
 import Sidebar from '@/app/components/sidebar/sidebar';
+import Calendar from '@/app/components/calendar/calendar';
 
 const Dashboard = () => {
   const [, setDailyGoals] = useAtom(dailyGoalsAtom);
@@ -18,9 +19,13 @@ const Dashboard = () => {
   }, [data]);
 
   return (
-    <div className="flex">
-      <Sidebar></Sidebar>
-      <PomodoroTimer></PomodoroTimer>
+    <div className="flex h-full min-h-screen p-4">
+      <Sidebar />
+      <div className="flex flex-grow flex-col pl-4">
+        <PomodoroTimer />
+        <div className="mb-4" />
+        <Calendar />
+      </div>
     </div>
   );
 };
