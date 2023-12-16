@@ -1,14 +1,19 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { StudyBlockType } from '@/graphql/graphql-types';
 import StudyBlock from './study-block';
+
+const currentDate = new Date();
+
+// Set the time to 1 AM on the current day
+currentDate.setHours(1, 0, 0, 0); // sets the time to 1:00 AM
 
 const dummyStudyBlocks: StudyBlockType[] = [
   {
     dailyGoalId: 1,
-    end: new Date().toISOString(),
-    start: new Date(new Date().setHours(new Date().getHours() - 1)).toISOString(),
+    end: new Date(currentDate.getTime() + 60 * 60 * 1000).toISOString(), // 1 hour after the start time
+    start: currentDate.toISOString(),
     studyCategoryId: 2,
     title: 'Study Session',
     userId: 1,

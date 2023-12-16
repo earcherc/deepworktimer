@@ -7,7 +7,7 @@ const Profile = () => {
   return (
     <>
       <div>
-        <div className="mx-auto max-w-screen-xl">
+        <div className="mx-auto max-w-screen-xl bg-gray-900">
           <main>
             <div className="divide-y divide-white/5">
               <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">

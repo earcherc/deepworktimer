@@ -1,7 +1,7 @@
 'use client';
 
 import { StudyBlockType } from '@/graphql/graphql-types';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 type StudyBlockUI = Pick<StudyBlockType, 'title' | 'start' | 'end'>;
 
@@ -36,12 +36,22 @@ const StudyBlock = ({ block }: { block: StudyBlockUI }) => {
   const { title, start, end } = block;
   const gridPosition = timeToGridRow(start, end);
 
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+
+  useEffect(() => {
+    // Update the formatted times after the component mounts
+    setStartTime(formatTime(start));
+    setEndTime(formatTime(end));
+  }, [start, end]); // Dependency array includes start and end to update if they change
+
   return (
     <li className="relative mt-px flex" style={{ gridRow: gridPosition }}>
       <div className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-blue-50 p-2 text-xs leading-5 hover:bg-blue-100">
         <p className="order-1 font-semibold text-blue-700">{title}</p>
         <p className="text-blue-500 group-hover:text-blue-700">
-          <time dateTime={start}>{formatTime(start)}</time> -<time dateTime={end}>{formatTime(end)}</time>
+          <time dateTime={start}>{startTime || 'Loading...'}</time> -
+          <time dateTime={end}>{endTime || 'Loading...'}</time>
         </p>
       </div>
     </li>
