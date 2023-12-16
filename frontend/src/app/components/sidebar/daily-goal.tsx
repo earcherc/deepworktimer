@@ -6,10 +6,11 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import { DailyGoalType } from '@/graphql/graphql-types';
 
-type DailyGoalTypeUI = Pick<DailyGoalType, 'blockSize' | 'quantity'>;
+type DailyGoalTypeUI = Pick<DailyGoalType, 'blockSize' | 'quantity' | 'id'>;
 
 const DailyGoal = () => {
   const [goal, setGoal] = useState<DailyGoalTypeUI>({
+    id: 1,
     blockSize: 60,
     quantity: 7,
   });
@@ -24,9 +25,9 @@ const DailyGoal = () => {
 
   // Dummy data for dropdown items, adjust as necessary
   const goals: DailyGoalTypeUI[] = [
-    { blockSize: 60, quantity: 5 },
-    { blockSize: 60, quantity: 7 },
-    { blockSize: 60, quantity: 10 },
+    { blockSize: 60, quantity: 5, id: 2 },
+    { blockSize: 60, quantity: 7, id: 1 },
+    { blockSize: 60, quantity: 10, id: 3 },
   ];
 
   const selectGoal = (selectedGoal: DailyGoalTypeUI) => {
@@ -53,7 +54,7 @@ const DailyGoal = () => {
         <Menu.Items className="absolute z-10 w-full rounded-md bg-white shadow-lg">
           <div className="py-1">
             {goals.map((item, index) => (
-              <Menu.Item key={index}>
+              <Menu.Item key={item.id || index}>
                 {({ active }) => (
                   <button
                     type="button"

@@ -34,10 +34,16 @@ const formatTime = (dateString: string): string => {
 
 const StudyBlock = ({ block }: { block: StudyBlockUI }) => {
   const { title, start, end } = block;
-  const gridPosition = timeToGridRow(start, end);
+  const [gridPosition, setGridPosition] = useState('');
 
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+
+  useEffect(() => {
+    // Calculate the grid position after the component mounts
+    const newGridPosition = timeToGridRow(start, end);
+    setGridPosition(newGridPosition);
+  }, [start, end]);
 
   useEffect(() => {
     // Update the formatted times after the component mounts
@@ -50,8 +56,13 @@ const StudyBlock = ({ block }: { block: StudyBlockUI }) => {
       <div className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-blue-50 p-2 text-xs leading-5 hover:bg-blue-100">
         <p className="order-1 font-semibold text-blue-700">{title}</p>
         <p className="text-blue-500 group-hover:text-blue-700">
-          <time dateTime={start}>{startTime || 'Loading...'}</time> -
-          <time dateTime={end}>{endTime || 'Loading...'}</time>
+          <time dateTime={start} suppressHydrationWarning={true}>
+            {startTime || 'Loading...'}
+          </time>{' '}
+          -{' '}
+          <time dateTime={end} suppressHydrationWarning={true}>
+            {endTime || 'Loading...'}
+          </time>
         </p>
       </div>
     </li>

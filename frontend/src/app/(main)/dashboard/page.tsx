@@ -19,9 +19,9 @@ const Dashboard = () => {
   }, [data]);
 
   return (
-    <div className="flex h-full min-h-screen p-4">
+    <div className="flex h-full p-4" style={{ height: 'calc(100vh - 4rem)' }}>
       <Sidebar />
-      <div className="flex flex-grow flex-col pl-4">
+      <div className="flex flex-grow flex-col overflow-hidden pl-4">
         <PomodoroTimer />
         <div className="mb-4" />
         <Calendar />
