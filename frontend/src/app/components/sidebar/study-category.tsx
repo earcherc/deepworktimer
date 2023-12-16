@@ -53,60 +53,59 @@ const StudyCategory = () => {
   return (
     <Menu as="div" className="relative rounded-lg bg-white p-4 shadow sm:p-6">
       <div className="mb-1 flex items-center justify-between">
-        <Menu.Button className="flex w-full items-center justify-between rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-          <h2 className="text-lg font-semibold text-gray-900">Choose Study Category</h2>
-          <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-        </Menu.Button>
+        <div className="relative">
+          <Menu.Button className="flex w-full items-center justify-between rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+            <h2 className="text-lg font-semibold text-gray-900">Choose Study Category</h2>
+            <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+          </Menu.Button>
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+          >
+            <Menu.Items className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg">
+              <div className="py-1">
+                {categories.length > 0 ? (
+                  categories.map((item) => (
+                    <Menu.Item key={item.id}>
+                      {({ active }) => (
+                        <button
+                          type="button"
+                          className={classNames(
+                            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                            'block w-full px-4 py-2 text-left text-sm',
+                          )}
+                          onClick={() => selectCategory(item)}
+                        >
+                          {item.title}
+                        </button>
+                      )}
+                    </Menu.Item>
+                  ))
+                ) : (
+                  <Menu.Item>
+                    <div className="block w-full px-4 py-2 text-left text-sm text-gray-500">No Categories</div>
+                  </Menu.Item>
+                )}
+              </div>
+            </Menu.Items>
+          </Transition>
+        </div>
         <button
           onClick={openCreateCategoryModal}
           className="ml-4 rounded-full bg-blue-500 p-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label="Add new category" // Accessibility label for screen readers
         >
           <PlusIcon className="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
-      >
-        <Menu.Items className="absolute z-10 w-80 rounded-md bg-white shadow-lg">
-          <div className="py-1">
-            {categories.length > 0 ? (
-              categories.map((item, index) => (
-                <Menu.Item key={index}>
-                  {({ active }) => (
-                    <button
-                      type="button"
-                      className={classNames(
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                        'block w-full px-4 py-2 text-left text-sm',
-                      )}
-                      onClick={() => selectCategory(item)}
-                    >
-                      {item.title}
-                    </button>
-                  )}
-                </Menu.Item>
-              ))
-            ) : (
-              <Menu.Item>
-                <button type="button" className="block w-full bg-gray-100 px-4 py-2 text-left text-sm text-gray-900">
-                  No Categories
-                </button>
-              </Menu.Item>
-            )}
-          </div>
-        </Menu.Items>
-      </Transition>
       {selectedCategory && (
         <div className="mt-4 space-y-2">
-          <div className="text-center text-2xl font-bold text-gray-900">
-            {selectedCategory ? selectedCategory.title : 'No Category Selected'}
-          </div>
+          <div className="text-center text-2xl font-bold text-gray-900">{selectedCategory.title}</div>
         </div>
       )}
     </Menu>
