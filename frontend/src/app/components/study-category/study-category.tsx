@@ -8,9 +8,12 @@ import { StudyCategoryType, useAllStudyCategoriesQuery, useUpdateStudyCategoryMu
 import { studyCategoriesAtom } from '@/app/store/atoms';
 import { useAtom } from 'jotai';
 import useToast from '@/app/context/toasts/toast-context';
+import StudyCategoryCreate from './study-category-create';
+import { useModalContext } from '@/app/context/modal/modal-context';
 
 const StudyCategory = () => {
   const { addToast } = useToast();
+  const { showModal } = useModalContext();
   const [categories, setCategories] = useAtom(studyCategoriesAtom);
   const [{ data }, updateStudyCategory] = useUpdateStudyCategoryMutation();
   const [{ data: queryData, fetching, error }] = useAllStudyCategoriesQuery();
@@ -45,7 +48,11 @@ const StudyCategory = () => {
   };
 
   const openCreateCategoryModal = () => {
-    // Logic to open the modal
+    showModal({
+      type: 'default',
+      title: 'Create Study Category',
+      content: <StudyCategoryCreate />,
+    });
   };
 
   const selectedCategory = categories.find((cat) => cat.selected);

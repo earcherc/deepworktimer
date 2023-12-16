@@ -1,5 +1,5 @@
 import DailyGoal from './daily-goal';
-import StudyCategory from './study-category';
+import StudyCategory from '../study-category/study-category';
 
 export default function Sidebar() {
   return (

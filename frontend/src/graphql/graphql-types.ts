@@ -81,7 +81,6 @@ export type DailyGoalInput = {
   blockSize: Scalars['Int']['input'];
   isActive?: Scalars['Boolean']['input'];
   quantity: Scalars['Int']['input'];
-  userId: Scalars['Int']['input'];
 };
 
 export type DailyGoalType = {
@@ -116,7 +115,6 @@ export type StudyBlockInput = {
   start: Scalars['DateTime']['input'];
   studyCategoryId: Scalars['Int']['input'];
   title: Scalars['String']['input'];
-  userId: Scalars['Int']['input'];
 };
 
 export type StudyBlockType = {
@@ -134,7 +132,6 @@ export type StudyBlockType = {
 export type StudyCategoryInput = {
   selected?: Scalars['Boolean']['input'];
   title: Scalars['String']['input'];
-  userId: Scalars['Int']['input'];
 };
 
 export type StudyCategoryType = {

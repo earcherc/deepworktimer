@@ -3,7 +3,8 @@ from ...models import User, DailyGoal, StudyBlock, StudyCategory
 
 
 @strawberry.experimental.pydantic.input(
-    model=DailyGoal, fields=["quantity", "block_size", "is_active", "user_id"]
+    model=DailyGoal,
+    fields=["quantity", "block_size", "is_active"],
 )
 class DailyGoalInput:
     pass
@@ -16,7 +17,6 @@ class DailyGoalInput:
         "end",
         "title",
         "rating",
-        "user_id",
         "daily_goal_id",
         "study_category_id",
     ],
@@ -26,7 +26,7 @@ class StudyBlockInput:
 
 
 @strawberry.experimental.pydantic.input(
-    model=StudyCategory, fields=["title", "user_id", "selected"]
+    model=StudyCategory, fields=["title", "selected"]
 )
 class StudyCategoryInput:
     pass

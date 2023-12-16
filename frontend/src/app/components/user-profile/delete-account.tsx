@@ -11,7 +11,7 @@ export default function DeleteAccountForm() {
   const [, setUser] = useAtom(userAtom);
   const [, deleteUser] = useDeleteCurrentUserMutation();
   const Router = useRouter();
-  const { showModal, hideModal } = useModalContext(); // Use the context hook
+  const { showModal, hideModal } = useModalContext();
 
   const { handleSubmit } = useForm();
 

@@ -1,6 +1,6 @@
 import React from 'react';
 
-type ModalContent = React.ReactNode | null;
+type ModalContent = React.ReactNode;
 
 type ModalButtonType = {
   text: string;
@@ -11,8 +11,9 @@ type ModalButtonType = {
 type ModalConfig = {
   type: 'success' | 'danger' | 'warning' | 'default';
   title: string;
-  message: string;
-  buttons: ModalButtonType[];
+  message?: string;
+  content?: ModalContent;
+  buttons?: ModalButtonType[];
 };
 
 interface ModalContextValue {

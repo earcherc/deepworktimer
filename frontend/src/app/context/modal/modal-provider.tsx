@@ -27,7 +27,7 @@ export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
 
   return (
     <ModalContext.Provider value={value}>
-      {isOpened && <ModalComponent />}
+      {isOpened && <ModalComponent>{modalConfig?.content}</ModalComponent>}
       {children}
     </ModalContext.Provider>
   );

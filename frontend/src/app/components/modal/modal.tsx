@@ -5,7 +5,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { CheckIcon, ExclamationTriangleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { useModalContext } from '@/app/context/modal/modal-context';
 
-const Modal = () => {
+const Modal = ({ children }: { children: React.ReactNode }) => {
   const { modalConfig, hideModal } = useModalContext();
 
   const modalTypeClasses = {
@@ -68,20 +68,23 @@ const Modal = () => {
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">{modalConfig?.message}</p>
                   </div>
+                  {children}
                 </div>
-                <div className="mt-5 sm:mt-6">
-                  {modalConfig?.buttons.map((button, index) => (
-                    <button
-                      key={index}
-                      onClick={button.onClick}
-                      className={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm ${
-                        button.isPrimary ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-300 hover:bg-gray-400'
-                      }`}
-                    >
-                      {button.text}
-                    </button>
-                  ))}
-                </div>
+                {modalConfig && modalConfig.buttons && (
+                  <div className="mt-5 sm:mt-6">
+                    {modalConfig.buttons.map((button, index) => (
+                      <button
+                        key={index}
+                        onClick={button.onClick}
+                        className={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm ${
+                          button.isPrimary ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-300 hover:bg-gray-400'
+                        }`}
+                      >
+                        {button.text}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </Dialog.Panel>
             </Transition.Child>
           </div>
