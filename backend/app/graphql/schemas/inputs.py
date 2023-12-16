@@ -26,7 +26,7 @@ class StudyBlockInput:
 
 
 @strawberry.experimental.pydantic.input(
-    model=StudyCategory, fields=["title", "user_id"]
+    model=StudyCategory, fields=["title", "user_id", "selected"]
 )
 class StudyCategoryInput:
     pass

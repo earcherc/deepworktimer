@@ -2,6 +2,7 @@ mutation CreateStudyCategory($studyCategory: StudyCategoryInput!) {
   createStudyCategory(studyCategory: $studyCategory) {
     id
     title
+    selected
     userId
   }
 }
@@ -10,6 +11,7 @@ mutation UpdateStudyCategory($id: Int!, $studyCategory: StudyCategoryInput!) {
   updateStudyCategory(id: $id, studyCategory: $studyCategory) {
     id
     title
+    selected
     userId
   }
 }

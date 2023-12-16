@@ -1,5 +1,6 @@
 'use client';
 
+import useToast from '@/app/context/toasts/toast-context';
 import { userAtom } from '@/app/store/atoms';
 import { UserInput, useUpdateCurrentUserMutation } from '@/graphql/graphql-types';
 import { useAtom } from 'jotai';
@@ -7,6 +8,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 export default function UserForm() {
+  const { addToast } = useToast();
   const [user, setUser] = useAtom(userAtom);
   const [updateUserResult, updateUser] = useUpdateCurrentUserMutation();
 
@@ -76,9 +78,15 @@ export default function UserForm() {
       const result = await updateUser({ user: submitData });
       if (result.data) {
         setUser(result.data.updateCurrentUser);
+        addToast({ type: 'success', content: 'User profile updated successfully.' });
+      } else {
+        // Handle case when result.data is not as expected
+        console.error('Failed to update user:', result.error);
+        addToast({ type: 'error', content: 'Failed to update user profile.' });
       }
     } catch (error) {
       console.error('Error updating user:', error);
+      addToast({ type: 'error', content: 'An error occurred while updating the profile.' });
     }
   };
 
@@ -94,7 +102,7 @@ export default function UserForm() {
               type="text"
               id="firstName"
               {...register('firstName')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -108,7 +116,7 @@ export default function UserForm() {
               type="text"
               id="lastName"
               {...register('lastName')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -123,7 +131,7 @@ export default function UserForm() {
               {...register('email')}
               type="email"
               autoComplete="email"
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 pl-2"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -138,7 +146,7 @@ export default function UserForm() {
               id="username"
               {...register('username')}
               autoComplete="username"
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1 .5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className=".5 block w-full rounded-md border-0 bg-white/5 py-1 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -152,7 +160,7 @@ export default function UserForm() {
               type="date"
               id="dateOfBirth"
               {...register('dateOfBirth')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -165,7 +173,7 @@ export default function UserForm() {
             <select
               id="gender"
               {...register('gender')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-2.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-2.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             >
               <option value="">Select Gender</option>
               <option value="MALE">Male</option>
@@ -184,7 +192,7 @@ export default function UserForm() {
             <textarea
               id="bio"
               {...register('bio')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -198,7 +206,7 @@ export default function UserForm() {
               type="text"
               id="jobTitle"
               {...register('jobTitle')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -212,7 +220,7 @@ export default function UserForm() {
               type="text"
               id="personalTitle"
               {...register('personalTitle')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -226,7 +234,7 @@ export default function UserForm() {
               type="number"
               id="latitude"
               {...register('latitude')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -240,7 +248,7 @@ export default function UserForm() {
               type="number"
               id="longitude"
               {...register('longitude')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -254,7 +262,7 @@ export default function UserForm() {
               type="text"
               id="timezone"
               {...register('timezone')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -268,7 +276,7 @@ export default function UserForm() {
               type="text"
               id="language"
               {...register('language')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -282,7 +290,7 @@ export default function UserForm() {
               type="text"
               id="status"
               {...register('status')}
-              className="block w-full rounded-md border-0 bg-white/5 pl-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>

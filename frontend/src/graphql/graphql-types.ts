@@ -132,6 +132,7 @@ export type StudyBlockType = {
 };
 
 export type StudyCategoryInput = {
+  selected?: Scalars['Boolean']['input'];
   title: Scalars['String']['input'];
   userId: Scalars['Int']['input'];
 };
@@ -139,6 +140,7 @@ export type StudyCategoryInput = {
 export type StudyCategoryType = {
   __typename?: 'StudyCategoryType';
   id?: Maybe<Scalars['Int']['output']>;
+  selected: Scalars['Boolean']['output'];
   title: Scalars['String']['output'];
   userId: Scalars['Int']['output'];
 };
@@ -274,7 +276,13 @@ export type CreateStudyCategoryMutationVariables = Exact<{
 
 export type CreateStudyCategoryMutation = {
   __typename?: 'CombinedMutation';
-  createStudyCategory: { __typename?: 'StudyCategoryType'; id?: number | null; title: string; userId: number };
+  createStudyCategory: {
+    __typename?: 'StudyCategoryType';
+    id?: number | null;
+    title: string;
+    selected: boolean;
+    userId: number;
+  };
 };
 
 export type UpdateStudyCategoryMutationVariables = Exact<{
@@ -284,7 +292,13 @@ export type UpdateStudyCategoryMutationVariables = Exact<{
 
 export type UpdateStudyCategoryMutation = {
   __typename?: 'CombinedMutation';
-  updateStudyCategory: { __typename?: 'StudyCategoryType'; id?: number | null; title: string; userId: number };
+  updateStudyCategory: {
+    __typename?: 'StudyCategoryType';
+    id?: number | null;
+    title: string;
+    selected: boolean;
+    userId: number;
+  };
 };
 
 export type DeleteStudyCategoryMutationVariables = Exact<{
@@ -385,7 +399,13 @@ export type AllStudyCategoriesQueryVariables = Exact<{ [key: string]: never }>;
 
 export type AllStudyCategoriesQuery = {
   __typename?: 'Query';
-  allStudyCategories: Array<{ __typename?: 'StudyCategoryType'; id?: number | null; title: string }>;
+  allStudyCategories: Array<{
+    __typename?: 'StudyCategoryType';
+    id?: number | null;
+    title: string;
+    selected: boolean;
+    userId: number;
+  }>;
 };
 
 export const CreateDailyGoalDocument = gql`
@@ -479,6 +499,7 @@ export const CreateStudyCategoryDocument = gql`
     createStudyCategory(studyCategory: $studyCategory) {
       id
       title
+      selected
       userId
     }
   }
@@ -494,6 +515,7 @@ export const UpdateStudyCategoryDocument = gql`
     updateStudyCategory(id: $id, studyCategory: $studyCategory) {
       id
       title
+      selected
       userId
     }
   }
@@ -621,6 +643,8 @@ export const AllStudyCategoriesDocument = gql`
     allStudyCategories {
       id
       title
+      selected
+      userId
     }
   }
 `;

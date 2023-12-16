@@ -1,5 +1,5 @@
 import strawberry
-from sqlmodel import select
+from sqlmodel import select, update
 from ...models import StudyCategory
 from ...database import get_session
 from ..schemas.models import StudyCategoryType
@@ -37,9 +37,18 @@ class StudyCategoryMutations:
         ).first()
 
         if db_study_category:
+            # If the category is being set to selected, reset others
+            if study_category.selected:
+                session.exec(
+                    update(StudyCategory)
+                    .where(StudyCategory.id != id)
+                    .values(selected=False)
+                )
+
             study_category_data = strawberry.asdict(study_category)
             for field, value in study_category_data.items():
                 setattr(db_study_category, field, value)
+
             session.commit()
             session.refresh(db_study_category)
             return StudyCategory.from_orm(db_study_category)

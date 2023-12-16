@@ -51,7 +51,7 @@ const DailyGoal = () => {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute z-10 w-full rounded-md bg-white shadow-lg">
+        <Menu.Items className="absolute z-10 w-80 rounded-md bg-white shadow-lg">
           <div className="py-1">
             {goals.map((item, index) => (
               <Menu.Item key={item.id || index}>
