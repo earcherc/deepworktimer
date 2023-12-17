@@ -29,7 +29,7 @@ const StudyCategory = () => {
       try {
         await updateStudyCategory({
           id: selectedCategory.id,
-          studyCategory: { ...selectedCategory, selected: true },
+          studyCategory: { selected: true },
         });
 
         const updatedCategories = categories.map((cat) => ({
@@ -37,6 +37,8 @@ const StudyCategory = () => {
           selected: cat.id === selectedCategory.id,
         }));
         setCategories(updatedCategories);
+
+        addToast({ type: 'success', content: 'Category updated successfully.' });
       } catch (error) {
         console.error('Error updating category:', error);
         addToast({ type: 'error', content: 'Failed to update the category.' });
@@ -104,10 +106,9 @@ const StudyCategory = () => {
         </div>
         <button
           onClick={openCreateCategoryModal}
-          className="ml-4 rounded-full bg-blue-500 p-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          aria-label="Add new category" // Accessibility label for screen readers
+          className="rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
-          <PlusIcon className="h-5 w-5" aria-hidden="true" />
+          <PlusIcon className="h-5 w-5" />
         </button>
       </div>
       {selectedCategory && (

@@ -1,7 +1,7 @@
 import strawberry
 from ...models import User, DailyGoal, StudyBlock, StudyCategory, Gender
 
-strawberry.enum(Gender)
+GenderStrawberry = strawberry.enum(Gender)
 
 
 # Strawberry GraphQL type using SQLModel (Pydantic) class

@@ -78,9 +78,9 @@ export type CombinedMutationUpdateStudyCategoryArgs = {
 };
 
 export type DailyGoalInput = {
-  blockSize: Scalars['Int']['input'];
-  isActive?: Scalars['Boolean']['input'];
-  quantity: Scalars['Int']['input'];
+  blockSize?: InputMaybe<Scalars['Int']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  quantity?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type DailyGoalType = {
@@ -109,12 +109,12 @@ export type Query = {
 };
 
 export type StudyBlockInput = {
-  dailyGoalId: Scalars['Int']['input'];
-  end: Scalars['DateTime']['input'];
-  rating: Scalars['Float']['input'];
-  start: Scalars['DateTime']['input'];
-  studyCategoryId: Scalars['Int']['input'];
-  title: Scalars['String']['input'];
+  dailyGoalId?: InputMaybe<Scalars['Int']['input']>;
+  end?: InputMaybe<Scalars['String']['input']>;
+  rating?: InputMaybe<Scalars['Int']['input']>;
+  start?: InputMaybe<Scalars['String']['input']>;
+  studyCategoryId?: InputMaybe<Scalars['Int']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type StudyBlockType = {
@@ -130,8 +130,8 @@ export type StudyBlockType = {
 };
 
 export type StudyCategoryInput = {
-  selected?: Scalars['Boolean']['input'];
-  title: Scalars['String']['input'];
+  selected?: InputMaybe<Scalars['Boolean']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type StudyCategoryType = {
@@ -144,8 +144,8 @@ export type StudyCategoryType = {
 
 export type UserInput = {
   bio?: InputMaybe<Scalars['String']['input']>;
-  dateOfBirth?: InputMaybe<Scalars['Date']['input']>;
-  email: Scalars['String']['input'];
+  dateOfBirth?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
   firstName?: InputMaybe<Scalars['String']['input']>;
   gender?: InputMaybe<Gender>;
   jobTitle?: InputMaybe<Scalars['String']['input']>;
@@ -157,7 +157,7 @@ export type UserInput = {
   profilePhotoUrl?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   timezone?: InputMaybe<Scalars['String']['input']>;
-  username: Scalars['String']['input'];
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UserType = {

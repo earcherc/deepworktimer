@@ -1,56 +1,46 @@
+from typing import Optional
 import strawberry
-from ...models import User, DailyGoal, StudyBlock, StudyCategory
+
+from .models import GenderStrawberry
 
 
-@strawberry.experimental.pydantic.input(
-    model=DailyGoal,
-    fields=["quantity", "block_size", "is_active"],
-)
-class DailyGoalInput:
-    pass
-
-
-@strawberry.experimental.pydantic.input(
-    model=StudyBlock,
-    fields=[
-        "start",
-        "end",
-        "title",
-        "rating",
-        "daily_goal_id",
-        "study_category_id",
-    ],
-)
-class StudyBlockInput:
-    pass
-
-
-@strawberry.experimental.pydantic.input(
-    model=StudyCategory, fields=["title", "selected"]
-)
+@strawberry.input
 class StudyCategoryInput:
-    pass
+    title: Optional[str] = None
+    selected: Optional[bool] = None
 
 
-@strawberry.experimental.pydantic.input(
-    model=User,
-    fields=[
-        "username",
-        "email",
-        "bio",
-        "job_title",
-        "personal_title",
-        "date_of_birth",
-        "latitude",
-        "longitude",
-        "first_name",
-        "last_name",
-        "gender",
-        "profile_photo_url",
-        "timezone",
-        "language",
-        "status",
-    ],
-)
+@strawberry.input
+class DailyGoalInput:
+    quantity: Optional[int] = None
+    block_size: Optional[int] = None
+    is_active: Optional[bool] = None
+
+
+@strawberry.input
+class StudyBlockInput:
+    start: Optional[str] = None
+    end: Optional[str] = None
+    title: Optional[str] = None
+    rating: Optional[int] = None
+    daily_goal_id: Optional[int] = None
+    study_category_id: Optional[int] = None
+
+
+@strawberry.input
 class UserInput:
-    pass
+    username: Optional[str] = None
+    email: Optional[str] = None
+    bio: Optional[str] = None
+    job_title: Optional[str] = None
+    personal_title: Optional[str] = None
+    date_of_birth: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    gender: Optional[GenderStrawberry] = None
+    profile_photo_url: Optional[str] = None
+    timezone: Optional[str] = None
+    language: Optional[str] = None
+    status: Optional[str] = None

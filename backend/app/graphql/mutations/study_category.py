@@ -14,18 +14,29 @@ class StudyCategoryMutations:
     ) -> StudyCategoryType:
         user_id = getattr(info.context["request"].state, "user_id", None)
         if user_id is None:
-            return None
+            # Handle case where user_id is not found
+            raise ValueError("User ID is required")
 
         session = next(get_session())
+        existing_category = session.exec(
+            select(StudyCategory).where(
+                StudyCategory.title == study_category.title,
+                StudyCategory.user_id == user_id,
+            )
+        ).first()
+
+        if existing_category:
+            raise ValueError(f"Category '{study_category.title}' already exists")
+
         study_category_data = strawberry.asdict(study_category)
         study_category_data["user_id"] = user_id
-        db_study_category = StudyCategory(**study_category_data)
+        new_category = StudyCategory(**study_category_data)
 
-        session.add(db_study_category)
+        session.add(new_category)
         session.commit()
-        session.refresh(db_study_category)
+        session.refresh(new_category)
 
-        return StudyCategory.from_orm(db_study_category)
+        return StudyCategory.from_orm(new_category)
 
     @strawberry.mutation
     def update_study_category(
@@ -37,17 +48,20 @@ class StudyCategoryMutations:
         ).first()
 
         if db_study_category:
-            # If the category is being set to selected, reset others
-            if study_category.selected:
+            if study_category.selected is not strawberry.UNSET:
                 session.exec(
                     update(StudyCategory)
-                    .where(StudyCategory.id != id)
+                    .where(
+                        StudyCategory.user_id == db_study_category.user_id,
+                        StudyCategory.id != id,
+                    )
                     .values(selected=False)
                 )
 
             study_category_data = strawberry.asdict(study_category)
             for field, value in study_category_data.items():
-                setattr(db_study_category, field, value)
+                if value is not None:
+                    setattr(db_study_category, field, value)
 
             session.commit()
             session.refresh(db_study_category)

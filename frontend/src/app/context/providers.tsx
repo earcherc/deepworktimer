@@ -12,9 +12,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <AltProvider value={urqlClient}>
       <Provider store={myStore}>
-        <ModalProvider>
-          <ToastProvider>{children}</ToastProvider>
-        </ModalProvider>
+        <ToastProvider>
+          <ModalProvider>{children}</ModalProvider>
+        </ToastProvider>
       </Provider>
     </AltProvider>
   );
