@@ -1,15 +1,15 @@
 'use client';
 
-import React, { Fragment, useEffect, useState } from 'react';
-import { Menu, Transition } from '@headlessui/react';
-import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid';
-import classNames from 'classnames';
 import { StudyCategoryType, useAllStudyCategoriesQuery, useUpdateStudyCategoryMutation } from '@/graphql/graphql-types';
-import { studyCategoriesAtom } from '@/app/store/atoms';
-import { useAtom } from 'jotai';
+import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid';
+import { useModalContext } from '@/app/context/modal/modal-context';
 import useToast from '@/app/context/toasts/toast-context';
 import StudyCategoryCreate from './study-category-create';
-import { useModalContext } from '@/app/context/modal/modal-context';
+import { studyCategoriesAtom } from '@/app/store/atoms';
+import { Menu, Transition } from '@headlessui/react';
+import React, { Fragment, useEffect } from 'react';
+import classNames from 'classnames';
+import { useAtom } from 'jotai';
 
 const StudyCategory = () => {
   const { addToast } = useToast();

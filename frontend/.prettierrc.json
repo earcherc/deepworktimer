@@ -4,5 +4,8 @@
   "singleQuote": true,
   "printWidth": 120,
   "tabWidth": 2,
-  "plugins": ["prettier-plugin-tailwindcss"]
+  "plugins": ["prettier-plugin-tailwindcss", "prettier-plugin-sort-imports"],
+  "importOrder": ["^@core/(.*)$", "^[./]"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
 }
