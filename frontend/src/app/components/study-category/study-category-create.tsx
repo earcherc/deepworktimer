@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { StudyCategoryInput, useCreateStudyCategoryMutation } from '@/graphql/graphql-types';
 import { useModalContext } from '@/app/context/modal/modal-context';
-import { studyCategoriesAtom } from '@/app/store/atoms';
-import { useAtom } from 'jotai';
 import useToast from '@/app/context/toasts/toast-context';
+import { studyCategoriesAtom } from '@/app/store/atoms';
+import { StudyCategoryInput, useCreateStudyCategoryMutation } from '@/graphql/graphql-types';
+import { mapErrors } from '@/libs/error-map';
+import { useAtom } from 'jotai';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 const StudyCategoryCreate = () => {
   const { addToast } = useToast();
@@ -27,29 +28,24 @@ const StudyCategoryCreate = () => {
 
   const onSubmit = async (formData: StudyCategoryInput) => {
     setIsSubmitting(true);
-    try {
-      const result = await createStudyCategory({ studyCategory: { title: formData.title } });
+    const { data, error } = await createStudyCategory({ studyCategory: { title: formData.title } });
 
-      const studyCategory = result.data?.createStudyCategory;
-      if (studyCategory) {
-        setCategories((prevCategories) => [...prevCategories, studyCategory]);
-        reset();
-        hideModal();
-        addToast({ type: 'success', content: 'Category created successfully.' });
-      } else if (result.error) {
-        console.error('Failed to create category:', result.error);
-        // Extracting the first error message
-        const errorMessage = result.error.graphQLErrors?.[0]?.message || 'Failed to create category.';
+    if (error) {
+      console.error('Failed to create category:', error);
+      const errorMap = mapErrors(error);
+      Object.values(errorMap).forEach((errorMessage) => {
         addToast({ type: 'error', content: errorMessage });
-      } else {
-        addToast({ type: 'error', content: 'Failed to create category.' });
-      }
-    } catch (error) {
-      console.error('Error creating category:', error);
-      addToast({ type: 'error', content: 'An error occurred while creating the category.' });
-    } finally {
-      setIsSubmitting(false);
+      });
+    } else if (data?.createStudyCategory) {
+      setCategories((prevCategories) => [...prevCategories, data.createStudyCategory]);
+      reset();
+      hideModal();
+      addToast({ type: 'success', content: 'Category created successfully.' });
+    } else {
+      addToast({ type: 'error', content: 'Failed to create category.' });
     }
+
+    setIsSubmitting(false);
   };
 
   return (
