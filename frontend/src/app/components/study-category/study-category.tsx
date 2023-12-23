@@ -68,7 +68,7 @@ const StudyCategory = () => {
   return (
     <Menu as="div" className="relative rounded-lg bg-white p-4 shadow sm:p-6">
       <div className="mb-1 flex items-center justify-between">
-        <div className="relative">
+        <div className="relative w-full">
           <Menu.Button className="flex w-full items-center justify-between rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
             <h2 className="text-lg font-semibold text-gray-900">Choose Study Category</h2>
             <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -112,7 +112,7 @@ const StudyCategory = () => {
         </div>
         <button
           onClick={openCreateCategoryModal}
-          className="rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="rounded-md bg-blue-500 ml-3 p-3 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           <PlusIcon className="h-5 w-5" />
         </button>

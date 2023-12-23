@@ -27,8 +27,8 @@ const DailyGoalCreate = () => {
     reset,
   } = useForm<FormData>({
     defaultValues: {
-      quantity: '0',
-      blockSize: '0',
+      blockSize: '60',
+      quantity: '2',
     },
   });
 
@@ -64,7 +64,7 @@ const DailyGoalCreate = () => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
         <label htmlFor="blockSize" className="block text-left text-sm font-medium leading-6 text-gray-900">
-          Block Size
+          Study Cycle Duration (minutes)
         </label>
         <div className="mt-2">
           <input
@@ -82,7 +82,7 @@ const DailyGoalCreate = () => {
 
       <div>
         <label htmlFor="quantity" className="block text-left text-sm font-medium leading-6 text-gray-900">
-          Goal Quantity
+          Study Cycle Count
         </label>
         <div className="mt-2">
           <input
