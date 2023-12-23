@@ -1,13 +1,13 @@
 'use client';
 
+import { StudyCategoryInput, useCreateStudyCategoryMutation } from '@/graphql/graphql-types';
 import { useModalContext } from '@/app/context/modal/modal-context';
 import useToast from '@/app/context/toasts/toast-context';
 import { studyCategoriesAtom } from '@/app/store/atoms';
-import { StudyCategoryInput, useCreateStudyCategoryMutation } from '@/graphql/graphql-types';
 import { mapErrors } from '@/libs/error-map';
-import { useAtom } from 'jotai';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import { useAtom } from 'jotai';
 
 const StudyCategoryCreate = () => {
   const { addToast } = useToast();

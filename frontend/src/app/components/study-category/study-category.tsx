@@ -8,6 +8,7 @@ import StudyCategoryCreate from './study-category-create';
 import { studyCategoriesAtom } from '@/app/store/atoms';
 import { Menu, Transition } from '@headlessui/react';
 import React, { Fragment, useEffect } from 'react';
+import { mapErrors } from '@/libs/error-map';
 import classNames from 'classnames';
 import { useAtom } from 'jotai';
 
@@ -15,37 +16,38 @@ const StudyCategory = () => {
   const { addToast } = useToast();
   const { showModal } = useModalContext();
   const [categories, setCategories] = useAtom(studyCategoriesAtom);
-  const [{ data }, updateStudyCategory] = useUpdateStudyCategoryMutation();
-  const [{ data: queryData, fetching, error }] = useAllStudyCategoriesQuery();
+  const [, updateStudyCategory] = useUpdateStudyCategoryMutation();
+  const [{ data: queryData }] = useAllStudyCategoriesQuery();
 
   useEffect(() => {
     if (queryData && queryData.allStudyCategories) {
       setCategories(queryData.allStudyCategories);
     }
-  }, [queryData, setCategories]);
+  }, [queryData]);
 
   const selectCategory = async (selectedCategory: StudyCategoryType) => {
-    if (typeof selectedCategory.id === 'number') {
-      try {
-        await updateStudyCategory({
-          id: selectedCategory.id,
-          studyCategory: { selected: true },
-        });
+    if (!selectedCategory.id) return;
 
-        const updatedCategories = categories.map((cat) => ({
-          ...cat,
-          selected: cat.id === selectedCategory.id,
-        }));
-        setCategories(updatedCategories);
+    const { data, error } = await updateStudyCategory({
+      id: selectedCategory.id,
+      studyCategory: { selected: true },
+    });
 
-        addToast({ type: 'success', content: 'Category updated successfully.' });
-      } catch (error) {
-        console.error('Error updating category:', error);
-        addToast({ type: 'error', content: 'Failed to update the category.' });
-      }
+    if (error) {
+      console.error('Failed to create category:', error);
+      const errorMap = mapErrors(error);
+      Object.values(errorMap).forEach((errorMessage) => {
+        addToast({ type: 'error', content: errorMessage });
+      });
+    } else if (data) {
+      const updatedCategories = categories.map((cat) => ({
+        ...cat,
+        selected: cat.id === selectedCategory.id,
+      }));
+      setCategories(updatedCategories);
+      addToast({ type: 'success', content: 'Category updated successfully.' });
     } else {
-      console.error('Selected category ID is undefined');
-      addToast({ type: 'error', content: 'Invalid category selection.' });
+      addToast({ type: 'error', content: 'Failed to update category.' });
     }
   };
 
