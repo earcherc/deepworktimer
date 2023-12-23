@@ -35,16 +35,10 @@ class DailyGoalMutations:
 
         if db_daily_goal:
             daily_goal_data = strawberry.asdict(daily_goal)
-
-            if (
-                "isActive" in daily_goal_data
-                and daily_goal_data["isActive"] is not None
-            ):
+            if daily_goal_data.get("is_active"):
                 session.exec(
                     update(DailyGoal)
-                    .where(
-                        DailyGoal.id != id,
-                    )
+                    .where(DailyGoal.id != id, DailyGoal.is_active == True)
                     .values(is_active=False)
                 )
 

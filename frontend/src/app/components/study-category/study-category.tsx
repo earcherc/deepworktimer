@@ -2,7 +2,6 @@
 
 import {
   StudyCategoryType,
-  useAllStudyCategoriesQuery,
   useUpdateStudyCategoryMutation,
   useUserStudyCategoriesQuery,
 } from '@/graphql/graphql-types';
@@ -35,7 +34,7 @@ const StudyCategory = () => {
 
     const { data, error } = await updateStudyCategory({
       id: selectedCategory.id,
-      studyCategory: { selected: true },
+      studyCategory: { isActive: true },
     });
 
     if (error) {
@@ -47,7 +46,7 @@ const StudyCategory = () => {
     } else if (data) {
       const updatedCategories = categories.map((cat) => ({
         ...cat,
-        selected: cat.id === selectedCategory.id,
+        isActive: cat.id === selectedCategory.id,
       }));
       setCategories(updatedCategories);
       addToast({ type: 'success', content: 'Category updated successfully.' });
@@ -64,7 +63,7 @@ const StudyCategory = () => {
     });
   };
 
-  const selectedCategory = categories.find((cat) => cat.selected);
+  const activeCategory = categories.find((cat) => cat.isActive);
 
   return (
     <Menu as="div" className="relative rounded-lg bg-white p-4 shadow sm:p-6">
@@ -118,9 +117,9 @@ const StudyCategory = () => {
           <PlusIcon className="h-5 w-5" />
         </button>
       </div>
-      {selectedCategory && (
+      {activeCategory && (
         <div className="mt-4 space-y-2">
-          <div className="text-center text-2xl font-bold text-gray-900">{selectedCategory.title}</div>
+          <div className="text-center text-2xl font-bold text-gray-900">{activeCategory.title}</div>
         </div>
       )}
     </Menu>

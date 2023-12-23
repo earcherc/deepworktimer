@@ -978,7 +978,7 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "selected",
+            "name": "isActive",
             "description": null,
             "type": {
               "kind": "SCALAR",
@@ -1024,7 +1024,7 @@
             "deprecationReason": null
           },
           {
-            "name": "selected",
+            "name": "isActive",
             "description": null,
             "args": [],
             "type": {

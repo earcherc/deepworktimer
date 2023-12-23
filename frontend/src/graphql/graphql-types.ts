@@ -130,14 +130,14 @@ export type StudyBlockType = {
 };
 
 export type StudyCategoryInput = {
-  selected?: InputMaybe<Scalars['Boolean']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type StudyCategoryType = {
   __typename?: 'StudyCategoryType';
   id?: Maybe<Scalars['Int']['output']>;
-  selected: Scalars['Boolean']['output'];
+  isActive: Scalars['Boolean']['output'];
   title: Scalars['String']['output'];
   userId: Scalars['Int']['output'];
 };
@@ -277,7 +277,7 @@ export type CreateStudyCategoryMutation = {
     __typename?: 'StudyCategoryType';
     id?: number | null;
     title: string;
-    selected: boolean;
+    isActive: boolean;
     userId: number;
   };
 };
@@ -293,7 +293,7 @@ export type UpdateStudyCategoryMutation = {
     __typename?: 'StudyCategoryType';
     id?: number | null;
     title: string;
-    selected: boolean;
+    isActive: boolean;
     userId: number;
   };
 };
@@ -402,7 +402,7 @@ export type UserStudyCategoriesQuery = {
     __typename?: 'StudyCategoryType';
     id?: number | null;
     title: string;
-    selected: boolean;
+    isActive: boolean;
     userId: number;
   }>;
 };
@@ -498,7 +498,7 @@ export const CreateStudyCategoryDocument = gql`
     createStudyCategory(studyCategory: $studyCategory) {
       id
       title
-      selected
+      isActive
       userId
     }
   }
@@ -514,7 +514,7 @@ export const UpdateStudyCategoryDocument = gql`
     updateStudyCategory(id: $id, studyCategory: $studyCategory) {
       id
       title
-      selected
+      isActive
       userId
     }
   }
@@ -644,7 +644,7 @@ export const UserStudyCategoriesDocument = gql`
     userStudyCategories {
       id
       title
-      selected
+      isActive
       userId
     }
   }

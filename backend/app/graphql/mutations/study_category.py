@@ -49,18 +49,17 @@ class StudyCategoryMutations:
 
         if db_study_category:
             study_category_data = strawberry.asdict(study_category)
-
-            if study_category_data["selected"] is not None:
-                # Update other study categories if selected is true
-                if study_category_data["selected"]:
-                    session.exec(
-                        update(StudyCategory)
-                        .where(
-                            StudyCategory.user_id == db_study_category.user_id,
-                            StudyCategory.id != id,
-                        )
-                        .values(selected=False)
+            if study_category_data.get("is_active"):
+                # Make sure only one category is active at a time
+                session.exec(
+                    update(StudyCategory)
+                    .where(
+                        StudyCategory.user_id == db_study_category.user_id,
+                        StudyCategory.id != id,
+                        StudyCategory.is_active == True,
                     )
+                    .values(is_active=False)
+                )
 
             # Update the fields if they are not None
             for field, value in study_category_data.items():

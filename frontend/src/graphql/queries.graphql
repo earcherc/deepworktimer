@@ -49,7 +49,7 @@ query UserStudyCategories {
   userStudyCategories {
     id
     title
-    selected
+    isActive
     userId
   }
 }

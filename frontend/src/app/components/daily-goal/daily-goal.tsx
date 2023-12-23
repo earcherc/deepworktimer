@@ -32,11 +32,11 @@ const DailyGoal = () => {
     }
   }, [queryData]);
 
-  const selectGoal = async (selectedGoal: DailyGoalType) => {
-    if (!selectedGoal.id) return;
+  const selectGoal = async (activeGoal: DailyGoalType) => {
+    if (!activeGoal.id) return;
 
     const { data, error } = await updateDailyGoal({
-      id: selectedGoal.id,
+      id: activeGoal.id,
       dailyGoal: { isActive: true },
     });
 
@@ -49,7 +49,7 @@ const DailyGoal = () => {
     } else if (data) {
       const updatedGoals = goals.map((goal) => ({
         ...goal,
-        isActive: goal.id === selectedGoal.id,
+        isActive: goal.id === activeGoal.id,
       }));
       setDailyGoals(updatedGoals);
       addToast({ type: 'success', content: 'Goal updated successfully.' });
@@ -66,7 +66,7 @@ const DailyGoal = () => {
     });
   };
 
-  const selectedGoal = goals.find((goal) => goal.isActive);
+  const activeGoal = goals.find((goal) => goal.isActive);
 
   return (
     <Menu as="div" className="relative rounded-lg bg-white p-4 shadow sm:p-6">
@@ -122,14 +122,14 @@ const DailyGoal = () => {
           <PlusIcon className="h-5 w-5" />
         </button>
       </div>
-      {selectedGoal && (
+      {activeGoal && (
         <div className="mt-4 space-y-2">
-          <div className="text-center text-sm font-medium text-gray-900">Blocks: {selectedGoal.quantity}</div>
+          <div className="text-center text-sm font-medium text-gray-900">Blocks: {activeGoal.quantity}</div>
           <div className="text-center text-sm font-medium text-gray-900">
-            Size: {selectedGoal.blockSize.toFixed(2)} min
+            Size: {activeGoal.blockSize.toFixed(2)} min
           </div>
           <div className="text-center text-sm font-medium text-gray-900">
-            Total: {getTotalTime(selectedGoal.blockSize, selectedGoal.quantity)}
+            Total: {getTotalTime(activeGoal.blockSize, activeGoal.quantity)}
           </div>
         </div>
       )}

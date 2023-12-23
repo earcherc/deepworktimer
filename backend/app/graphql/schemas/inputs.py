@@ -7,7 +7,7 @@ from .models import GenderStrawberry
 @strawberry.input
 class StudyCategoryInput:
     title: Optional[str] = None
-    selected: Optional[bool] = None
+    is_active: Optional[bool] = None
 
 
 @strawberry.input
