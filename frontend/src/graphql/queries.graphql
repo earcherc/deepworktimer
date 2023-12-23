@@ -24,8 +24,10 @@ query CurrentUser {
 query UserDailyGoals {
   userDailyGoals {
     id
-    blockSize
     quantity
+    blockSize
+    createdAt
+    isActive
     userId
   }
 }
@@ -43,8 +45,8 @@ query UserStudyBlocks {
   }
 }
 
-query AllStudyCategories {
-  allStudyCategories {
+query UserStudyCategories {
+  userStudyCategories {
     id
     title
     selected

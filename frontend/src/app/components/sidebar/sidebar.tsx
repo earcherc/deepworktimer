@@ -1,5 +1,5 @@
-import DailyGoal from './daily-goal';
 import StudyCategory from '../study-category/study-category';
+import DailyGoal from '../daily-goal/daily-goal';
 
 export default function Sidebar() {
   return (
@@ -12,9 +12,6 @@ export default function Sidebar() {
             </li>
             <li>
               <StudyCategory></StudyCategory>
-            </li>
-            <li>
-              <DailyGoal></DailyGoal>
             </li>
           </ul>
         </nav>

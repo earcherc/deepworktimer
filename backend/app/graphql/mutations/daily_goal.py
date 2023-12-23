@@ -1,6 +1,5 @@
 import strawberry
-from sqlmodel import select
-from typing import Optional
+from sqlmodel import select, update
 from ...models import DailyGoal
 from ...database import get_session
 from ..schemas.models import DailyGoalType
@@ -35,8 +34,25 @@ class DailyGoalMutations:
         ).first()
 
         if db_daily_goal:
-            for field, value in daily_goal.dict().items():
-                setattr(db_daily_goal, field, value)
+            daily_goal_data = strawberry.asdict(daily_goal)
+
+            if (
+                "isActive" in daily_goal_data
+                and daily_goal_data["isActive"] is not None
+            ):
+                session.exec(
+                    update(DailyGoal)
+                    .where(
+                        DailyGoal.id != id,
+                    )
+                    .values(is_active=False)
+                )
+
+            # Update the fields if they are not None
+            for field, value in daily_goal_data.items():
+                if value is not None:
+                    setattr(db_daily_goal, field, value)
+
             session.commit()
             session.refresh(db_daily_goal)
             return DailyGoal.from_orm(db_daily_goal)

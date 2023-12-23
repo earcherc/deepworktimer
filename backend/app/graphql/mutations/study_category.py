@@ -48,17 +48,21 @@ class StudyCategoryMutations:
         ).first()
 
         if db_study_category:
-            if study_category.selected is not strawberry.UNSET:
-                session.exec(
-                    update(StudyCategory)
-                    .where(
-                        StudyCategory.user_id == db_study_category.user_id,
-                        StudyCategory.id != id,
-                    )
-                    .values(selected=False)
-                )
-
             study_category_data = strawberry.asdict(study_category)
+
+            if study_category_data["selected"] is not None:
+                # Update other study categories if selected is true
+                if study_category_data["selected"]:
+                    session.exec(
+                        update(StudyCategory)
+                        .where(
+                            StudyCategory.user_id == db_study_category.user_id,
+                            StudyCategory.id != id,
+                        )
+                        .values(selected=False)
+                    )
+
+            # Update the fields if they are not None
             for field, value in study_category_data.items():
                 if value is not None:
                     setattr(db_study_category, field, value)

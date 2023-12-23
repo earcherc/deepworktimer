@@ -42,9 +42,15 @@ class Query:
         return [StudyBlock.from_orm(block) for block in study_blocks]
 
     @strawberry.field
-    def all_study_categories(self) -> List[StudyCategoryType]:
+    def user_study_categories(
+        self, info: strawberry.types.Info
+    ) -> List[StudyCategoryType]:
+        user_id = getattr(info.context["request"].state, "user_id", None)
+        if user_id is None:
+            return []
+
         session = next(get_session())
-        statement = select(StudyCategory)
+        statement = select(StudyCategory).where(StudyCategory.user_id == user_id)
         study_categories = session.exec(statement).all()
         return [StudyCategory.from_orm(category) for category in study_categories]
 

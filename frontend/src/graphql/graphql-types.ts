@@ -102,10 +102,10 @@ export enum Gender {
 
 export type Query = {
   __typename?: 'Query';
-  allStudyCategories: Array<StudyCategoryType>;
   currentUser?: Maybe<UserType>;
   userDailyGoals: Array<DailyGoalType>;
   userStudyBlocks: Array<StudyBlockType>;
+  userStudyCategories: Array<StudyCategoryType>;
 };
 
 export type StudyBlockInput = {
@@ -369,8 +369,10 @@ export type UserDailyGoalsQuery = {
   userDailyGoals: Array<{
     __typename?: 'DailyGoalType';
     id?: number | null;
-    blockSize: number;
     quantity: number;
+    blockSize: number;
+    createdAt: any;
+    isActive: boolean;
     userId: number;
   }>;
 };
@@ -392,11 +394,11 @@ export type UserStudyBlocksQuery = {
   }>;
 };
 
-export type AllStudyCategoriesQueryVariables = Exact<{ [key: string]: never }>;
+export type UserStudyCategoriesQueryVariables = Exact<{ [key: string]: never }>;
 
-export type AllStudyCategoriesQuery = {
+export type UserStudyCategoriesQuery = {
   __typename?: 'Query';
-  allStudyCategories: Array<{
+  userStudyCategories: Array<{
     __typename?: 'StudyCategoryType';
     id?: number | null;
     title: string;
@@ -601,8 +603,10 @@ export const UserDailyGoalsDocument = gql`
   query UserDailyGoals {
     userDailyGoals {
       id
-      blockSize
       quantity
+      blockSize
+      createdAt
+      isActive
       userId
     }
   }
@@ -635,9 +639,9 @@ export function useUserStudyBlocksQuery(options?: Omit<Urql.UseQueryArgs<UserStu
     ...options,
   });
 }
-export const AllStudyCategoriesDocument = gql`
-  query AllStudyCategories {
-    allStudyCategories {
+export const UserStudyCategoriesDocument = gql`
+  query UserStudyCategories {
+    userStudyCategories {
       id
       title
       selected
@@ -646,11 +650,11 @@ export const AllStudyCategoriesDocument = gql`
   }
 `;
 
-export function useAllStudyCategoriesQuery(
-  options?: Omit<Urql.UseQueryArgs<AllStudyCategoriesQueryVariables>, 'query'>,
+export function useUserStudyCategoriesQuery(
+  options?: Omit<Urql.UseQueryArgs<UserStudyCategoriesQueryVariables>, 'query'>,
 ) {
-  return Urql.useQuery<AllStudyCategoriesQuery, AllStudyCategoriesQueryVariables>({
-    query: AllStudyCategoriesDocument,
+  return Urql.useQuery<UserStudyCategoriesQuery, UserStudyCategoriesQueryVariables>({
+    query: UserStudyCategoriesDocument,
     ...options,
   });
 }
