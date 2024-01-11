@@ -12,9 +12,9 @@ if TYPE_CHECKING:
 class StudyBlock(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     start: datetime
-    end: datetime
-    title: str
-    rating: float = Field(ge=0, le=5)  # Rating between 0 and 5
+    end: Optional[datetime] = Field(default=None)
+    rating: Optional[float] = Field(default=None, ge=0, le=5)  # Rating between 0 and 5
+    is_countdown: bool = Field(default=True)
 
     # Foreign keys
     user_id: int = Field(foreign_key="user.id", index=True)
