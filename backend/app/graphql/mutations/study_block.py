@@ -38,8 +38,9 @@ class StudyBlockMutations:
 
         study_block_data = strawberry.asdict(study_block)
         if db_study_block:
-            for field, value in study_block_data:
-                setattr(db_study_block, field, value)
+            for field, value in study_block_data.items():
+                if value is not None:
+                    setattr(db_study_block, field, value)
             session.commit()
             session.refresh(db_study_block)
             return StudyBlock.from_orm(db_study_block)

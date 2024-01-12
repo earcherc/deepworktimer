@@ -21,8 +21,8 @@ class DailyGoalInput:
 class StudyBlockInput:
     start: Optional[str] = None
     end: Optional[str] = None
-    title: Optional[str] = None
     rating: Optional[int] = None
+    is_countdown: Optional[bool] = None
     daily_goal_id: Optional[int] = None
     study_category_id: Optional[int] = None
 

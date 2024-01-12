@@ -35,10 +35,10 @@ query UserDailyGoals {
 query UserStudyBlocks {
   userStudyBlocks {
     id
-    title
     start
     end
     rating
+    isCountdown
     studyCategoryId
     dailyGoalId
     userId

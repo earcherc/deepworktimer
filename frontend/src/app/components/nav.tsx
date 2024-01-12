@@ -1,15 +1,15 @@
 'use client';
 
-import { Fragment, useEffect } from 'react';
-import { Disclosure, Menu, Transition } from '@headlessui/react';
-import classNames from 'classnames';
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/20/solid';
-import Link from 'next/link';
-import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
-import { userAtom } from '../store/atoms';
-import { useAtom } from 'jotai';
+import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { useCurrentUserQuery } from '@/graphql/graphql-types';
+import { usePathname, useRouter } from 'next/navigation';
+import { Fragment, useEffect } from 'react';
+import { userAtom } from '../store/atoms';
+import classNames from 'classnames';
+import { useAtom } from 'jotai';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -39,7 +39,7 @@ export default function Nav() {
     }
   };
 
-  const [{ data, fetching, error }] = useCurrentUserQuery();
+  const [{ data }] = useCurrentUserQuery();
 
   useEffect(() => {
     if (data && data.currentUser) {

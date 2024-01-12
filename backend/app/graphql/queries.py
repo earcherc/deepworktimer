@@ -37,7 +37,7 @@ class Query:
             return []
 
         session = next(get_session())
-        statement = select(StudyBlock).where(StudyBlock.userId == user_id)
+        statement = select(StudyBlock).where(StudyBlock.user_id == user_id)
         study_blocks = session.exec(statement).all()
         return [StudyBlock.from_orm(block) for block in study_blocks]
 

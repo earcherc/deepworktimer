@@ -3,8 +3,8 @@ mutation CreateStudyBlock($studyBlock: StudyBlockInput!) {
     id
     start
     end
-    title
     rating
+    isCountdown
     userId
     dailyGoalId
     studyCategoryId
@@ -16,8 +16,8 @@ mutation UpdateStudyBlock($id: Int!, $studyBlock: StudyBlockInput!) {
     id
     start
     end
-    title
     rating
+    isCountdown
     userId
     dailyGoalId
     studyCategoryId

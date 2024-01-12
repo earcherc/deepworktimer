@@ -111,21 +111,21 @@ export type Query = {
 export type StudyBlockInput = {
   dailyGoalId?: InputMaybe<Scalars['Int']['input']>;
   end?: InputMaybe<Scalars['String']['input']>;
+  isCountdown?: InputMaybe<Scalars['Boolean']['input']>;
   rating?: InputMaybe<Scalars['Int']['input']>;
   start?: InputMaybe<Scalars['String']['input']>;
   studyCategoryId?: InputMaybe<Scalars['Int']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type StudyBlockType = {
   __typename?: 'StudyBlockType';
   dailyGoalId: Scalars['Int']['output'];
-  end: Scalars['DateTime']['output'];
+  end?: Maybe<Scalars['DateTime']['output']>;
   id?: Maybe<Scalars['Int']['output']>;
-  rating: Scalars['Float']['output'];
+  isCountdown: Scalars['Boolean']['output'];
+  rating?: Maybe<Scalars['Float']['output']>;
   start: Scalars['DateTime']['output'];
   studyCategoryId: Scalars['Int']['output'];
-  title: Scalars['String']['output'];
   userId: Scalars['Int']['output'];
 };
 
@@ -232,9 +232,9 @@ export type CreateStudyBlockMutation = {
     __typename?: 'StudyBlockType';
     id?: number | null;
     start: any;
-    end: any;
-    title: string;
-    rating: number;
+    end?: any | null;
+    rating?: number | null;
+    isCountdown: boolean;
     userId: number;
     dailyGoalId: number;
     studyCategoryId: number;
@@ -252,9 +252,9 @@ export type UpdateStudyBlockMutation = {
     __typename?: 'StudyBlockType';
     id?: number | null;
     start: any;
-    end: any;
-    title: string;
-    rating: number;
+    end?: any | null;
+    rating?: number | null;
+    isCountdown: boolean;
     userId: number;
     dailyGoalId: number;
     studyCategoryId: number;
@@ -384,10 +384,10 @@ export type UserStudyBlocksQuery = {
   userStudyBlocks: Array<{
     __typename?: 'StudyBlockType';
     id?: number | null;
-    title: string;
     start: any;
-    end: any;
-    rating: number;
+    end?: any | null;
+    rating?: number | null;
+    isCountdown: boolean;
     studyCategoryId: number;
     dailyGoalId: number;
     userId: number;
@@ -454,8 +454,8 @@ export const CreateStudyBlockDocument = gql`
       id
       start
       end
-      title
       rating
+      isCountdown
       userId
       dailyGoalId
       studyCategoryId
@@ -472,8 +472,8 @@ export const UpdateStudyBlockDocument = gql`
       id
       start
       end
-      title
       rating
+      isCountdown
       userId
       dailyGoalId
       studyCategoryId
@@ -622,10 +622,10 @@ export const UserStudyBlocksDocument = gql`
   query UserStudyBlocks {
     userStudyBlocks {
       id
-      title
       start
       end
       rating
+      isCountdown
       studyCategoryId
       dailyGoalId
       userId
