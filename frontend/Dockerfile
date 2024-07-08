@@ -1,6 +1,5 @@
-# Use the official Node.js 18 image.
-# Alpine for production
-FROM node:18
+# Use the official Node.js 18 image, Alpine version.
+FROM node:18-alpine
 
 # Create and change to the app directory.
 WORKDIR /frontend

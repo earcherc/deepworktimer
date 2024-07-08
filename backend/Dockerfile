@@ -1,8 +1,12 @@
 # Use an official Python runtime as a parent image
-FROM python:3.11-slim
+FROM python:3.11-alpine
 
 # Set the working directory in the container
 WORKDIR /backend
+
+# Install dependencies and additional utilities
+RUN apk update && \
+  apk add --no-cache gcc musl-dev libffi-dev netcat-openbsd
 
 # Copy the dependencies file to the working directory
 COPY requirements.txt .
@@ -12,11 +16,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the current directory contents into the container
 COPY . .
-
-# Install additional utilities
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends netcat-openbsd && \
-  rm -rf /var/lib/apt/lists/*
 
 # Make scripts executable
 RUN chmod +x ./wait-for-db.sh
