@@ -8,6 +8,6 @@ If you are using DBeaver as your database management tool, you can configure it 
 |---------------------|-------------------------------------------|
 | Database Type       | PostgreSQL                                |
 | Host                | localhost                                 |
-| Port                | 5433                                      |
+| Port                | 5432                                      |
 | Database Name       | deepwork_db                               |
 | User Name           | [Your PostgreSQL Username]                |
