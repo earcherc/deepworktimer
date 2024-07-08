@@ -20,14 +20,18 @@ const PomodoroTimer = () => {
 
   const activeCategory = categoriesData?.userStudyCategories.find((cat) => cat.isActive);
   const activeDailyGoal = dailyGoalsData?.userDailyGoals.find((goal) => goal.isActive);
-
   const defaultWorkTimeInSeconds = (activeDailyGoal?.blockSize || 25) * 60;
+  const [customDuration, setCustomDuration] = useState<number>(defaultWorkTimeInSeconds);
 
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
   const [isActive, setIsActive] = useState<boolean>(false);
 
   const [, createStudyBlock] = useCreateStudyBlockMutation();
   const [, updateStudyBlock] = useUpdateStudyBlockMutation();
+
+  useEffect(() => {
+    setCustomDuration(defaultWorkTimeInSeconds);
+  }, [dailyGoalsData]);
 
   const expiryTimestamp = new Date();
   expiryTimestamp.setSeconds(expiryTimestamp.getSeconds() + defaultWorkTimeInSeconds);
@@ -138,6 +142,11 @@ const PomodoroTimer = () => {
     setStudyBlockId(null);
   };
 
+  const setCustomTimerDuration = (durationInSeconds: number) => {
+    setCustomDuration(durationInSeconds);
+    restart(expiryTimestamp, false);
+  };
+
   return (
     <div className="rounded-lg bg-white p-4 shadow sm:p-6">
       <div className="flex flex-col items-center">
@@ -148,12 +157,21 @@ const PomodoroTimer = () => {
         </p>
         <div className="flex space-x-3">
           {!isRunning && !studyBlockId && (
-            <button
-              onClick={startWorkSession}
-              className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              Start
-            </button>
+            <>
+              <input
+                type="number"
+                value={customDuration}
+                onChange={(e) => setCustomTimerDuration(parseInt(e.target.value, 10))}
+                className="rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                placeholder="Custom Duration (seconds)"
+              />
+              <button
+                onClick={startWorkSession}
+                className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                Start
+              </button>
+            </>
           )}
           {isRunning && (
             <button
