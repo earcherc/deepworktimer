@@ -4,7 +4,7 @@
 
 
 name: deepwork
-root: ~/Documents/code/deepwork
+root: ~/Documents/code/deep-work
 
 windows:
   - deepwork-dev:
