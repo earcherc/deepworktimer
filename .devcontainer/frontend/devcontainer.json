@@ -1,0 +1,20 @@
+{
+    "name": "Frontend Development",
+    "dockerComposeFile": ["../docker-compose.yml"],
+    "service": "frontend",
+    "workspaceFolder": "/frontend",
+    "shutdownAction": "none",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "editor.defaultFormatter": "esbenp.prettier-vscode",
+                "editor.formatOnSave": true
+            },
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    }
+}
