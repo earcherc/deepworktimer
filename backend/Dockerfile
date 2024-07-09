@@ -4,9 +4,9 @@ FROM python:3.11-alpine
 # Set the working directory in the container
 WORKDIR /backend
 
-# Install dependencies and additional utilities
+# Install dependencies and additional utilities, including Git
 RUN apk update && \
-  apk add --no-cache gcc musl-dev libffi-dev netcat-openbsd
+  apk add --no-cache gcc musl-dev libffi-dev netcat-openbsd git
 
 # Copy the dependencies file to the working directory
 COPY requirements.txt .

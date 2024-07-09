@@ -1,6 +1,9 @@
 # Use the official Node.js 18 image, Alpine version.
 FROM node:18-alpine
 
+# Install Git
+RUN apk add --no-cache git
+
 # Create and change to the app directory.
 WORKDIR /frontend
 
