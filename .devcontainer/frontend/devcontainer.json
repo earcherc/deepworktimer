@@ -1,4 +1,5 @@
-{
+// https://stackoverflow.com/questions/73676584/sharing-ssh-credentials-with-dev-container-in-vscode
+{ 
   "name": "Frontend Development",
     "dockerComposeFile": ["../../docker-compose.yml"],
     "service": "frontend",
