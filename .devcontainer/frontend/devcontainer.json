@@ -1,20 +1,24 @@
 {
-    "name": "Frontend Development",
+  "name": "Frontend Development",
     "dockerComposeFile": ["../../docker-compose.yml"],
     "service": "frontend",
-    "workspaceFolder": "/workspace/frontend",
+  "workspaceFolder": "/workspace/frontend",
     "shutdownAction": "none",
-    "customizations": {
-        "vscode": {
-            "settings": {
-                "editor.defaultFormatter": "esbenp.prettier-vscode",
-                "editor.formatOnSave": true
-            },
-            "extensions": [
-                "dbaeumer.vscode-eslint",
-                "esbenp.prettier-vscode",
-                "ms-azuretools.vscode-docker"
-            ]
-        }
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker"
+      ]
     }
+  },
+  "mounts": [
+    "type=bind,source=${localWorkspaceFolder},target=/workspace",
+    "type=bind,source=/Users/${localEnv:USER}/.ssh,target=/root/.ssh,readonly"
+  ]
 }
