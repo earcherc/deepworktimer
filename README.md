@@ -1,12 +1,9 @@
 # Deep Work Companion App
 
-## Introduction
-
+[Wiki](https://github.com/earcherc/deep-work/wiki)
 [Planning Doc](https://docs.google.com/document/d/1zfZVOmlV_5TOfJoYeOAtwDp23rfpGEp4Doelewh11Kg/edit?usp=sharing)
 
 The Deep Work Companion App is designed to help users achieve optimal deep work routines. This app integrates features like metrics tracking, friend connectivity, and Pomodoro timers to enhance productivity and focus. Whether you're a professional looking to maximize efficiency or a student aiming to improve study habits, this app provides the tools necessary to establish and maintain a powerful deep work routine.
-
-## Tech Stack
 
 ### Frontend
 
