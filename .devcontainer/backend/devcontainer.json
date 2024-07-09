@@ -1,3 +1,4 @@
+// https://stackoverflow.com/questions/73676584/sharing-ssh-credentials-with-dev-container-in-vscode
 {
     "name": "Backend Development",
     "dockerComposeFile": ["../../docker-compose.yml"],
@@ -12,7 +13,8 @@
                     "editor.defaultFormatter": "ms-python.black-formatter"
                 },
                 "python.formatting.provider": "black",
-                "editor.formatOnSave": true
+                "editor.formatOnSave": true,
+                "terminal.integrated.inheritEnv": true
             },
             "extensions": [
                 "ms-python.python",
