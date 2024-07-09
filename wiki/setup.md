@@ -41,14 +41,15 @@ choco install docker-desktop git direnv vscode tmux tmuxinator
 
 ## Environment Variables
 
-1. In the ROOT of the project, copy and rename `.env.example`:
+1. In the root of the project, copy and rename the `.env.example` file to `.env`:
    ```sh
    cp .env.example .env
    ```
 
-   Edit the `.env` file and set the values for your environment.
-   
-2. Change directory to /frontend:
+   Edit the `.env` file and set the values for your environment, including your AWS credentials. You can leave the PostgreSQL variables as is
+<br>
+
+2. Change directory to `/frontend` and set up the frontend environment variables:
    ```sh
    cd frontend
    cp .env.example .env.local
@@ -60,7 +61,25 @@ Now, I've set this project to work with Vscode Dev Containers.
 
 VSCode Dev Containers allow you to run your development environment within a Docker container, ensuring consistency across different setups. For more information, refer to the [Dev Containers documentation](https://code.visualstudio.com/docs/remote/containers).
 
-There may be some issues with getting git working properly. You will most likely need to change the `devcontainer.json` mounting paths so that Docker has access to your ssh keys. 
+### Setting Up and Running Multi-Window Dev Container
+
+1. **Open the Project in VSCode**:
+   
+
+2. **Open the Command Palette**:
+   - Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (macOS) to open the Command Palette.
+
+3. **Reopen in Container**:
+   - Type `Dev Containers: Reopen in Container` and select it.
+   - It will ask you which `devcontainer.json` file to start, pick whichever and do the other in the next iteration.
+   - This process will run the `docker-compose.yml` file and build the containers, this will take a few minutes the first time.
+   - Once this has completed, you can view the containers in your Docker desktop app, along with logs, status, etc.
+   - Open the project again in a new VSCode window and repeat the first step, this time selecting the other `devcontainer.json` environment to boot.
+ 
+
+### Troubleshooting Git SSH Keys
+
+There may be some issues with getting git working properly. You will most likely need to change the `devcontainer.json` mounting paths so that Docker has access to your SSH keys. 
 
 Replace the mounts list with this if running Windows:
 ```json
@@ -105,6 +124,19 @@ If you prefer to set up your development environment locally without using Dev C
       ```sh
       npm run dev
       ```
+
+## Running Docker Compose Locally
+
+If you prefer to run the entire stack locally using Docker Compose, follow these steps:
+
+1. Ensure Docker and Docker Compose are installed on your system.
+2. Navigate to the root of the project directory where the `docker-compose.yml` file is located.
+3. Run the following command to start the services:
+   ```sh
+   docker-compose up --build
+   ```
+
+This will start all the necessary services including the frontend, backend, and database.
 
 ## Pushing Commits and Pushing to the Repository
 
