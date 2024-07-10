@@ -17,8 +17,6 @@ services:
       dockerfile: Dockerfile
     volumes:
       - .:/workspace:cached # Mount the root folder that contains .git
-      - ./frontend:/frontend # Support for local development
-      - /frontend/node_modules # Avoid mounting node_modules
     ports:
       - '3000:3000'
     environment:
@@ -32,7 +30,6 @@ services:
       - .env
     volumes:
       - .:/workspace:cached # Mount the root folder that contains .git
-      - ./backend:/backend # Support for local development
     ports:
       - '8000:8000'
 

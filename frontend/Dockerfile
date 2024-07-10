@@ -1,5 +1,5 @@
 # Use the official Node.js 18 image, Alpine version.
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Install Git and OpenSSH
 RUN apk add --no-cache git openssh
@@ -8,7 +8,7 @@ RUN apk add --no-cache git openssh
 WORKDIR /frontend
 
 # Copy package.json and package-lock.json, and install dependencies.
-COPY package*.json .
+COPY package*.json ./
 
 RUN npm install --frozen-lockfile
 
