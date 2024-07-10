@@ -3,7 +3,7 @@
     "name": "Backend Development",
     "dockerComposeFile": ["../../docker-compose.yml"],
     "service": "backend",
-    "workspaceFolder": "/workspace/backend",
+    "workspaceFolder": "/app/backend",
     "shutdownAction": "none",
     "customizations": {
         "vscode": {

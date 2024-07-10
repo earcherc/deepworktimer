@@ -3,7 +3,7 @@
   "name": "Frontend Development",
     "dockerComposeFile": ["../../docker-compose.yml"],
     "service": "frontend",
-  "workspaceFolder": "/workspace/frontend",
+  "workspaceFolder": "/app/frontend",
     "shutdownAction": "none",
   "customizations": {
     "vscode": {

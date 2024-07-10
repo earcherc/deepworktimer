@@ -2,7 +2,7 @@
 FROM python:3.11-alpine
 
 # Set the working directory in the container
-WORKDIR /backend
+WORKDIR /app/backend
 
 # Install dependencies and additional utilities, including Git and OpenSSH
 RUN apk update && \

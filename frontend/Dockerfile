@@ -5,7 +5,7 @@ FROM node:20-alpine
 RUN apk add --no-cache git openssh
 
 # Create and change to the app directory.
-WORKDIR /frontend
+WORKDIR /app/frontend
 
 # Copy package.json and package-lock.json, and install dependencies.
 COPY package*.json ./
