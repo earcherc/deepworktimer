@@ -31,12 +31,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
       "@app/*": ["./src/app/*"],
       "@components/*": ["./src/app/components/*"],
       "@styles/*": ["./src/styles/*"],
-      "@libs/*": ["./src/libs/*"],
-      "@hooks/*": ["./src/hooks/*"],
       "@types/*": ["./src/types/*"]
     }
   },
