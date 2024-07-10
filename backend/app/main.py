@@ -1,7 +1,9 @@
 from fastapi import FastAPI, Request
 from redis.asyncio import Redis
 from contextlib import asynccontextmanager
-from .routers import auth_router, upload_router, daily_goal_router, user_router, study_block_router, study_category_router
+from .routers import daily_goal_router, user_router, study_block_router, study_category_router
+from .auth import auth_router
+from .uploads import upload_router
 from .auth.auth_utils import get_user_id_from_session
 
 @asynccontextmanager
