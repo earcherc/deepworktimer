@@ -4,6 +4,5 @@ fastapi==0.104.1
 psycopg2-binary==2.9.9
 passlib[bcrypt]==1.7.4
 redis==5.0.1
-strawberry-graphql[fastapi]==0.215.1
 sqlmodel==0.0.12
 uvicorn==0.24.0.post1
