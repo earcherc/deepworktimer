@@ -3,7 +3,7 @@
 import useToast from '@app/context/toasts/toast-context';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { DefaultService, DailyGoal, StudyCategory, StudyBlock, StudyBlockUpdate } from '@api';
+import { StudyBlocksService, DailyGoalsService, StudyCategoriesService, StudyBlock, DailyGoal, StudyCategory } from '@api';
 import { useTimer } from 'react-timer-hook';
 import { parseISO, differenceInSeconds } from 'date-fns';
 
@@ -12,17 +12,17 @@ const PomodoroTimer = () => {
   const queryClient = useQueryClient();
 
   // Queries
-  const { data: categoriesData } = useQuery({ 
-    queryKey: ['studyCategories'], 
-    queryFn: DefaultService.readStudyCategoriesStudyCategoriesGet 
+  const { data: categoriesData } = useQuery({
+    queryKey: ['studyCategories'],
+    queryFn: () => StudyCategoriesService.readStudyCategoriesStudyCategoriesGet()
   });
-  const { data: dailyGoalsData } = useQuery({ 
-    queryKey: ['dailyGoals'], 
-    queryFn: DefaultService.readDailyGoalsDailyGoalsGet 
+  const { data: dailyGoalsData } = useQuery({
+    queryKey: ['dailyGoals'],
+    queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet()
   });
-  const { data: studyBlocksData } = useQuery({ 
-    queryKey: ['studyBlocks'], 
-    queryFn: DefaultService.readStudyBlocksStudyBlocksGet 
+  const { data: studyBlocksData } = useQuery({
+    queryKey: ['studyBlocks'],
+    queryFn: () => StudyBlocksService.readStudyBlocksStudyBlocksGet()
   });
 
   // Active data
@@ -34,22 +34,34 @@ const PomodoroTimer = () => {
   const [customDuration, setCustomDuration] = useState(defaultWorkTimeInSeconds);
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
   const [isActive, setIsActive] = useState(false);
+  const [isCountDown, setIsCountDown] = useState(true);
+  const [isEditingTime, setIsEditingTime] = useState(false);
 
   // Mutations
   const createStudyBlockMutation = useMutation({
-    mutationFn: DefaultService.createStudyBlockStudyBlocksPost,
+    mutationFn: StudyBlocksService.createStudyBlockStudyBlocksPost,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['studyBlocks'] }),
   });
 
   const updateStudyBlockMutation = useMutation({
-    mutationFn: ({ id, block }: { id: number, block: StudyBlockUpdate }) => 
-      DefaultService.updateStudyBlockStudyBlocksStudyBlockIdPut(id, block),
+    mutationFn: ({ id, block }: { id: number, block: Partial<StudyBlock> }) => 
+      StudyBlocksService.updateStudyBlockStudyBlocksStudyBlockIdPatch(id, block),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['studyBlocks'] }),
   });
 
   // Timer setup
   const expiryTimestamp = new Date();
   expiryTimestamp.setSeconds(expiryTimestamp.getSeconds() + customDuration);
+
+  const handleTimerExpiration = useCallback(async () => {
+    if (studyBlockId) {
+      await endStudyBlock();
+    }
+    restart(expiryTimestamp, false);
+    setIsActive(false);
+    setStudyBlockId(null);
+    addToast({ type: 'success', content: 'Pomodoro session completed!' });
+  }, [studyBlockId, expiryTimestamp]);
 
   const { 
     seconds, 
@@ -78,16 +90,6 @@ const PomodoroTimer = () => {
   }, [studyBlocksData, isActive]);
 
   // Handlers
-  const handleTimerExpiration = useCallback(async () => {
-    if (studyBlockId) {
-      await endStudyBlock();
-    }
-    restart(expiryTimestamp, false);
-    setIsActive(false);
-    setStudyBlockId(null);
-    addToast({ type: 'success', content: 'Pomodoro session completed!' });
-  }, [studyBlockId, expiryTimestamp]);
-
   const startWorkSession = useCallback(() => {
     createNewStudyBlock();
     setIsActive(true);
@@ -127,7 +129,7 @@ const PomodoroTimer = () => {
         const data = await createStudyBlockMutation.mutateAsync({
           user_id: 1, // TODO: Replace with actual user ID
           start: new Date().toISOString(),
-          is_countdown: true,
+          is_countdown: isCountDown,
           daily_goal_id: activeDailyGoal.id,
           study_category_id: activeCategory.id,
         });
@@ -141,18 +143,18 @@ const PomodoroTimer = () => {
     }
   };
 
-const endStudyBlock = async () => {
-  if (studyBlockId) {
-    try {
-      await updateStudyBlockMutation.mutateAsync({
-        id: studyBlockId,
-        block: { end: new Date().toISOString() }
-      });
-    } catch (error) {
-      addToast({ type: 'error', content: 'Failed to end study block' });
+  const endStudyBlock = async () => {
+    if (studyBlockId) {
+      try {
+        await updateStudyBlockMutation.mutateAsync({
+          id: studyBlockId,
+          block: { end: new Date().toISOString() }
+        });
+      } catch (error) {
+        addToast({ type: 'error', content: 'Failed to end study block' });
+      }
     }
-  }
-};
+  };
 
   const recoverIncompleteSession = () => {
     const latestIncompleteBlock = studyBlocksData?.filter((block: StudyBlock) => !block.end)
@@ -161,10 +163,11 @@ const endStudyBlock = async () => {
     if (latestIncompleteBlock?.id) {
       setIsActive(true);
       setStudyBlockId(latestIncompleteBlock.id);
+      setIsCountDown(latestIncompleteBlock.is_countdown ?? true);
       const startTimestamp = parseISO(latestIncompleteBlock.start).getTime();
       const nowTimestamp = Date.now();
       const elapsed = differenceInSeconds(nowTimestamp, startTimestamp);
-      const remainingTimeInSeconds = Math.max(0, defaultWorkTimeInSeconds - elapsed);
+      const remainingTimeInSeconds = isCountDown ? Math.max(0, defaultWorkTimeInSeconds - elapsed) : elapsed;
       const newExpiryTimestamp = new Date();
       newExpiryTimestamp.setSeconds(newExpiryTimestamp.getSeconds() + remainingTimeInSeconds);
       restart(newExpiryTimestamp, true);
@@ -180,6 +183,28 @@ const endStudyBlock = async () => {
     restart(newExpiryTimestamp, false);
   };
 
+  const handleTimeClick = () => {
+    if (!isRunning) {
+      setIsEditingTime(true);
+    }
+  };
+
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const [h, m, s] = e.target.value.split(':').map(Number);
+    const totalSeconds = (h * 3600) + (m * 60) + s;
+    if (totalSeconds <= 32400) { // 9 hours in seconds
+      setCustomTimerDuration(totalSeconds);
+    }
+  };
+
+  const handleTimeBlur = () => {
+    setIsEditingTime(false);
+  };
+
+  const formatTime = (h: number, m: number, s: number) => {
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
   // Render
   return (
     <div className="rounded-lg bg-white p-4 shadow sm:p-6">
@@ -187,26 +212,39 @@ const endStudyBlock = async () => {
         <h2 className="mb-4 text-xl font-semibold text-gray-900">
           {isRunning ? 'Focus Time' : 'Pomodoro Timer'}
         </h2>
-        <p className="mb-8 text-5xl font-bold text-indigo-600">
-          {`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}
-        </p>
+        {isEditingTime ? (
+          <input
+            type="text"
+            value={formatTime(hours, minutes, seconds)}
+            onChange={handleTimeChange}
+            onBlur={handleTimeBlur}
+            className="mb-8 text-5xl font-bold text-indigo-600 bg-transparent border-b border-indigo-600 focus:outline-none"
+            autoFocus
+          />
+        ) : (
+          <p className="mb-8 text-5xl font-bold text-indigo-600 cursor-pointer" onClick={handleTimeClick}>
+            {formatTime(hours, minutes, seconds)}
+          </p>
+        )}
+        <div className="flex space-x-3 mb-4">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={isCountDown}
+              onChange={(e) => setIsCountDown(e.target.checked)}
+              className="mr-2"
+            />
+            Countdown
+          </label>
+        </div>
         <div className="flex space-x-3">
           {!isRunning && !studyBlockId && (
-            <>
-              <input
-                type="number"
-                value={customDuration / 60}
-                onChange={(e) => setCustomTimerDuration(parseInt(e.target.value, 10) * 60)}
-                className="rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-                placeholder="Duration (minutes)"
-              />
-              <button
-                onClick={startWorkSession}
-                className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              >
-                Start
-              </button>
-            </>
+            <button
+              onClick={startWorkSession}
+              className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              Start
+            </button>
           )}
           {isRunning && (
             <button onClick={pauseTimer} className="timer-button bg-yellow-500 hover:bg-yellow-400">
