@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AuthenticationService, User } from '@api';
+import { AuthenticationService, User, UsersService } from '@api';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -20,7 +20,7 @@ export default function Nav() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery<User>({ queryKey: ['currentUser'] });
+  const { data: user } = useQuery<User>({ queryKey: ['currentUser'], queryFn: () => UsersService.readCurrentUserUsersMeGet() });
 
   const logoutMutation = useMutation({
     mutationFn: AuthenticationService.logoutAuthLogoutPost,

@@ -17,7 +17,7 @@ const DailyGoalComp = () => {
   const queryClient = useQueryClient();
 
   const { data: goals = [] } = useQuery<DailyGoal[]>({
-    queryKey: ['dailyGoals'],
+    queryKey: ['dailyGoals'], queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet()
   });
 
   const updateDailyGoalMutation = useMutation({

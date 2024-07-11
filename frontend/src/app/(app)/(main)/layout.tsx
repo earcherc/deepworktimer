@@ -5,7 +5,12 @@ import { StudyBlocksService, DailyGoalsService, StudyCategoriesService, UsersSer
 import Nav from '@app/components/nav';
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
-   useQuery({
+  useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => UsersService.readCurrentUserUsersMeGet(),
+  });
+  
+  useQuery({
     queryKey: ['studyCategories'],
     queryFn: () => StudyCategoriesService.readStudyCategoriesStudyCategoriesGet()
   });
@@ -18,12 +23,8 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   useQuery({
     queryKey: ['studyBlocks'],
     queryFn: () => StudyBlocksService.readStudyBlocksStudyBlocksGet()
-  }); 
+  });
 
-  useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => UsersService.readCurrentUserUsersMeGet()
-  }); 
 
   return (
     

@@ -17,7 +17,8 @@ const StudyCategoryComponent = () => {
 
   const { data: categories = [] } = useQuery<StudyCategory[]>({
     queryKey: ['studyCategories'],
-  })
+    queryFn: () => StudyCategoriesService.readStudyCategoriesStudyCategoriesGet(),
+  });
 
   const updateStudyCategoryMutation = useMutation({
     mutationFn: (category: StudyCategory) => {
