@@ -1,29 +1,18 @@
 'use client';
 
 import React, { Fragment, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import StudyBlock from './study-block';
-import { StudyBlock as StudyBlockType } from '@api';
-
-const currentDate = new Date();
-
-// Set the time to 1 AM on the current day
-currentDate.setHours(1, 0, 0, 0); // sets the time to 1:00 AM
-
-const dummyStudyBlocks: StudyBlockType[] = [
-  {
-    id: 1,
-    daily_goal_id: 1,
-    user_id: 1,
-    end: new Date(currentDate.getTime() + 60 * 60 * 1000).toISOString(), // 1 hour after the start time
-    start: currentDate.toISOString(),
-    study_category_id: 2,
-    rating: 4.5,
-  },
-];
+import { StudyBlocksService, StudyBlock as StudyBlockType } from '@api';
 
 export default function Calendar() {
-  const container = useRef(null);
-  const containerOffset = useRef(null);
+  const container = useRef<HTMLDivElement>(null);
+  const containerOffset = useRef<HTMLDivElement>(null);
+
+  const { data: studyBlocks = [] } = useQuery<StudyBlockType[]>({
+    queryKey: ['studyBlocks'],
+    queryFn: () => StudyBlocksService.readStudyBlocksStudyBlocksGet(),
+  });
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -49,17 +38,13 @@ export default function Calendar() {
                   </Fragment>
                 ))}
               </div>
-
               {/* Events */}
               <ol
                 className="col-start-1 col-end-2 row-start-1 grid grid-cols-1"
                 style={{ gridTemplateRows: '1.75rem repeat(1440, minmax(1px, auto))' }}
               >
-                {dummyStudyBlocks.map((block, index) => (
-                  <StudyBlock
-                    key={block.daily_goal_id || index}
-                    block={{...block}}
-                  />
+                {studyBlocks.map((block) => (
+                  <StudyBlock key={block.id} block={block} />
                 ))}
               </ol>
             </div>
