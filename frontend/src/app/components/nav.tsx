@@ -4,17 +4,17 @@ import { dailyGoalsAtom } from '@app/store/atoms';
 import { useAtom } from 'jotai';
 import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { DefaultService } from '@api/services/DefaultService';
 import { DailyGoal } from '@api/models/DailyGoal';
 import PomodoroTimer from '@app/components/timer/timer';
 import Sidebar from '@app/components/sidebar/sidebar';
 import Calendar from '@app/components/calendar/calendar';
+import { DailyGoalsService } from '@api/index';
 
 const Dashboard = () => {
   const [, setDailyGoals] = useAtom(dailyGoalsAtom);
   const { data, isLoading, error } = useQuery<DailyGoal[]>({
     queryKey: ['dailyGoals'],
-    queryFn: () => DefaultService.readDailyGoalsDailyGoalsGet(),
+    queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet(),
   });
 
   useEffect(() => {
