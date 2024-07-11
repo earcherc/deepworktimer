@@ -21,10 +21,7 @@ const DailyGoalComp = () => {
   });
 
   const updateDailyGoalMutation = useMutation({
-    mutationFn: (goal: DailyGoal) => { 
-      if (goal.id === undefined) {
-       throw new Error("Goal ID is undefined");
-      }
+    mutationFn: (goal: DailyGoal) => {
       return DailyGoalsService.updateDailyGoalDailyGoalsDailyGoalIdPatch(goal.id, goal);
     },
     onSuccess: () => {

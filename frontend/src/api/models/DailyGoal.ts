@@ -3,11 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 export type DailyGoal = {
-    id?: number;
     quantity: number;
     block_size: number;
     is_active?: boolean;
-    created_at?: string;
+    id: number;
     user_id: number;
+    created_at: string;
 };
 
