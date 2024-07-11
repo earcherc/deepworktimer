@@ -7,10 +7,10 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
-export type { Body_upload_image_upload_image_post } from './models/Body_upload_image_upload_image_post';
 export type { DailyGoal } from './models/DailyGoal';
 export type { DailyGoalCreate } from './models/DailyGoalCreate';
 export type { DailyGoalUpdate } from './models/DailyGoalUpdate';
+export { Gender } from './models/Gender';
 export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { LoginRequest } from './models/LoginRequest';
 export type { PasswordChangeRequest } from './models/PasswordChangeRequest';
@@ -26,4 +26,9 @@ export type { UserCreate } from './models/UserCreate';
 export type { UserUpdate } from './models/UserUpdate';
 export type { ValidationError } from './models/ValidationError';
 
-export { DefaultService } from './services/DefaultService';
+export { AuthenticationService } from './services/AuthenticationService';
+export { DailyGoalsService } from './services/DailyGoalsService';
+export { StudyBlocksService } from './services/StudyBlocksService';
+export { StudyCategoriesService } from './services/StudyCategoriesService';
+export { UploadsService } from './services/UploadsService';
+export { UsersService } from './services/UsersService';

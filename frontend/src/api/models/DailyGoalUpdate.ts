@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type DailyGoalUpdate = {
-    quantity: number;
-    block_size: number;
-    is_active: boolean;
+    quantity?: number;
+    block_size?: number;
+    is_active?: boolean;
 };
 

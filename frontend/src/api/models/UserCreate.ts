@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Gender } from './Gender';
 export type UserCreate = {
     username: string;
     email: string;
@@ -13,11 +14,11 @@ export type UserCreate = {
     longitude?: number;
     first_name?: string;
     last_name?: string;
-    gender?: string;
+    gender?: Gender;
     profile_photo_url?: string;
     timezone?: string;
     language?: string;
     status?: string;
-    hashed_password: string;
+    password: string;
 };
 

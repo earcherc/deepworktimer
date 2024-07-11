@@ -2,9 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Gender } from './Gender';
 export type UserUpdate = {
-    username: string;
-    email: string;
+    username?: string;
+    email?: string;
     bio?: string;
     job_title?: string;
     personal_title?: string;
@@ -13,7 +14,7 @@ export type UserUpdate = {
     longitude?: number;
     first_name?: string;
     last_name?: string;
-    gender?: string;
+    gender?: Gender;
     profile_photo_url?: string;
     timezone?: string;
     language?: string;

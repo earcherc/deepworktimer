@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type StudyCategoryUpdate = {
-    title: string;
+    title?: string;
     is_active?: boolean;
 };
 

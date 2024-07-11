@@ -5,6 +5,7 @@
 export type DailyGoalCreate = {
     quantity: number;
     block_size: number;
-    is_active: boolean;
+    is_active?: boolean;
+    user_id: number;
 };
 
