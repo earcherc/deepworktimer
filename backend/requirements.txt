@@ -7,3 +7,5 @@ redis==5.0.1
 sqlmodel==0.0.12
 uvicorn==0.24.0.post1
 python-multipart
+asyncpg
+pydantic[email]

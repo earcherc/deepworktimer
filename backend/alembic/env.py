@@ -6,18 +6,17 @@ from sqlalchemy import pool
 from alembic import context
 from sqlmodel import SQLModel
 
-from app.config import Config
 from app.models import *
+from app.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Overwrite the sqlalchemy.url with the one from the config
-config.set_main_option(
-    "sqlalchemy.url",
-    f"postgresql://{Config.POSTGRES_USER}:{Config.POSTGRES_PASSWORD}@{Config.DATABASE_HOST}/{Config.DATABASE_NAME}",
-)
+sync_db_url = str(settings.DATABASE_URL).replace("+asyncpg", "")
+config.set_main_option("sqlalchemy.url", sync_db_url)
+
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
