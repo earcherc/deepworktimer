@@ -1,24 +1,31 @@
-# /backend/app/auth/auth_routes.py
 from fastapi import APIRouter, Depends, Response, HTTPException, Request
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from .auth_utils import (
     create_session,
-    pwd_context,
+    verify_password,
     delete_session,
     get_user_id_from_session,
+    hash_password,
 )
 from .auth_schemas import RegistrationRequest, LoginRequest, PasswordChangeRequest
 from ..dependencies import get_redis
 from ..database import get_session
 from ..models import User as UserModel
-from sqlmodel import Session, col, or_, select
+from ..uploads import get_presigned_url_for_image
+from redis.asyncio import Redis
 
 router = APIRouter()
 
 
-def authenticate_user(username: str, password: str, session: Session) -> int:
-    user_statement = select(UserModel).where(UserModel.username == username)
-    user = session.exec(user_statement).first()
-    if user and pwd_context.verify(password, user.hashed_password):
+async def authenticate_user(
+    username: str, password: str, session: AsyncSession
+) -> int | None:
+    result = await session.execute(
+        select(UserModel).where(UserModel.username == username)
+    )
+    user = result.scalar_one_or_none()
+    if user and verify_password(password, user.hashed_password):
         return user.id
     return None
 
@@ -27,28 +34,37 @@ def authenticate_user(username: str, password: str, session: Session) -> int:
 async def login(
     response: Response,
     login_request: LoginRequest,
-    redis=Depends(get_redis),
-    session: Session = Depends(get_session),
+    redis: Redis = Depends(get_redis),
+    session: AsyncSession = Depends(get_session),
 ):
-    user_id = authenticate_user(login_request.username, login_request.password, session)
+    user_id = await authenticate_user(
+        login_request.username, login_request.password, session
+    )
     if not user_id:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
 
     session_id = await create_session(redis, user_id)
-    user = session.exec(select(UserModel).where(UserModel.id == user_id)).first()
+    result = await session.execute(select(UserModel).where(UserModel.id == user_id))
+    user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Secure False for local dev only (localhost)
     response.set_cookie(key="session_id", value=session_id, httponly=True, secure=False)
 
-    # Serialize user data and exclude sensitive field
     user_data = user.dict(exclude={"hashed_password"})
+
+    # Generate presigned URL for profile photo if it exists
+    if user.profile_photo_url:
+        presigned_url = await get_presigned_url_for_image(user.profile_photo_url)
+        user_data["profile_photo_presigned_url"] = presigned_url
+
     return user_data
 
 
 @router.post("/logout")
-async def logout(response: Response, request: Request, redis=Depends(get_redis)):
+async def logout(
+    response: Response, request: Request, redis: Redis = Depends(get_redis)
+):
     session_id = request.cookies.get("session_id")
     if session_id:
         await delete_session(redis, session_id)
@@ -57,22 +73,20 @@ async def logout(response: Response, request: Request, redis=Depends(get_redis))
 
 
 @router.post("/register")
-def register(
-    registration_request: RegistrationRequest, session: Session = Depends(get_session)
+async def register(
+    registration_request: RegistrationRequest,
+    session: AsyncSession = Depends(get_session),
 ):
-    user_exists_statement = select(UserModel).where(
-        or_(
-            col(UserModel.username) == registration_request.username,
-            col(UserModel.email) == registration_request.email,
+    result = await session.execute(
+        select(UserModel).where(
+            (UserModel.username == registration_request.username)
+            | (UserModel.email == registration_request.email)
         )
     )
-
-    existing_user = session.exec(user_exists_statement).first()
-
-    if existing_user:
+    if result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Username or email already exists")
 
-    hashed_password = pwd_context.hash(registration_request.password)
+    hashed_password = hash_password(registration_request.password)
     new_user = UserModel(
         username=registration_request.username,
         email=registration_request.email,
@@ -80,25 +94,23 @@ def register(
     )
 
     session.add(new_user)
-    session.commit()
-    session.refresh(new_user)
-
+    await session.commit()
+    await session.refresh(new_user)
     return {"id": new_user.id}
 
 
 @router.post("/validate-session")
-async def validate_session(request: Request, session=Depends(get_session)):
+async def validate_session(request: Request):
     user_id = getattr(request.state, "user_id", None)
-    is_valid = user_id is not None
-    return {"isValid": is_valid}
+    return {"isValid": user_id is not None}
 
 
 @router.post("/change-password")
 async def change_password(
     request: Request,
     password_change: PasswordChangeRequest,
-    redis=Depends(get_redis),
-    session=Depends(get_session),
+    redis: Redis = Depends(get_redis),
+    session: AsyncSession = Depends(get_session),
 ):
     session_id = request.cookies.get("session_id")
     if not session_id:
@@ -110,13 +122,14 @@ async def change_password(
             status_code=401, detail="Invalid session or session expired"
         )
 
-    user = session.exec(select(UserModel).where(UserModel.id == user_id)).first()
-    if not user or not pwd_context.verify(
+    result = await session.execute(select(UserModel).where(UserModel.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user or not verify_password(
         password_change.current_password, user.hashed_password
     ):
         raise HTTPException(status_code=403, detail="Current password is incorrect")
 
-    user.hashed_password = pwd_context.hash(password_change.new_password)
-    session.commit()
+    user.hashed_password = hash_password(password_change.new_password)
+    await session.commit()
 
     return {"message": "Password changed successfully"}
