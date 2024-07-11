@@ -3,9 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type StudyBlockUpdate = {
-    start: string;
     end?: string;
     rating?: number;
-    is_countdown?: boolean;
 };
 
