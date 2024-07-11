@@ -7,7 +7,6 @@ export type StudyBlockCreate = {
     end?: string;
     rating?: number;
     is_countdown?: boolean;
-    user_id: number;
     daily_goal_id: number;
     study_category_id: number;
 };

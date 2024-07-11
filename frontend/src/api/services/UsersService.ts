@@ -82,6 +82,17 @@ export class UsersService {
         });
     }
     /**
+     * Read Current User
+     * @returns User Successful Response
+     * @throws ApiError
+     */
+    public static readCurrentUserUsersMeGet(): CancelablePromise<User> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/users/me',
+        });
+    }
+    /**
      * Read User
      * @param userId
      * @returns User Successful Response

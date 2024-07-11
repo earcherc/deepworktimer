@@ -35,7 +35,7 @@
       "@components/*": ["./src/app/components/*"],
       "@styles/*": ["./src/styles/*"],
       "@types/*": ["./src/types/*"],
-      "@api/*": ["./src/api/*"],
+      "@lib/*": ["./src/lib/*"],
       "@api": ["./src/api"]
     }
   },

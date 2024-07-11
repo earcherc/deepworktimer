@@ -5,6 +5,5 @@
 export type StudyCategoryCreate = {
     title: string;
     is_active?: boolean;
-    user_id: number;
 };
 
