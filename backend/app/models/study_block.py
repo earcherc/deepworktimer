@@ -11,16 +11,14 @@ if TYPE_CHECKING:
 
 class StudyBlock(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    start: datetime
+    start: datetime = Field(...)
     end: Optional[datetime] = Field(default=None)
-    rating: Optional[float] = Field(default=None, ge=0, le=5)  # Rating between 0 and 5
+    rating: Optional[float] = Field(default=None, ge=0, le=5)
     is_countdown: bool = Field(default=True)
-
     # Foreign keys
     user_id: int = Field(foreign_key="user.id", index=True)
     daily_goal_id: int = Field(foreign_key="dailygoal.id", index=True)
     study_category_id: int = Field(foreign_key="studycategory.id", index=True)
-
     # Relationships
     user: "User" = Relationship(back_populates="study_blocks")
     daily_goal: "DailyGoal" = Relationship(back_populates="study_blocks")
