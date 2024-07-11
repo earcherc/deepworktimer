@@ -1,22 +1,20 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-# Shared properties
 class StudyCategoryBase(BaseModel):
     title: str
-    is_active: bool = False
+    is_active: bool = Field(default=False)
 
-# Properties to receive via API on creation
 class StudyCategoryCreate(StudyCategoryBase):
     user_id: int
 
-# Properties to receive via API on update
-class StudyCategoryUpdate(StudyCategoryBase):
-    pass
+class StudyCategoryUpdate(BaseModel):
+    title: Optional[str] = None
+    is_active: Optional[bool] = None
 
-# Properties shared by models stored in DB and returned to client
 class StudyCategory(StudyCategoryBase):
-    id: Optional[int] = None
+    id: int
+    user_id: int
 
     class Config:
         orm_mode = True

@@ -1,36 +1,54 @@
 from typing import Optional
-from pydantic import BaseModel
-from datetime import date
+from pydantic import BaseModel, Field, EmailStr
+from datetime import date, datetime
+from enum import Enum
 
-# Shared properties
+class Gender(str, Enum):
+    MALE = "MALE"
+    FEMALE = "FEMALE"
+    OTHER = "OTHER"
+    NOT_SPECIFIED = "NOT_SPECIFIED"
+
 class UserBase(BaseModel):
     username: str
-    email: str
+    email: EmailStr
     bio: Optional[str] = None
     job_title: Optional[str] = None
     personal_title: Optional[str] = None
     date_of_birth: Optional[date] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
+    latitude: Optional[float] = Field(None, ge=-90, le=90)
+    longitude: Optional[float] = Field(None, ge=-180, le=180)
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    gender: Optional[str] = None
+    gender: Optional[Gender] = None
     profile_photo_url: Optional[str] = None
     timezone: Optional[str] = None
     language: Optional[str] = None
     status: Optional[str] = None
 
-# Properties to receive via API on creation
 class UserCreate(UserBase):
-    hashed_password: str
+    password: str
 
-# Properties to receive via API on update
-class UserUpdate(UserBase):
-    pass
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    bio: Optional[str] = None
+    job_title: Optional[str] = None
+    personal_title: Optional[str] = None
+    date_of_birth: Optional[date] = None
+    latitude: Optional[float] = Field(None, ge=-90, le=90)
+    longitude: Optional[float] = Field(None, ge=-180, le=180)
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    gender: Optional[Gender] = None
+    profile_photo_url: Optional[str] = None
+    timezone: Optional[str] = None
+    language: Optional[str] = None
+    status: Optional[str] = None
 
-# Properties shared by models stored in DB and returned to client
 class User(UserBase):
-    id: Optional[int] = None
+    id: int
+    created_at: datetime
 
     class Config:
         orm_mode = True

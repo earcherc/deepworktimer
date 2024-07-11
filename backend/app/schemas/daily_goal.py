@@ -1,24 +1,28 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from datetime import datetime
 
-# Shared properties
+# Base model with shared properties
 class DailyGoalBase(BaseModel):
     quantity: int
     block_size: int
-    is_active: bool
+    is_active: bool = Field(default=False)
 
-# Properties to receive on item creation
+# Model for creating a new DailyGoal
 class DailyGoalCreate(DailyGoalBase):
-    pass
+    user_id: int
 
-# Properties to receive on item update
-class DailyGoalUpdate(DailyGoalBase):
-    pass
+# Model for updating an existing DailyGoal
+class DailyGoalUpdate(BaseModel):
+    quantity: Optional[int] = None
+    block_size: Optional[int] = None
+    is_active: Optional[bool] = None
 
-# Properties shared by models stored in DB and returned to client
+# Full DailyGoal model (for responses)
 class DailyGoal(DailyGoalBase):
-    id: Optional[int] = None
-    user_id: Optional[int] = None
+    id: int
+    user_id: int
+    created_at: datetime
 
     class Config:
         orm_mode = True
