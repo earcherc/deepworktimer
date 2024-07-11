@@ -1,8 +1,7 @@
 'use client';
 
+import { StudyBlock as StudyBlockType } from '@api';
 import React, { useEffect, useState } from 'react';
-
-type StudyBlockUI = Pick<StudyBlockType, 'title' | 'start' | 'end'>;
 
 // Helper function to convert ISO date string to grid row start/end
 const timeToGridRow = (start: string, end: string): string => {
@@ -31,8 +30,8 @@ const formatTime = (dateString: string): string => {
   return new Date(dateString).toLocaleTimeString([], options).toUpperCase();
 };
 
-const StudyBlock = ({ block }: { block: StudyBlockUI }) => {
-  const { title, start, end } = block;
+const StudyBlock = ({ block }: { block: StudyBlockType }) => {
+  const { start, end } = block;
   const [gridPosition, setGridPosition] = useState('');
 
   const [startTime, setStartTime] = useState('');
@@ -53,7 +52,7 @@ const StudyBlock = ({ block }: { block: StudyBlockUI }) => {
   return (
     <li className="relative mt-px flex" style={{ gridRow: gridPosition }}>
       <div className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-blue-50 p-2 text-xs leading-5 hover:bg-blue-100">
-        <p className="order-1 font-semibold text-blue-700">{title}</p>
+        <p className="order-1 font-semibold text-blue-700">Session</p>
         <p className="text-blue-500 group-hover:text-blue-700">
           <time dateTime={start} suppressHydrationWarning={true}>
             {startTime || 'Loading...'}

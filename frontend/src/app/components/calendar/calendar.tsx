@@ -2,6 +2,7 @@
 
 import React, { Fragment, useRef } from 'react';
 import StudyBlock from './study-block';
+import { StudyBlock as StudyBlockType } from '@api';
 
 const currentDate = new Date();
 
@@ -10,12 +11,12 @@ currentDate.setHours(1, 0, 0, 0); // sets the time to 1:00 AM
 
 const dummyStudyBlocks: StudyBlockType[] = [
   {
-    dailyGoalId: 1,
+    id: 1,
+    daily_goal_id: 1,
+    user_id: 1,
     end: new Date(currentDate.getTime() + 60 * 60 * 1000).toISOString(), // 1 hour after the start time
     start: currentDate.toISOString(),
-    studyCategoryId: 2,
-    title: 'Study Session',
-    userId: 1,
+    study_category_id: 2,
     rating: 4.5,
   },
 ];
@@ -56,8 +57,8 @@ export default function Calendar() {
               >
                 {dummyStudyBlocks.map((block, index) => (
                   <StudyBlock
-                    key={block.dailyGoalId || index}
-                    block={{ title: block.title, start: block.start, end: block.end }}
+                    key={block.daily_goal_id || index}
+                    block={{...block}}
                   />
                 ))}
               </ol>
