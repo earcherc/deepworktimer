@@ -6,7 +6,7 @@ class StudyCategoryBase(BaseModel):
     is_active: bool = Field(default=False)
 
 class StudyCategoryCreate(StudyCategoryBase):
-    user_id: int
+    pass
 
 class StudyCategoryUpdate(BaseModel):
     title: Optional[str] = None

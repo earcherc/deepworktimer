@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from ..database import get_session
@@ -6,15 +6,9 @@ from ..models import User
 from ..schemas import UserCreate, UserUpdate, User as UserSchema
 from ..auth import hash_password
 from typing import List
+from .utils import get_current_user_id
 
 router = APIRouter()
-
-
-async def get_current_user_id(request: Request) -> int:
-    user_id = request.state.user_id
-    if user_id is None:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    return user_id
 
 
 @router.post("/", response_model=UserSchema)
@@ -30,6 +24,14 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_session))
     await db.refresh(db_user)
     return db_user
 
+
+@router.get("/me", response_model=UserSchema)
+async def read_current_user(db: AsyncSession = Depends(get_session), user_id: int = Depends(get_current_user_id)):
+    result = await db.execute(select(User).where(User.id == user_id))
+    db_user = result.scalar_one_or_none()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
 
 @router.get("/{user_id}", response_model=UserSchema)
 async def read_user(user_id: int, db: AsyncSession = Depends(get_session)):

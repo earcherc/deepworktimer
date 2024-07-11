@@ -1,18 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from ..database import get_session
 from ..models import StudyBlock
 from ..schemas import StudyBlockCreate, StudyBlockUpdate, StudyBlock as StudyBlockSchema
+from .utils import get_current_user_id
 from typing import List
 
 router = APIRouter()
-
-async def get_current_user_id(request: Request) -> int:
-    user_id = request.state.user_id
-    if user_id is None:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    return user_id
 
 @router.post("/", response_model=StudyBlockSchema)
 async def create_study_block(
@@ -20,7 +15,7 @@ async def create_study_block(
     db: AsyncSession = Depends(get_session),
     user_id: int = Depends(get_current_user_id)
 ):
-    db_study_block = StudyBlock(**study_block.dict())
+    db_study_block = StudyBlock(**study_block.dict(), user_id=user_id)
     db.add(db_study_block)
     await db.commit()
     await db.refresh(db_study_block)

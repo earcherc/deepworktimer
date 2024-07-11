@@ -9,7 +9,6 @@ class StudyBlockBase(BaseModel):
     is_countdown: bool = True
 
 class StudyBlockCreate(StudyBlockBase):
-    user_id: int
     daily_goal_id: int
     study_category_id: int
 

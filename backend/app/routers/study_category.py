@@ -6,14 +6,9 @@ from ..database import get_session
 from ..models import StudyCategory
 from ..schemas import StudyCategoryCreate, StudyCategoryUpdate, StudyCategory as StudyCategorySchema
 from typing import List
+from .utils import get_current_user_id
 
 router = APIRouter()
-
-async def get_current_user_id(request: Request) -> int:
-    user_id = request.state.user_id
-    if user_id is None:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    return user_id
 
 @router.post("/", response_model=StudyCategorySchema)
 async def create_study_category(

@@ -10,7 +10,7 @@ class DailyGoalBase(BaseModel):
 
 # Model for creating a new DailyGoal
 class DailyGoalCreate(DailyGoalBase):
-    user_id: int
+    pass
 
 # Model for updating an existing DailyGoal
 class DailyGoalUpdate(BaseModel):
