@@ -3,46 +3,39 @@ import { useRouter } from 'next/navigation';
 import React, { FormEvent, useState } from 'react';
 import useToast from '../context/toasts/toast-context';
 import classNames from 'classnames';
-import { userAtom } from '../store/atoms';
-import { useAtom } from 'jotai';
+import { useMutation } from '@tanstack/react-query';
+import { AuthenticationService } from '@api';
 
 const LoginForm = () => {
   const { addToast } = useToast();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [, setUser] = useAtom(userAtom);
+
   const router = useRouter();
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const res = await fetch('http://localhost/api/auth/login', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        setErrorMessage(errorData.detail);
-        addToast({ type: 'error', content: errorData.detail });
-        return;
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: { username: string; password: string }) => {
+      try {
+        const response = await AuthenticationService.loginAuthLoginPost(credentials);
+        return response
+      } catch (error) {
+        if (error instanceof Error) {
+          throw error;
+        }
+        throw new Error('An error occurred while registering.');
       }
-
-      const userData = await res.json();
-      // Assuming userData contains the user object
-      setUser(userData);
+    },
+    onSuccess: () => {
       router.push('/dashboard');
-    } catch (error) {
-      console.error('Login error:', error);
-      setErrorMessage('An error occurred while logging in.');
-      addToast({ type: 'error', content: 'An error occurred while logging in.' });
-    }
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', content: error.message });
+    },
+  });
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    loginMutation.mutate({ username, password });
   };
 
   return (
@@ -60,10 +53,7 @@ const LoginForm = () => {
               autoComplete="username"
               placeholder="johndoe"
               value={username}
-              onInput={(e) => {
-                setUsername(e.currentTarget.value);
-                setErrorMessage(null);
-              }}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
@@ -83,10 +73,8 @@ const LoginForm = () => {
               type="password"
               autoComplete="current-password"
               value={password}
-              onInput={(e) => {
-                setPassword(e.currentTarget.value);
-                setErrorMessage(null);
-              }}
+              onChange={(e) => setPassword(e.target.value)
+              }
               required
               className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
@@ -109,7 +97,9 @@ const LoginForm = () => {
           </button>
         </div>
       </form>
-      {errorMessage && <div className="mt-2 text-red-500">{errorMessage}</div>}
+      {loginMutation.isError && (
+        <div className="mt-2 text-red-500">{loginMutation.error.message}</div>
+      )}
     </>
   );
 };

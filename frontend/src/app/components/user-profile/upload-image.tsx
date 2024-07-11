@@ -3,8 +3,8 @@
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
-import useToast from '@/app/context/toasts/toast-context';
-import { userAtom } from '@/app/store/atoms';
+import useToast from '@app/context/toasts/toast-context';
+import { userAtom } from '@app/store/atoms';
 import { useAtom } from 'jotai';
 
 type FormData = {

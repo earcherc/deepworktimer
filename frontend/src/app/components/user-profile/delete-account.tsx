@@ -5,7 +5,7 @@ import { useAtom } from 'jotai';
 import { useForm } from 'react-hook-form';
 import { useDeleteCurrentUserMutation } from '@/graphql/graphql-types';
 import { useRouter } from 'next/navigation';
-import { useModalContext } from '@/app/context/modal/modal-context';
+import { useModalContext } from '@app/context/modal/modal-context';
 
 export default function DeleteAccountForm() {
   const [, setUser] = useAtom(userAtom);

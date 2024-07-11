@@ -1,6 +1,5 @@
 'use client';
 
-import { StudyBlockType } from '@/graphql/graphql-types';
 import React, { Fragment, useRef } from 'react';
 import StudyBlock from './study-block';
 

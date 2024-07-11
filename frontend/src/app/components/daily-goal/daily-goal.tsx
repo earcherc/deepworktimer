@@ -1,23 +1,41 @@
 'use client';
 
-import { DailyGoalType, useUpdateDailyGoalMutation, useUserDailyGoalsQuery } from '@/graphql/graphql-types';
+import React from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid';
-import { useModalContext } from '@/app/context/modal/modal-context';
-import useToast from '@/app/context/toasts/toast-context';
 import { Menu, Transition } from '@headlessui/react';
-import { dailyGoalsAtom } from '@/app/store/atoms';
-import React, { Fragment, useEffect } from 'react';
+import { useModalContext } from '@app/context/modal/modal-context';
+import useToast from '@app/context/toasts/toast-context';
 import DailyGoalCreate from './daily-goal-create';
-import { mapErrors } from '@/libs/error-map';
 import classNames from 'classnames';
-import { useAtom } from 'jotai';
+import { DailyGoalsService, DailyGoal } from '@api';
 
-const DailyGoal = () => {
+
+const DailyGoalComp = () => {
   const { addToast } = useToast();
   const { showModal } = useModalContext();
-  const [goals, setDailyGoals] = useAtom(dailyGoalsAtom);
-  const [, updateDailyGoal] = useUpdateDailyGoalMutation();
-  const [{ data: queryData }] = useUserDailyGoalsQuery();
+  const queryClient = useQueryClient();
+
+  const { data: goals = [] } = useQuery<DailyGoal[]>({
+    queryKey: ['dailyGoals'],
+  });
+
+  const updateDailyGoalMutation = useMutation({
+    mutationFn: (goal: DailyGoal) => { 
+      if (goal.id === undefined) {
+       throw new Error("Goal ID is undefined");
+      }
+      return DailyGoalsService.updateDailyGoalDailyGoalsDailyGoalIdPatch(goal.id, goal);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dailyGoals'] });
+      addToast({ type: 'success', content: 'Goal updated successfully.' });
+    },
+    onError: (error) => {
+      console.error('Failed to update goal:', error);
+      addToast({ type: 'error', content: 'Failed to update goal.' });
+    },
+  });
 
   const getTotalTime = (blockSize: number, quantity: number) => {
     const totalMinutes = blockSize * quantity;
@@ -26,36 +44,8 @@ const DailyGoal = () => {
     return `${hours}hr ${minutes}min`;
   };
 
-  useEffect(() => {
-    if (queryData && queryData.userDailyGoals) {
-      setDailyGoals(queryData.userDailyGoals);
-    }
-  }, [queryData]);
-
-  const selectGoal = async (activeGoal: DailyGoalType) => {
-    if (!activeGoal.id) return;
-
-    const { data, error } = await updateDailyGoal({
-      id: activeGoal.id,
-      dailyGoal: { isActive: true },
-    });
-
-    if (error) {
-      console.error('Failed to update goal:', error);
-      const errorMap = mapErrors(error);
-      Object.values(errorMap).forEach((errorMessage) => {
-        addToast({ type: 'error', content: errorMessage });
-      });
-    } else if (data) {
-      const updatedGoals = goals.map((goal) => ({
-        ...goal,
-        isActive: goal.id === activeGoal.id,
-      }));
-      setDailyGoals(updatedGoals);
-      addToast({ type: 'success', content: 'Goal updated successfully.' });
-    } else {
-      addToast({ type: 'error', content: 'Failed to update goal.' });
-    }
+  const selectGoal = (activeGoal: DailyGoal) => {
+    updateDailyGoalMutation.mutate({ ...activeGoal, is_active: true });
   };
 
   const openCreateGoalModal = () => {
@@ -66,7 +56,7 @@ const DailyGoal = () => {
     });
   };
 
-  const activeGoal = goals.find((goal) => goal.isActive);
+  const activeGoal = goals.find((goal) => goal.is_active);
 
   return (
     <Menu as="div" className="relative rounded-lg bg-white p-4 shadow sm:p-6">
@@ -77,7 +67,7 @@ const DailyGoal = () => {
             <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </Menu.Button>
           <Transition
-            as={Fragment}
+            as={React.Fragment}
             enter="transition ease-out duration-100"
             enterFrom="transform opacity-0 scale-95"
             enterTo="transform opacity-100 scale-100"
@@ -100,8 +90,8 @@ const DailyGoal = () => {
                           onClick={() => selectGoal(goal)}
                         >
                           <span className="font-semibold">Quantity:</span> {goal.quantity},{' '}
-                          <span className="font-semibold">Duration:</span> {goal.blockSize}m,{' '}
-                          <span className="font-semibold">Total:</span> {getTotalTime(goal.blockSize, goal.quantity)}
+                          <span className="font-semibold">Duration:</span> {goal.block_size}m,{' '}
+                          <span className="font-semibold">Total:</span> {getTotalTime(goal.block_size, goal.quantity)}
                         </button>
                       )}
                     </Menu.Item>
@@ -117,7 +107,7 @@ const DailyGoal = () => {
         </div>
         <button
           onClick={openCreateGoalModal}
-          className="rounded-md ml-3 bg-blue-500 p-3 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="ml-3 rounded-md bg-blue-500 p-3 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           <PlusIcon className="h-5 w-5" />
         </button>
@@ -126,10 +116,10 @@ const DailyGoal = () => {
         <div className="mt-4 space-y-2">
           <div className="text-center text-sm font-medium text-gray-900">Blocks: {activeGoal.quantity}</div>
           <div className="text-center text-sm font-medium text-gray-900">
-            Size: {activeGoal.blockSize.toFixed(2)} min
+            Size: {activeGoal.block_size.toFixed(2)} min
           </div>
           <div className="text-center text-sm font-medium text-gray-900">
-            Total: {getTotalTime(activeGoal.blockSize, activeGoal.quantity)}
+            Total: {getTotalTime(activeGoal.block_size, activeGoal.quantity)}
           </div>
         </div>
       )}
@@ -137,4 +127,4 @@ const DailyGoal = () => {
   );
 };
 
-export default DailyGoal;
+export default DailyGoalComp;

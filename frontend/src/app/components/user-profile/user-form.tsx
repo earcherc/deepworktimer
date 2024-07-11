@@ -1,7 +1,7 @@
 'use client';
 
-import useToast from '@/app/context/toasts/toast-context';
-import { userAtom } from '@/app/store/atoms';
+import useToast from '@app/context/toasts/toast-context';
+import { userAtom } from '@app/store/atoms';
 import { UserInput, useUpdateCurrentUserMutation } from '@/graphql/graphql-types';
 import { useAtom } from 'jotai';
 import { useEffect } from 'react';

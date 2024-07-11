@@ -1,6 +1,5 @@
 'use client';
 
-import { StudyBlockType } from '@/graphql/graphql-types';
 import React, { useEffect, useState } from 'react';
 
 type StudyBlockUI = Pick<StudyBlockType, 'title' | 'start' | 'end'>;

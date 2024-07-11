@@ -4,49 +4,44 @@ import React, { FormEvent, useState } from 'react';
 import classNames from 'classnames';
 import { useRouter } from 'next/navigation';
 import useToast from '../context/toasts/toast-context';
+import { useMutation } from '@tanstack/react-query';
+import { AuthenticationService } from '@api';
 
 const RegistrationForm = () => {
   const { addToast } = useToast();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const router = useRouter();
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const res = await fetch('http://localhost/api/auth/register', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, email, password }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        setErrorMessage(errorData.detail);
-        addToast({ type: 'error', content: errorData.detail });
-        return;
+  const registrationMutation = useMutation({
+    mutationFn: async (userData: { username: string; email: string; password: string }) => {
+      try {
+        const response = await AuthenticationService.registerAuthRegisterPost(userData);
+        return response;
+      } catch (error) {
+        if (error instanceof Error) {
+          throw error;
+        }
+        throw new Error('An error occurred while registering.');
       }
-
-      const userData = await res.json();
-
+    },
+    onSuccess: () => {
       router.push('/login');
-    } catch (error) {
-      console.error('Registration error:', error);
-      setErrorMessage('An error occurred while registering.');
-      addToast({ type: 'error', content: 'An error occurred while registering.' });
-    }
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', content: error.message });
+    },
+  });
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    registrationMutation.mutate({ username, email, password });
   };
 
   return (
     <>
-      {errorMessage && <div className="mt-2 text-red-500">{errorMessage}</div>}
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
@@ -60,10 +55,7 @@ const RegistrationForm = () => {
               autoComplete="new-username"
               placeholder="johndoe"
               value={username}
-              onInput={(e) => {
-                setUsername(e.currentTarget.value);
-                setErrorMessage(null);
-              }}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
@@ -82,10 +74,7 @@ const RegistrationForm = () => {
               autoComplete="new-email"
               placeholder="email@example.com"
               value={email}
-              onInput={(e) => {
-                setEmail(e.currentTarget.value);
-                setErrorMessage(null);
-              }}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
@@ -103,10 +92,7 @@ const RegistrationForm = () => {
               type="password"
               autoComplete="new-password"
               value={password}
-              onInput={(e) => {
-                setPassword(e.currentTarget.value);
-                setErrorMessage(null);
-              }}
+              onChange={(e) => setPassword(e.target.value)}
               required
               className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
@@ -115,20 +101,23 @@ const RegistrationForm = () => {
 
         <div>
           <button
-            disabled={!username || !email || !password}
+            disabled={!username || !email || !password || registrationMutation.isPending}
             type="submit"
             className={classNames(
               'flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600',
               {
-                'cursor-not-allowed bg-indigo-300': !username || !email || !password,
-                'bg-indigo-600 hover:bg-indigo-500': username && email && password,
+                'cursor-not-allowed bg-indigo-300': !username || !email || !password || registrationMutation.isPending,
+                'bg-indigo-600 hover:bg-indigo-500': username && email && password && !registrationMutation.isPending,
               },
             )}
           >
-            Register
+            {registrationMutation.isPending ? 'Registering...' : 'Register'}
           </button>
         </div>
       </form>
+      {registrationMutation.isError && (
+        <div className="mt-2 text-red-500">{registrationMutation.error.message}</div>
+      )}
     </>
   );
 };

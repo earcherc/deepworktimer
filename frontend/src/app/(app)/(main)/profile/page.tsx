@@ -1,7 +1,7 @@
-import ChangePasswordForm from '@/app/components/user-profile/change-password';
-import DeleteAccountForm from '@/app/components/user-profile/delete-account';
-import ImageUploadForm from '@/app/components/user-profile/upload-image';
-import UserForm from '@app/components/user-profile/user-form';
+import ChangePasswordForm from '@components/user-profile/change-password';
+import DeleteAccountForm from '@components/user-profile/delete-account';
+import ImageUploadForm from '@components/user-profile/upload-image';
+import UserForm from '@components/user-profile/user-form';
 
 const Profile = () => {
   return (

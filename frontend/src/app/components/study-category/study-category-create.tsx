@@ -1,51 +1,45 @@
 'use client';
 
-import { StudyCategoryInput, useCreateStudyCategoryMutation } from '@/graphql/graphql-types';
-import { useModalContext } from '@/app/context/modal/modal-context';
-import useToast from '@/app/context/toasts/toast-context';
-import { studyCategoriesAtom } from '@/app/store/atoms';
-import { mapErrors } from '@/libs/error-map';
+import React from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useModalContext } from '@app/context/modal/modal-context';
+import useToast from '@app/context/toasts/toast-context';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
-import { useAtom } from 'jotai';
+import { StudyCategoryCreate, StudyCategoriesService } from '@api';
 
-const StudyCategoryCreate = () => {
+const StudyCategoryCreateComponent = () => {
   const { addToast } = useToast();
-  const [, setCategories] = useAtom(studyCategoriesAtom);
   const { hideModal } = useModalContext();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [, createStudyCategory] = useCreateStudyCategoryMutation();
+  const queryClient = useQueryClient();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm({
+  } = useForm<StudyCategoryCreate>({
     defaultValues: {
       title: '',
     },
   });
 
-  const onSubmit = async (formData: StudyCategoryInput) => {
-    setIsSubmitting(true);
-    const { data, error } = await createStudyCategory({ studyCategory: { title: formData.title } });
-
-    if (error) {
-      console.error('Failed to create category:', error);
-      const errorMap = mapErrors(error);
-      Object.values(errorMap).forEach((errorMessage) => {
-        addToast({ type: 'error', content: errorMessage });
-      });
-    } else if (data?.createStudyCategory) {
-      setCategories((prevCategories) => [...prevCategories, data.createStudyCategory]);
+  const createStudyCategoryMutation = useMutation({
+    mutationFn: (formData: StudyCategoryCreate) =>
+      StudyCategoriesService.createStudyCategoryStudyCategoriesPost({ title: formData.title }), // Ensure this function exists in your API service
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['studyCategories'] });
       reset();
       hideModal();
       addToast({ type: 'success', content: 'Category created successfully.' });
-    } else {
+    },
+    onError: (error) => {
+      console.error('Failed to create category:', error);
       addToast({ type: 'error', content: 'Failed to create category.' });
-    }
+    },
+  });
 
-    setIsSubmitting(false);
+  const onSubmit = (formData: StudyCategoryCreate) => {
+    createStudyCategoryMutation.mutate(formData);
   };
 
   return (
@@ -62,7 +56,7 @@ const StudyCategoryCreate = () => {
             id="title"
             className="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
             placeholder="Enter category title"
-            disabled={isSubmitting}
+            disabled={createStudyCategoryMutation.isPending}
           />
           {errors.title && <span className="text-sm text-red-600">This field is required</span>}
         </div>
@@ -71,9 +65,9 @@ const StudyCategoryCreate = () => {
         <button
           type="submit"
           className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
-          disabled={isSubmitting}
+          disabled={createStudyCategoryMutation.isPending}
         >
-          {isSubmitting ? 'Creating...' : 'Create'}
+          {createStudyCategoryMutation.isPending ? 'Creating...' : 'Create'}
         </button>
         <button
           type="button"
@@ -87,4 +81,4 @@ const StudyCategoryCreate = () => {
   );
 };
 
-export default StudyCategoryCreate;
+export default StudyCategoryCreateComponent;

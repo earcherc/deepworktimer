@@ -1,6 +1,6 @@
 'use client';
 
-import useToast from '@/app/context/toasts/toast-context';
+import useToast from '@app/context/toasts/toast-context';
 import { useForm } from 'react-hook-form';
 
 type FormData = {

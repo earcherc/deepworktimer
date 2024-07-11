@@ -1,58 +1,43 @@
 'use client';
 
-import {
-  StudyCategoryType,
-  useUpdateStudyCategoryMutation,
-  useUserStudyCategoriesQuery,
-} from '@/graphql/graphql-types';
+import React from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid';
-import { useModalContext } from '@/app/context/modal/modal-context';
-import useToast from '@/app/context/toasts/toast-context';
-import StudyCategoryCreate from './study-category-create';
-import { studyCategoriesAtom } from '@/app/store/atoms';
 import { Menu, Transition } from '@headlessui/react';
-import React, { Fragment, useEffect } from 'react';
-import { mapErrors } from '@/libs/error-map';
+import { useModalContext } from '@app/context/modal/modal-context';
+import useToast from '@app/context/toasts/toast-context';
+import StudyCategoryCreate from './study-category-create';
 import classNames from 'classnames';
-import { useAtom } from 'jotai';
+import { StudyCategoriesService, StudyCategory } from '@api'; 
 
-const StudyCategory = () => {
+const StudyCategoryComponent = () => {
   const { addToast } = useToast();
   const { showModal } = useModalContext();
-  const [categories, setCategories] = useAtom(studyCategoriesAtom);
-  const [, updateStudyCategory] = useUpdateStudyCategoryMutation();
-  const [{ data: queryData }] = useUserStudyCategoriesQuery();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (queryData && queryData.userStudyCategories) {
-      setCategories(queryData.userStudyCategories);
-    }
-  }, [queryData]);
+  const { data: categories = [] } = useQuery<StudyCategory[]>({
+    queryKey: ['studyCategories'],
+  })
 
-  const selectCategory = async (selectedCategory: StudyCategoryType) => {
-    if (!selectedCategory.id) return;
-
-    const { data, error } = await updateStudyCategory({
-      id: selectedCategory.id,
-      studyCategory: { isActive: true },
-    });
-
-    if (error) {
-      console.error('Failed to create category:', error);
-      const errorMap = mapErrors(error);
-      Object.values(errorMap).forEach((errorMessage) => {
-        addToast({ type: 'error', content: errorMessage });
-      });
-    } else if (data) {
-      const updatedCategories = categories.map((cat) => ({
-        ...cat,
-        isActive: cat.id === selectedCategory.id,
-      }));
-      setCategories(updatedCategories);
+  const updateStudyCategoryMutation = useMutation({
+    mutationFn: (category: StudyCategory) => {
+      if (category.id === undefined) {
+        throw new Error("Category ID is undefined");
+      }
+      return StudyCategoriesService.updateStudyCategoryStudyCategoriesStudyCategoryIdPatch(category.id, { is_active: true }); 
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['studyCategories'] });
       addToast({ type: 'success', content: 'Category updated successfully.' });
-    } else {
+    },
+    onError: (error) => {
+      console.error('Failed to update category:', error);
       addToast({ type: 'error', content: 'Failed to update category.' });
-    }
+    },
+  });
+
+  const selectCategory = (selectedCategory: StudyCategory) => {
+    updateStudyCategoryMutation.mutate(selectedCategory);
   };
 
   const openCreateCategoryModal = () => {
@@ -63,7 +48,7 @@ const StudyCategory = () => {
     });
   };
 
-  const activeCategory = categories.find((cat) => cat.isActive);
+  const activeCategory = categories.find((cat) => cat.is_active);
 
   return (
     <Menu as="div" className="relative rounded-lg bg-white p-4 shadow sm:p-6">
@@ -74,7 +59,7 @@ const StudyCategory = () => {
             <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </Menu.Button>
           <Transition
-            as={Fragment}
+            as={React.Fragment}
             enter="transition ease-out duration-100"
             enterFrom="transform opacity-0 scale-95"
             enterTo="transform opacity-100 scale-100"
@@ -85,8 +70,8 @@ const StudyCategory = () => {
             <Menu.Items className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg">
               <div className="py-1">
                 {categories.length > 0 ? (
-                  categories.map((item) => (
-                    <Menu.Item key={item.id}>
+                  categories.map((category) => (
+                    <Menu.Item key={category.id}>
                       {({ active }) => (
                         <button
                           type="button"
@@ -94,9 +79,9 @@ const StudyCategory = () => {
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                             'block w-full px-4 py-2 text-left text-sm',
                           )}
-                          onClick={() => selectCategory(item)}
+                          onClick={() => selectCategory(category)}
                         >
-                          {item.title}
+                          {category.title}
                         </button>
                       )}
                     </Menu.Item>
@@ -112,7 +97,7 @@ const StudyCategory = () => {
         </div>
         <button
           onClick={openCreateCategoryModal}
-          className="rounded-md bg-blue-500 ml-3 p-3 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="ml-3 rounded-md bg-blue-500 p-3 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           <PlusIcon className="h-5 w-5" />
         </button>
@@ -126,4 +111,4 @@ const StudyCategory = () => {
   );
 };
 
-export default StudyCategory;
+export default StudyCategoryComponent;
