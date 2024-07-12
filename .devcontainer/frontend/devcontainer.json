@@ -1,27 +1,43 @@
 // https://stackoverflow.com/questions/73676584/sharing-ssh-credentials-with-dev-container-in-vscode
-{ 
+{
   "name": "Frontend Development",
-    "dockerComposeFile": ["../../docker-compose.yml"],
-    "service": "frontend",
+  "dockerComposeFile": ["../../docker-compose.yml"],
+  "service": "frontend",
   "workspaceFolder": "/app/frontend",
-    "shutdownAction": "none",
+  "shutdownAction": "none",
   "customizations": {
     "vscode": {
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnSave": true,
         "terminal.integrated.inheritEnv": true
-
       },
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "ms-azuretools.vscode-docker"
+        "ms-azuretools.vscode-docker",
+        "waderyan.gitblame",
+        "yzhang.markdown-all-in-one",
+        "christian-kohler.npm-intellisense",
+        "christian-kohler.path-intellisense",
+        "rvest.vs-code-prettier-eslint",
+        "yoavbls.pretty-ts-errors",
+        "bradlc.vscode-tailwindcss",
+        "formulahendry.auto-rename-tag",
+        "drKnoxy.eslint-disable-snippets",
+        "vscodevim.vim",
+        "eamodio.gitlens",
+        "ecmel.vscode-html-css"
       ]
     }
   },
   "mounts": [
+    // Comment out if not on mac
     "type=bind,source=${localWorkspaceFolder},target=/workspace",
     "type=bind,source=/Users/${localEnv:USER}/.ssh,target=/root/.ssh,readonly"
+    // Uncomment the following lines for Windows:
+    // "type=bind,source=C:/Users/${localEnv:USERNAME}/.ssh,target=/root/.ssh,readonly"
+    // Uncomment the following lines for Linux:
+    // "type=bind,source=/home/${localEnv:USER}/.ssh,target=/root/.ssh,readonly"
   ]
 }
