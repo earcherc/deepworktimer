@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 from pydantic import BaseModel, Field, EmailStr
 from datetime import date, datetime
 from enum import Enum
@@ -21,7 +21,8 @@ class UserBase(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     gender: Optional[Gender] = None
-    profile_photo_url: Optional[str] = None
+    profile_photo_key: Optional[str] = None
+    profile_photo_urls: Optional[Dict[str, Optional[str]]] = None
     timezone: Optional[str] = None
     language: Optional[str] = None
     status: Optional[str] = None
@@ -41,7 +42,7 @@ class UserUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     gender: Optional[Gender] = None
-    profile_photo_url: Optional[str] = None
+    profile_photo_key: Optional[str] = None
     timezone: Optional[str] = None
     language: Optional[str] = None
     status: Optional[str] = None

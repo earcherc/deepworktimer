@@ -28,31 +28,62 @@ async def upload_profile_photo(
 ):
     try:
         user_id = await get_user_id_from_session(redis, request.cookies.get("session_id"))
+        logger.info(f"User ID from session: {user_id}")
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid session or session expired")
-
+        
+        logger.info(f"File name: {file.filename}")
         if not allowed_file(file.filename):
             raise HTTPException(status_code=400, detail="File type not allowed")
-
+        
         file_content = await file.read()
+        logger.info(f"File size: {len(file_content)} bytes")
         if len(file_content) > MAX_FILE_SIZE:
             raise HTTPException(status_code=400, detail="File size exceeds maximum limit of 5MB")
-
-        file_urls = await process_and_upload_image(file_content, file.filename)
+        
+        logger.info("Processing and uploading image")
+        profile_photo_key = await process_and_upload_image(file_content, file.filename, user_id)
+        logger.info(f"Profile photo key: {profile_photo_key}")
+        
+        logger.info("Fetching user from database")
+        user = await session.execute(select(User).where(User.id == user_id))
+        user = user.scalar_one_or_none()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        logger.info("Updating user profile photo key")
+        user.profile_photo_key = profile_photo_key
+        await session.commit()
+        
+        logger.info("Profile photo uploaded successfully")
+        return {"message": "Profile photo uploaded successfully"}
+    except Exception as e:
+        logger.error(f"Error in upload_profile_photo: {str(e)}")
+        logger.exception("Full traceback:")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.delete("/remove-profile-photo")
+async def remove_profile_photo(
+    request: Request,
+    redis: Redis = Depends(get_redis),
+    session: AsyncSession = Depends(get_session),
+):
+    try:
+        user_id = await get_user_id_from_session(redis, request.cookies.get("session_id"))
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid session or session expired")
 
         user = await session.execute(select(User).where(User.id == user_id))
         user = user.scalar_one_or_none()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        user.profile_photo_url = file_urls['original_url']
-        user.profile_photo_medium_url = file_urls['medium_url']
-        user.profile_photo_thumbnail_url = file_urls['thumbnail_url']
+        user.profile_photo_key = None
         await session.commit()
 
-        return file_urls
+        return {"message": "Profile photo removed successfully"}
     except Exception as e:
-        logger.error(f"Error in upload_profile_photo: {str(e)}")
+        logger.error(f"Error in remove_profile_photo: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/get-profile-photo-view-url")

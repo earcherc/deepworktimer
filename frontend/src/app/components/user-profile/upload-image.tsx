@@ -41,8 +41,9 @@ const uploadMutation = useMutation({
   },
   onError: (error: any) => {
     console.error('Image upload error:', error);
-    addToast({ type: 'error', content: 'An error occurred while uploading the image' });
-  },
+    const errorMessage = error.response?.data?.detail || 'An error occurred while uploading the image';
+    addToast({ type: 'error', content: errorMessage });
+},
 });
 
   const onSubmit = async () => {
@@ -52,6 +53,26 @@ const uploadMutation = useMutation({
     }
     uploadMutation.mutate(selectedFile);
   };
+
+  const removeMutation = useMutation({
+    mutationFn: () => {
+      return UploadsService.removeProfilePhotoUploadRemoveProfilePhotoDelete();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      addToast({ type: 'success', content: 'Profile photo removed successfully' });
+      setPreview(null);
+      setSelectedFile(null);
+    },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.detail || 'An error occurred while removing the profile photo';
+      addToast({ type: 'error', content: errorMessage });
+    },
+  });
+
+  const removeProfilePhoto = () => {
+    removeMutation.mutate();
+  }
 
   const removeImage = () => {
     setPreview(null);
@@ -79,10 +100,10 @@ const uploadMutation = useMutation({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="pb-8">
       <div className="col-span-full flex items-center gap-x-8">
-        {user?.profile_photo_url ? (
+        {user && user.profile_photo_urls ? (
           <Image
-            src={user.profile_photo_url}
-            alt="Preview Image"
+            src={user.profile_photo_urls.original || ''}
+            alt="Profile Image"
             className="h-24 w-24 flex-none rounded-lg bg-gray-800 object-cover"
             width={96}
             height={96}
@@ -90,7 +111,7 @@ const uploadMutation = useMutation({
         ) : preview ? (
           <Image
             src={preview}
-            alt="Profile Image"
+            alt="Preview Image"
             className="h-24 w-24 flex-none rounded-lg bg-gray-800 object-cover"
             width={96}
             height={96}
@@ -99,13 +120,24 @@ const uploadMutation = useMutation({
           <div className="h-24 w-24 flex-none rounded-lg bg-gray-800" />
         )}
         <div>
+          {user && user.profile_photo_urls ? (
           <button
             type="button"
-            className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/20"
-            onClick={() => imageInputRef.current?.click()}
+            className="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400"
+            onClick={removeProfilePhoto}
+            disabled={removeMutation.isPending}
           >
-            {preview ? 'Change Image' : 'Select Image'}
+            {removeMutation.isPending ? 'Removing...' : 'Remove Photo'}
           </button>
+          ) : (
+            <button
+              type="button"
+              className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/20"
+              onClick={() => imageInputRef.current?.click()}
+            >
+              Select Image
+            </button>
+          )}
           {selectedFile && (
             <>
               <button

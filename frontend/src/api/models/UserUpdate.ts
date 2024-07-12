@@ -15,7 +15,7 @@ export type UserUpdate = {
     first_name?: string;
     last_name?: string;
     gender?: Gender;
-    profile_photo_url?: string;
+    profile_photo_key?: string;
     timezone?: string;
     language?: string;
     status?: string;

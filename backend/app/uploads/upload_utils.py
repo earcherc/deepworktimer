@@ -21,20 +21,6 @@ def generate_file_name(original_filename: str) -> str:
     extension = original_filename.split(".")[-1]
     return f"{uuid.uuid4()}.{extension}"
 
-def generate_presigned_url(file_name: str, operation: str, expiration: int = 900) -> str:
-    try:
-        return s3_client.generate_presigned_url(
-            ClientMethod=operation,
-            Params={
-                "Bucket": settings.AWS_S3_BUCKET_NAME,
-                "Key": file_name,
-            },
-            ExpiresIn=expiration,
-        )
-    except Exception as e:
-        logger.error(f"Error generating presigned URL: {str(e)}")
-        raise
-
 def get_presigned_url_for_image(file_name: str, operation: str = "get_object", expiration: int = 3600) -> str:
     try:
         return s3_client.generate_presigned_url(

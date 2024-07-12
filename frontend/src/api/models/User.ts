@@ -15,7 +15,8 @@ export type User = {
     first_name?: string;
     last_name?: string;
     gender?: Gender;
-    profile_photo_url?: string;
+    profile_photo_key?: string;
+    profile_photo_urls?: Record<string, string>;
     timezone?: string;
     language?: string;
     status?: string;

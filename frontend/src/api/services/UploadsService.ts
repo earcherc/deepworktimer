@@ -27,6 +27,17 @@ export class UploadsService {
         });
     }
     /**
+     * Remove Profile Photo
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static removeProfilePhotoUploadRemoveProfilePhotoDelete(): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/upload/remove-profile-photo',
+        });
+    }
+    /**
      * Get Profile Photo View Url
      * @returns any Successful Response
      * @throws ApiError

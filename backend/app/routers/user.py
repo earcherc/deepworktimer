@@ -7,25 +7,21 @@ from ..schemas import UserCreate, UserUpdate, User as UserSchema
 from ..auth import hash_password
 from typing import List
 from .utils import get_current_user_id
-from ..uploads.upload_utils import get_presigned_url_for_image
-from urllib.parse import urlparse
+from ..uploads.upload_services import get_profile_photo_urls
 
 router = APIRouter()
-
 
 @router.post("/", response_model=UserSchema)
 async def create_user(user: UserCreate, db: AsyncSession = Depends(get_session)):
     result = await db.execute(select(User).where(User.email == user.email))
     if result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Email already registered")
-
     hashed_password = hash_password(user.password)
     db_user = User(**user.dict(exclude={"password"}), hashed_password=hashed_password)
     db.add(db_user)
     await db.commit()
     await db.refresh(db_user)
     return db_user
-
 
 @router.get("/me", response_model=UserSchema)
 async def read_current_user(db: AsyncSession = Depends(get_session), user_id: int = Depends(get_current_user_id)):
@@ -35,10 +31,7 @@ async def read_current_user(db: AsyncSession = Depends(get_session), user_id: in
         raise HTTPException(status_code=404, detail="User not found")
     
     user_dict = db_user.__dict__
-    if db_user.profile_photo_url:
-        file_name = urlparse(db_user.profile_photo_url).path.lstrip("/")
-        presigned_url = await get_presigned_url_for_image(file_name)
-        user_dict["profile_photo_url"] = presigned_url
+    user_dict["profile_photo_urls"] = await get_profile_photo_urls(db_user.profile_photo_key)
     return user_dict
 
 @router.get("/{user_id}", response_model=UserSchema)
@@ -47,16 +40,25 @@ async def read_user(user_id: int, db: AsyncSession = Depends(get_session)):
     db_user = result.scalar_one_or_none()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return db_user
-
+    
+    user_dict = db_user.__dict__
+    user_dict["profile_photo_urls"] = await get_profile_photo_urls(db_user.profile_photo_key)
+    return user_dict
 
 @router.get("/", response_model=List[UserSchema])
 async def read_users(
     skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_session)
 ):
     result = await db.execute(select(User).offset(skip).limit(limit))
-    return result.scalars().all()
-
+    users = result.scalars().all()
+    
+    user_list = []
+    for user in users:
+        user_dict = user.__dict__
+        user_dict["profile_photo_urls"] = await get_profile_photo_urls(user.profile_photo_key)
+        user_list.append(user_dict)
+    
+    return user_list
 
 @router.patch("/", response_model=UserSchema)
 async def update_current_user(
@@ -68,15 +70,14 @@ async def update_current_user(
     db_user = result.scalar_one_or_none()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-
     update_data = user.dict(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_user, key, value)
-
     await db.commit()
     await db.refresh(db_user)
-    return db_user
-
+    user_dict = db_user.__dict__
+    user_dict["profile_photo_urls"] = await get_profile_photo_urls(db_user.profile_photo_key)
+    return user_dict
 
 @router.delete("/", response_model=bool)
 async def delete_current_user(

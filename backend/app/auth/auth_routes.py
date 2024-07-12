@@ -12,7 +12,7 @@ from .auth_schemas import RegistrationRequest, LoginRequest, PasswordChangeReque
 from ..dependencies import get_redis
 from ..database import get_session
 from ..models import User as UserModel
-from ..uploads.upload_utils import get_presigned_url_for_image 
+from ..uploads.upload_services import get_profile_photo_urls 
 from redis.asyncio import Redis
 from urllib.parse import urlparse
 
@@ -51,11 +51,8 @@ async def login(
     response.set_cookie(key="session_id", value=session_id, httponly=True, secure=False)
     user_data = user.__dict__
     user_data.pop("hashed_password", None)
-    # Generate presigned URL for profile photo if it exists
-    if user.profile_photo_url:
-        file_name = urlparse(user.profile_photo_url).path.lstrip("/")
-        presigned_url = await get_presigned_url_for_image(file_name)
-        user_data["profile_photo_presigned_url"] = presigned_url
+    # Generate presigned URLs for profile photos if they exist
+    user_data["profile_photo_urls"] = await get_profile_photo_urls(user.profile_photo_key)
     return user_data
 
 
