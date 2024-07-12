@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import classNames from 'classnames';
 import {
   ArrowPathIcon,
   ChevronRightIcon,
@@ -7,6 +6,7 @@ import {
   LockClosedIcon,
   ServerIcon,
 } from '@heroicons/react/20/solid';
+import classNames from 'classnames';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -210,11 +210,9 @@ const footerNavigation = {
   ],
 };
 
-
 export default function Home() {
   return (
     <div className="bg-white">
-
       {/* Header */}
       <header className="absolute inset-x-0 top-0 z-50">
         <nav className="flex mx-auto p-6 lg:px-8" aria-label="Global">
@@ -234,7 +232,6 @@ export default function Home() {
       </header>
 
       <main>
-
         {/* Hero section */}
         <div className="relative isolate pt-14">
           <svg
@@ -456,7 +453,10 @@ export default function Home() {
                       <div className="font-semibold">{featuredTestimonial.author.name}</div>
                       <div className="text-gray-600">{`@${featuredTestimonial.author.handle}`}</div>
                     </div>
-                    <Image className="h-10 w-auto flex-none" src={featuredTestimonial.author.logoUrl} alt=""
+                    <Image
+                      className="h-10 w-auto flex-none"
+                      src={featuredTestimonial.author.logoUrl}
+                      alt=""
                       height={40}
                       width={40}
                     />

@@ -1,9 +1,9 @@
 'use client';
 
-import React, { Fragment, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import StudyBlock from './study-block';
 import { StudyBlocksService, StudyBlock as StudyBlockType } from '@api';
+import { useQuery } from '@tanstack/react-query';
+import { Fragment, useRef } from 'react';
+import StudyBlock from './study-block';
 
 export default function Calendar() {
   const container = useRef<HTMLDivElement>(null);

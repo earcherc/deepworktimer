@@ -1,8 +1,8 @@
 'use client';
 
-import { v4 as uuid } from 'uuid';
 import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 import Toast from '@app/components/toasts/toast';
+import { v4 as uuid } from 'uuid';
 
 export const ToastContext = createContext<ToastContext | undefined>(undefined);
 

@@ -1,15 +1,15 @@
 'use client';
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { ApiError, AuthenticationService, User, UsersService } from '@api';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
+import useToast from '@app/context/toasts/toast-context';
 import { usePathname, useRouter } from 'next/navigation';
-import { Fragment } from 'react';
 import classNames from 'classnames';
+import { Fragment } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ApiError, AuthenticationService, User, UsersService } from '@api';
-import useToast from '@app/context/toasts/toast-context';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -22,23 +22,25 @@ export default function Nav() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery<User>({ queryKey: ['currentUser'], queryFn: () => UsersService.readCurrentUserUsersMeGet() });
+  const { data: user } = useQuery<User>({
+    queryKey: ['currentUser'],
+    queryFn: () => UsersService.readCurrentUserUsersMeGet(),
+  });
 
   const logoutMutation = useMutation({
-  mutationFn: AuthenticationService.logoutAuthLogoutPost,
-  onSuccess: () => {
-    queryClient.setQueryData(['currentUser'], null);
-    router.push('/');
-  },
-  onError: (error: unknown) => {
-    let errorMessage = 'An error occurred while logging out';
-    if (error instanceof ApiError) {
-      errorMessage = error.body?.detail || errorMessage;
-    }
-    addToast({ type: 'error', content: errorMessage });
-  },
-});
-
+    mutationFn: AuthenticationService.logoutAuthLogoutPost,
+    onSuccess: () => {
+      queryClient.setQueryData(['currentUser'], null);
+      router.push('/');
+    },
+    onError: (error: unknown) => {
+      let errorMessage = 'An error occurred while logging out';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
+    },
+  });
 
   const handleLogout = () => {
     logoutMutation.mutate();

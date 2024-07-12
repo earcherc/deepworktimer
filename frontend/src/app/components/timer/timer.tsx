@@ -1,11 +1,19 @@
 'use client';
 
-import useToast from '@app/context/toasts/toast-context';
-import React, { useEffect, useState, useCallback } from 'react';
+import {
+  StudyBlocksService,
+  DailyGoalsService,
+  StudyCategoriesService,
+  StudyBlock,
+  DailyGoal,
+  StudyCategory,
+  ApiError,
+} from '@api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { StudyBlocksService, DailyGoalsService, StudyCategoriesService, StudyBlock, DailyGoal, StudyCategory, ApiError } from '@api';
-import { useTimer } from 'react-timer-hook';
+import React, { useEffect, useState, useCallback } from 'react';
+import useToast from '@app/context/toasts/toast-context';
 import { parseISO, differenceInSeconds } from 'date-fns';
+import { useTimer } from 'react-timer-hook';
 
 const PomodoroTimer = () => {
   const { addToast } = useToast();
@@ -14,15 +22,15 @@ const PomodoroTimer = () => {
   // Queries
   const { data: categoriesData } = useQuery({
     queryKey: ['studyCategories'],
-    queryFn: () => StudyCategoriesService.readStudyCategoriesStudyCategoriesGet()
+    queryFn: () => StudyCategoriesService.readStudyCategoriesStudyCategoriesGet(),
   });
   const { data: dailyGoalsData } = useQuery({
     queryKey: ['dailyGoals'],
-    queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet()
+    queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet(),
   });
   const { data: studyBlocksData } = useQuery({
     queryKey: ['studyBlocks'],
-    queryFn: () => StudyBlocksService.readStudyBlocksStudyBlocksGet()
+    queryFn: () => StudyBlocksService.readStudyBlocksStudyBlocksGet(),
   });
 
   // Active data
@@ -55,7 +63,7 @@ const PomodoroTimer = () => {
   });
 
   const updateStudyBlockMutation = useMutation({
-    mutationFn: ({ id, block }: { id: number, block: Partial<StudyBlock> }) =>
+    mutationFn: ({ id, block }: { id: number; block: Partial<StudyBlock> }) =>
       StudyBlocksService.updateStudyBlockStudyBlocksStudyBlockIdPatch(id, block),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studyBlocks'] });
@@ -84,16 +92,7 @@ const PomodoroTimer = () => {
     addToast({ type: 'success', content: 'Pomodoro session completed!' });
   }, [studyBlockId, expiryTimestamp]);
 
-  const { 
-    seconds, 
-    minutes, 
-    hours, 
-    isRunning, 
-    start, 
-    pause, 
-    resume, 
-    restart 
-  } = useTimer({
+  const { seconds, minutes, hours, isRunning, start, pause, resume, restart } = useTimer({
     expiryTimestamp,
     onExpire: handleTimerExpiration,
     autoStart: false,
@@ -157,7 +156,8 @@ const PomodoroTimer = () => {
 
   // Helper functions
   const recoverIncompleteSession = () => {
-    const latestIncompleteBlock = studyBlocksData?.filter((block: StudyBlock) => !block.end)
+    const latestIncompleteBlock = studyBlocksData
+      ?.filter((block: StudyBlock) => !block.end)
       .sort((a: StudyBlock, b: StudyBlock) => new Date(b.start).getTime() - new Date(a.start).getTime())[0];
 
     if (latestIncompleteBlock?.id) {
@@ -191,8 +191,9 @@ const PomodoroTimer = () => {
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const [h, m, s] = e.target.value.split(':').map(Number);
-    const totalSeconds = (h * 3600) + (m * 60) + s;
-    if (totalSeconds <= 32400) { // 9 hours in seconds
+    const totalSeconds = h * 3600 + m * 60 + s;
+    if (totalSeconds <= 32400) {
+      // 9 hours in seconds
       setCustomTimerDuration(totalSeconds);
     }
   };
@@ -209,9 +210,7 @@ const PomodoroTimer = () => {
   return (
     <div className="rounded-lg bg-white p-4 shadow sm:p-6">
       <div className="flex flex-col items-center">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">
-          {isRunning ? 'Focus Time' : 'Pomodoro Timer'}
-        </h2>
+        <h2 className="mb-4 text-xl font-semibold text-gray-900">{isRunning ? 'Focus Time' : 'Pomodoro Timer'}</h2>
         {isEditingTime ? (
           <input
             type="text"

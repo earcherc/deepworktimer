@@ -1,3 +1,3 @@
-import { OpenAPI } from './index';  
+import { OpenAPI } from './index';
 
 OpenAPI.BASE = '/api';

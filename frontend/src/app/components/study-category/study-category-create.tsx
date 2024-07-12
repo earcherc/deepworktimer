@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
+import { StudyCategoryCreate, StudyCategoriesService, ApiError } from '@api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useModalContext } from '@app/context/modal/modal-context';
 import useToast from '@app/context/toasts/toast-context';
 import { useForm } from 'react-hook-form';
-import { StudyCategoryCreate, StudyCategoriesService, ApiError } from '@api';
+import React from 'react';
 
 const StudyCategoryCreateComponent = () => {
   const { addToast } = useToast();
@@ -40,7 +40,6 @@ const StudyCategoryCreateComponent = () => {
       addToast({ type: 'error', content: errorMessage });
     },
   });
-
 
   const onSubmit = (formData: StudyCategoryCreate) => {
     createStudyCategoryMutation.mutate(formData);

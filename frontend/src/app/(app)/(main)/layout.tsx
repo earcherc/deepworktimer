@@ -1,7 +1,7 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { StudyBlocksService, DailyGoalsService, StudyCategoriesService, UsersService } from '@api';
+import { useQuery } from '@tanstack/react-query';
 import Nav from '@app/components/nav';
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
@@ -9,25 +9,23 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
     queryKey: ['currentUser'],
     queryFn: () => UsersService.readCurrentUserUsersMeGet(),
   });
-  
+
   useQuery({
     queryKey: ['studyCategories'],
-    queryFn: () => StudyCategoriesService.readStudyCategoriesStudyCategoriesGet()
+    queryFn: () => StudyCategoriesService.readStudyCategoriesStudyCategoriesGet(),
   });
 
   useQuery({
     queryKey: ['dailyGoals'],
-    queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet()
+    queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet(),
   });
 
   useQuery({
     queryKey: ['studyBlocks'],
-    queryFn: () => StudyBlocksService.readStudyBlocksStudyBlocksGet()
+    queryFn: () => StudyBlocksService.readStudyBlocksStudyBlocksGet(),
   });
 
-
   return (
-    
     <main className="bg-gray-700 text-white">
       <Nav />
       {children}

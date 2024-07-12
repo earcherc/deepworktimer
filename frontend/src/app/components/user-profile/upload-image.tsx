@@ -1,11 +1,17 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
-import Image from 'next/image';
-import { useForm } from 'react-hook-form';
-import useToast from '@app/context/toasts/toast-context';
+import {
+  ApiError,
+  Body_upload_profile_photo_upload_upload_profile_photo_post,
+  UploadsService,
+  User,
+  UsersService,
+} from '@api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ApiError, Body_upload_profile_photo_upload_upload_profile_photo_post, UploadsService, User, UsersService } from '@api';
+import useToast from '@app/context/toasts/toast-context';
+import React, { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import Image from 'next/image';
 
 type FormData = {
   image: FileList;
@@ -24,29 +30,29 @@ export default function ImageUploadForm() {
     queryFn: () => UsersService.readCurrentUserUsersMeGet(),
   });
 
-const uploadMutation = useMutation({
-  mutationFn: async (file: File) => {
-    const formData: Body_upload_profile_photo_upload_upload_profile_photo_post = {
-      file: file,
-    };
-    return UploadsService.uploadProfilePhotoUploadUploadProfilePhotoPost(formData);
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-    addToast({ type: 'success', content: 'Image uploaded successfully' });
-    reset();
-    setPreview(null);
-    setSelectedFile(null);
-  },
-  onError: (error: unknown) => {
-    let errorMessage = 'An error occurred while uploading the image';
-    if (error instanceof ApiError) {
-      errorMessage = error.body?.detail || errorMessage;
-    }
-    addToast({ type: 'error', content: errorMessage });
-  },
-});
-  
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData: Body_upload_profile_photo_upload_upload_profile_photo_post = {
+        file: file,
+      };
+      return UploadsService.uploadProfilePhotoUploadUploadProfilePhotoPost(formData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      addToast({ type: 'success', content: 'Image uploaded successfully' });
+      reset();
+      setPreview(null);
+      setSelectedFile(null);
+    },
+    onError: (error: unknown) => {
+      let errorMessage = 'An error occurred while uploading the image';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
+    },
+  });
+
   const onSubmit = async () => {
     if (!selectedFile) {
       addToast({ type: 'error', content: 'No image selected' });
@@ -73,7 +79,7 @@ const uploadMutation = useMutation({
 
   const removeProfilePhoto = () => {
     removeMutation.mutate();
-  }
+  };
 
   const removeImage = () => {
     setPreview(null);
@@ -122,14 +128,14 @@ const uploadMutation = useMutation({
         )}
         <div>
           {user && user.profile_photo_urls ? (
-          <button
-            type="button"
-            className="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400"
-            onClick={removeProfilePhoto}
-            disabled={removeMutation.isPending}
-          >
-            {removeMutation.isPending ? 'Removing...' : 'Remove Photo'}
-          </button>
+            <button
+              type="button"
+              className="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400"
+              onClick={removeProfilePhoto}
+              disabled={removeMutation.isPending}
+            >
+              {removeMutation.isPending ? 'Removing...' : 'Remove Photo'}
+            </button>
           ) : (
             <button
               type="button"

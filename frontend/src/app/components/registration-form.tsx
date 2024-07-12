@@ -1,11 +1,11 @@
 'use client';
 
-import React, { FormEvent, useState } from 'react';
-import classNames from 'classnames';
-import { useRouter } from 'next/navigation';
 import useToast from '../context/toasts/toast-context';
-import { useMutation } from '@tanstack/react-query';
 import { ApiError, AuthenticationService } from '@api';
+import { useMutation } from '@tanstack/react-query';
+import React, { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import classNames from 'classnames';
 
 const RegistrationForm = () => {
   const { addToast } = useToast();
@@ -32,7 +32,7 @@ const RegistrationForm = () => {
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
-      setErrorMessage(errorMessage); 
+      setErrorMessage(errorMessage);
       addToast({ type: 'error', content: errorMessage });
     },
   });
@@ -117,9 +117,7 @@ const RegistrationForm = () => {
           </button>
         </div>
       </form>
-      {errorMessage && (
-        <div className="mt-2 text-red-500">{errorMessage}</div>
-      )}
+      {errorMessage && <div className="mt-2 text-red-500">{errorMessage}</div>}
     </>
   );
 };

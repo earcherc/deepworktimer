@@ -1,10 +1,10 @@
 'use client';
-import { useRouter } from 'next/navigation';
-import React, { FormEvent, useState } from 'react';
 import useToast from '../context/toasts/toast-context';
-import classNames from 'classnames';
-import { useMutation } from '@tanstack/react-query';
 import { ApiError, AuthenticationService } from '@api';
+import { useMutation } from '@tanstack/react-query';
+import React, { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import classNames from 'classnames';
 
 const LoginForm = () => {
   const { addToast } = useToast();
@@ -21,7 +21,7 @@ const LoginForm = () => {
     },
     onSuccess: () => {
       router.push('/dashboard');
-    setErrorMessage(null);
+      setErrorMessage(null);
     },
     onError: (error: unknown) => {
       let errorMessage = 'An error occurred while logging in';
@@ -91,16 +91,14 @@ const LoginForm = () => {
               {
                 'cursor-not-allowed bg-indigo-300': !username || !password,
                 'bg-indigo-600 hover:bg-indigo-500': username && password,
-              }
+              },
             )}
           >
             Sign in
           </button>
         </div>
       </form>
-      {errorMessage && (
-        <div className="mt-2 text-red-500">{errorMessage}</div>
-      )}
+      {errorMessage && <div className="mt-2 text-red-500">{errorMessage}</div>}
     </>
   );
 };

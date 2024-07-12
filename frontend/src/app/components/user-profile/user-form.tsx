@@ -1,9 +1,9 @@
 'use client';
 
-import useToast from '@app/context/toasts/toast-context';
-import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import useToast from '@app/context/toasts/toast-context';
 import { UsersService, User, ApiError } from '@api';
+import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 
 export default function UserForm() {
@@ -15,11 +15,7 @@ export default function UserForm() {
     queryFn: () => UsersService.readCurrentUserUsersMeGet(),
   });
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-  } = useForm<Partial<User>>();
+  const { register, handleSubmit, reset } = useForm<Partial<User>>();
 
   useEffect(() => {
     if (user) {
@@ -42,11 +38,8 @@ export default function UserForm() {
     },
   });
 
-
   const onSubmit = async (data: Partial<User>) => {
-    const filteredData = Object.fromEntries(
-      Object.entries(data).filter(([_, v]) => v != null && v !== '')
-    );
+    const filteredData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v != null && v !== ''));
     updateUserMutation.mutate(filteredData);
   };
 

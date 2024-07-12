@@ -1,15 +1,14 @@
 'use client';
 
-import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid';
-import { Menu, Transition } from '@headlessui/react';
 import { useModalContext } from '@app/context/modal/modal-context';
+import { DailyGoalsService, DailyGoal, ApiError } from '@api';
 import useToast from '@app/context/toasts/toast-context';
+import { Menu, Transition } from '@headlessui/react';
 import DailyGoalCreate from './daily-goal-create';
 import classNames from 'classnames';
-import { DailyGoalsService, DailyGoal, ApiError } from '@api';
-
+import React from 'react';
 
 const DailyGoalComp = () => {
   const { addToast } = useToast();
@@ -17,7 +16,8 @@ const DailyGoalComp = () => {
   const queryClient = useQueryClient();
 
   const { data: goals = [] } = useQuery<DailyGoal[]>({
-    queryKey: ['dailyGoals'], queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet()
+    queryKey: ['dailyGoals'],
+    queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet(),
   });
 
   const updateDailyGoalMutation = useMutation({
@@ -36,7 +36,6 @@ const DailyGoalComp = () => {
       addToast({ type: 'error', content: errorMessage });
     },
   });
-
 
   const getTotalTime = (blockSize: number, quantity: number) => {
     const totalMinutes = blockSize * quantity;

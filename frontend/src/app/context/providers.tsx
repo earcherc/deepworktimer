@@ -1,10 +1,10 @@
 'use client';
 
-import { createStore, Provider as JotaiProvider } from 'jotai';
-import ToastProvider from './toasts/toast-provider';
-import { ModalProvider } from './modal/modal-provider';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { createStore, Provider as JotaiProvider } from 'jotai';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ModalProvider } from './modal/modal-provider';
+import ToastProvider from './toasts/toast-provider';
 import { queryClient } from '@lib/react-query';
 
 export function Providers({ children }: { children: React.ReactNode }) {

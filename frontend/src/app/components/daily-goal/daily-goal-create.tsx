@@ -1,11 +1,10 @@
 'use client';
 
-import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ApiError, DailyGoalCreate, DailyGoalsService } from '@api';
 import { useModalContext } from '@app/context/modal/modal-context';
 import useToast from '@app/context/toasts/toast-context';
 import { useForm } from 'react-hook-form';
-import { ApiError, DailyGoalCreate, DailyGoalsService } from '@api';
 
 const DailyGoalCreateComponent = () => {
   const { addToast } = useToast();
@@ -44,7 +43,6 @@ const DailyGoalCreateComponent = () => {
       addToast({ type: 'error', content: errorMessage });
     },
   });
-
 
   const onSubmit = (formData: DailyGoalCreate) => {
     createDailyGoalMutation.mutate(formData);

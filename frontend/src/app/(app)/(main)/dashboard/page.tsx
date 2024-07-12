@@ -1,8 +1,8 @@
 'use client';
 
+import Calendar from '@app/components/calendar/calendar';
 import PomodoroTimer from '@app/components/timer/timer';
 import Sidebar from '@app/components/sidebar/sidebar';
-import Calendar from '@app/components/calendar/calendar';
 
 const Dashboard = () => {
   return (

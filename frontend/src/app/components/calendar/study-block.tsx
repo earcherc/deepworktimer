@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { StudyBlock as StudyBlockType } from '@api';
+import React, { useEffect, useState } from 'react';
 
 const timeToGridRow = (start: string, end: string | undefined): string => {
   const startDate = new Date(start);

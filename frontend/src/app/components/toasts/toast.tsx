@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
-import classNames from 'classnames';
 import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/20/solid';
-import ProgressBar from './progress-bar';
 import useToast from '@app/context/toasts/toast-context';
+import ProgressBar from './progress-bar';
+import classNames from 'classnames';
+import React from 'react';
 
 const Toast = ({ toast }: { toast: Toast }) => {
   const { removeToast, pauseToast, resumeToast } = useToast();

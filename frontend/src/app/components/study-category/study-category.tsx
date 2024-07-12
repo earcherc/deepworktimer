@@ -1,14 +1,14 @@
 'use client';
 
-import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ApiError, StudyCategoriesService, StudyCategory } from '@api';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid';
-import { Menu, Transition } from '@headlessui/react';
 import { useModalContext } from '@app/context/modal/modal-context';
-import useToast from '@app/context/toasts/toast-context';
 import StudyCategoryCreate from './study-category-create';
+import useToast from '@app/context/toasts/toast-context';
+import { Menu, Transition } from '@headlessui/react';
 import classNames from 'classnames';
-import { ApiError, StudyCategoriesService, StudyCategory } from '@api'; 
+import React from 'react';
 
 const StudyCategoryComponent = () => {
   const { addToast } = useToast();
@@ -23,9 +23,11 @@ const StudyCategoryComponent = () => {
   const updateStudyCategoryMutation = useMutation({
     mutationFn: (category: StudyCategory) => {
       if (category.id === undefined) {
-        throw new Error("Category ID is undefined");
+        throw new Error('Category ID is undefined');
       }
-      return StudyCategoriesService.updateStudyCategoryStudyCategoriesStudyCategoryIdPatch(category.id, { is_active: true });
+      return StudyCategoriesService.updateStudyCategoryStudyCategoriesStudyCategoryIdPatch(category.id, {
+        is_active: true,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studyCategories'] });
@@ -39,7 +41,6 @@ const StudyCategoryComponent = () => {
       addToast({ type: 'error', content: errorMessage });
     },
   });
-
 
   const selectCategory = (selectedCategory: StudyCategory) => {
     updateStudyCategoryMutation.mutate(selectedCategory);

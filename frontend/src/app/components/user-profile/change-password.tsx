@@ -1,9 +1,9 @@
 'use client';
 
 import useToast from '@app/context/toasts/toast-context';
-import { useForm } from 'react-hook-form';
-import { useMutation } from '@tanstack/react-query';
 import { ApiError, AuthenticationService } from '@api';
+import { useMutation } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
 
 type FormData = {
   current_password: string;
@@ -12,11 +12,7 @@ type FormData = {
 };
 
 export default function ChangePasswordForm() {
-  const {
-    register,
-    handleSubmit,
-    reset,
-  } = useForm<FormData>();
+  const { register, handleSubmit, reset } = useForm<FormData>();
   const { addToast } = useToast();
 
   const changePasswordMutation = useMutation({
@@ -34,7 +30,6 @@ export default function ChangePasswordForm() {
       addToast({ type: 'error', content: errorMessage });
     },
   });
-
 
   const onSubmit = async (data: FormData) => {
     if (data.new_password !== data.confirm_password) {
