@@ -1,93 +1,40 @@
 'use client';
 
 import useToast from '@app/context/toasts/toast-context';
-import { userAtom } from '@app/store/atoms';
-import { UserInput, useUpdateCurrentUserMutation } from '@/graphql/graphql-types';
-import { useAtom } from 'jotai';
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { UsersService, User } from '@api';
 
 export default function UserForm() {
   const { addToast } = useToast();
-  const [user, setUser] = useAtom(userAtom);
-  const [updateUserResult, updateUser] = useUpdateCurrentUserMutation();
+  const queryClient = useQueryClient();
+
+  const { data: user } = useQuery<User>({
+    queryKey: ['currentUser'],
+    queryFn: () => UsersService.readCurrentUserUsersMeGet(),
+  });
 
   const {
     register,
     handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<UserInput>({
-    defaultValues: {
-      email: '',
-      username: '',
-      bio: '',
-      jobTitle: '',
-      personalTitle: '',
-      dateOfBirth: '',
-      latitude: undefined,
-      longitude: undefined,
-      firstName: '',
-      lastName: '',
-      gender: undefined,
-      profilePhotoUrl: '',
-      timezone: '',
-      language: '',
-      status: '',
+  } = useForm<Partial<User>>({
+    defaultValues: user || {},
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: (data: Partial<User>) => UsersService.updateCurrentUserUsersPatch(data),
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(['currentUser'], updatedUser);
+      addToast({ type: 'success', content: 'User profile updated successfully.' });
+    },
+    onError: (error: any) => {
+      console.error('Error updating user:', error);
+      addToast({ type: 'error', content: error.message || 'An error occurred while updating the profile.' });
     },
   });
 
-  useEffect(() => {
-    reset({
-      email: user?.email || '',
-      username: user?.username || '',
-      bio: user?.bio || '',
-      jobTitle: user?.jobTitle || '',
-      personalTitle: user?.personalTitle || '',
-      dateOfBirth: user?.dateOfBirth || '',
-      latitude: user?.latitude,
-      longitude: user?.longitude,
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      gender: user?.gender,
-      profilePhotoUrl: user?.profilePhotoUrl || '',
-      timezone: user?.timezone || '',
-      language: user?.language || '',
-      status: user?.status || '',
-    });
-  }, [user, reset]);
-
-  const onSubmit = async (data: UserInput) => {
-    try {
-      let submitData = { ...data };
-
-      // Remove fields from submitData if they are empty or undefined
-      if (!submitData.dateOfBirth) {
-        delete submitData.dateOfBirth;
-      }
-      if (submitData.latitude === undefined) {
-        delete submitData.latitude;
-      }
-      if (submitData.longitude === undefined) {
-        delete submitData.longitude;
-      }
-      if (submitData.gender === undefined) {
-        delete submitData.gender;
-      }
-
-      const result = await updateUser({ user: submitData });
-      if (result.data) {
-        setUser(result.data.updateCurrentUser);
-        addToast({ type: 'success', content: 'User profile updated successfully.' });
-      } else {
-        // Handle case when result.data is not as expected
-        console.error('Failed to update user:', result.error);
-        addToast({ type: 'error', content: 'Failed to update user profile.' });
-      }
-    } catch (error) {
-      console.error('Error updating user:', error);
-      addToast({ type: 'error', content: 'An error occurred while updating the profile.' });
-    }
+  const onSubmit = async (data: Partial<User>) => {
+    updateUserMutation.mutate(data);
   };
 
   return (
@@ -101,21 +48,21 @@ export default function UserForm() {
             <input
               type="text"
               id="firstName"
-              {...register('firstName')}
+              {...register('first_name')}
               className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
 
         <div className="col-span-3">
-          <label htmlFor="lastName" className="block text-sm font-medium leading-6 text-white">
+          <label htmlFor="last_name" className="block text-sm font-medium leading-6 text-white">
             Last Name
           </label>
           <div className="mt-2">
             <input
               type="text"
-              id="lastName"
-              {...register('lastName')}
+              id="last_name"
+              {...register('last_name')}
               className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
@@ -152,14 +99,14 @@ export default function UserForm() {
         </div>
 
         <div className="col-span-3">
-          <label htmlFor="dateOfBirth" className="block text-sm font-medium leading-6 text-white">
+          <label htmlFor="date_of_birth" className="block text-sm font-medium leading-6 text-white">
             Date of Birth
           </label>
           <div className="mt-2">
             <input
               type="date"
-              id="dateOfBirth"
-              {...register('dateOfBirth')}
+              id="date_of_birth"
+              {...register('date_of_birth')}
               className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
@@ -198,28 +145,28 @@ export default function UserForm() {
         </div>
 
         <div className="col-span-3">
-          <label htmlFor="jobTitle" className="block text-sm font-medium leading-6 text-white">
+          <label htmlFor="job_title" className="block text-sm font-medium leading-6 text-white">
             Job Title
           </label>
           <div className="mt-2">
             <input
               type="text"
-              id="jobTitle"
-              {...register('jobTitle')}
+              id="job_title"
+              {...register('job_title')}
               className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
 
         <div className="col-span-3">
-          <label htmlFor="personalTitle" className="block text-sm font-medium leading-6 text-white">
+          <label htmlFor="personal_title" className="block text-sm font-medium leading-6 text-white">
             Personal Title
           </label>
           <div className="mt-2">
             <input
               type="text"
-              id="personalTitle"
-              {...register('personalTitle')}
+              id="personal_title"
+              {...register('personal_title')}
               className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>

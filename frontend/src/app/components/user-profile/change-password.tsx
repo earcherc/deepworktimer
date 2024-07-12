@@ -2,6 +2,8 @@
 
 import useToast from '@app/context/toasts/toast-context';
 import { useForm } from 'react-hook-form';
+import { useMutation } from '@tanstack/react-query';
+import { AuthenticationService } from '@api';
 
 type FormData = {
   current_password: string;
@@ -14,42 +16,32 @@ export default function ChangePasswordForm() {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
   } = useForm<FormData>();
   const { addToast } = useToast();
 
+  const changePasswordMutation = useMutation({
+    mutationFn: (data: { current_password: string; new_password: string }) =>
+      AuthenticationService.changePasswordAuthChangePasswordPost(data),
+    onSuccess: () => {
+      addToast({ type: 'success', content: 'Password updated successfully' });
+      reset();
+    },
+    onError: (error: any) => {
+      console.error('Password change error:', error);
+      addToast({ type: 'error', content: error.message || 'An error occurred while changing password' });
+    },
+  });
+
   const onSubmit = async (data: FormData) => {
     if (data.new_password !== data.confirm_password) {
-      console.error('Passwords do not match');
       addToast({ type: 'error', content: 'Passwords do not match' });
       return;
     }
 
-    try {
-      const res = await fetch('http://localhost/api/auth/change-password', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          current_password: data.current_password,
-          new_password: data.new_password,
-        }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        addToast({ type: 'error', content: errorData.detail });
-        return;
-      }
-
-      addToast({ type: 'success', content: 'Password updated successfully' });
-      reset();
-    } catch (error) {
-      console.error('Password change error:', error);
-      addToast({ type: 'error', content: 'An error occurred while changing password' });
-    }
+    changePasswordMutation.mutate({
+      current_password: data.current_password,
+      new_password: data.new_password,
+    });
   };
 
   return (

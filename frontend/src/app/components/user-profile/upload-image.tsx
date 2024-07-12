@@ -4,64 +4,89 @@ import React, { useRef, useState } from 'react';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import useToast from '@app/context/toasts/toast-context';
-import { userAtom } from '@app/store/atoms';
-import { useAtom } from 'jotai';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { UploadsService } from '@api';
 
 type FormData = {
   image: FileList;
 };
 
 export default function ImageUploadForm() {
-  const { register, handleSubmit, watch, setValue, reset } = useForm<FormData>();
+  const { register, handleSubmit, setValue, reset } = useForm<FormData>();
   const { addToast } = useToast();
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const [user, setUser] = useAtom(userAtom);
   const [preview, setPreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const queryClient = useQueryClient();
 
-  const image = watch('image');
+  const { data: profilePhotoUrl } = useQuery({
+    queryKey: ['profilePhotoUrl'],
+    queryFn: () => UploadsService.getProfilePhotoUrlUploadGetProfilePhotoUrlGet(),
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      try {
+        const { presigned_url, file_url } = await UploadsService.getUploadUrlUploadGetPresignedUrlPost(file.name);
+        console.log('Presigned URL:', presigned_url);
+        console.log('File URL:', file_url);
+        
+        const uploadResponse = await fetch(presigned_url, {
+          method: 'PUT',
+          body: file,
+          headers: {
+            'Content-Type': file.type,
+          },
+        });
+
+        if (!uploadResponse.ok) {
+          const errorText = await uploadResponse.text();
+          throw new Error(`Upload failed with status ${uploadResponse.status}: ${errorText}`);
+        }
+
+        await UploadsService.confirmUploadUploadConfirmUploadPost(file_url);
+
+        return file_url;
+      } catch (error) {
+        console.error('Detailed upload error:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profilePhotoUrl'] });
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      addToast({ type: 'success', content: 'Image uploaded successfully' });
+      reset();
+      setPreview(null);
+      setSelectedFile(null);
+    },
+    onError: (error: any) => {
+      console.error('Image upload error:', error);
+      addToast({ type: 'error', content: 'An error occurred while uploading the image' });
+    },
+  });
 
   const removeImage = () => {
     setPreview(null);
+    setSelectedFile(null);
     if (imageInputRef.current) {
       imageInputRef.current.value = '';
     }
     setValue('image', null as unknown as FileList);
   };
 
-  const onSubmit = async (data: FormData) => {
-    const imageFile = data.image?.[0];
-    if (!imageFile) {
+  const onSubmit = async () => {
+    if (!selectedFile) {
       addToast({ type: 'error', content: 'No image selected' });
       return;
     }
-
-    const formData = new FormData();
-    formData.append('file', imageFile);
-
-    try {
-      const res = await fetch('http://localhost/api/upload/image', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        addToast({ type: 'error', content: errorData.detail });
-        return;
-      }
-
-      addToast({ type: 'success', content: 'Image uploaded successfully' });
-      reset();
-    } catch (error) {
-      console.error('Image upload error:', error);
-      addToast({ type: 'error', content: 'An error occurred while uploading the image' });
-    }
+    uploadMutation.mutate(selectedFile);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setSelectedFile(file);
       setValue('image', event.target.files as FileList);
 
       const reader = new FileReader();
@@ -83,40 +108,43 @@ export default function ImageUploadForm() {
             width={96}
             height={96}
           />
-        ) : (
+        ) : profilePhotoUrl?.profile_photo_presigned_url ? (
           <Image
-            src={user?.profilePhotoUrl || 'https://i.imgur.com/tdi3NGa.png'}
+            src={profilePhotoUrl.profile_photo_presigned_url}
             alt="Profile Image"
             className="h-24 w-24 flex-none rounded-lg bg-gray-800 object-cover"
             width={96}
             height={96}
           />
+        ) : (
+          <div className="h-24 w-24 flex-none rounded-lg bg-gray-800" />
         )}
         <div>
-          {preview ? (
-            <button
-              type="button"
-              className="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400"
-              onClick={removeImage}
-            >
-              Remove
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/20"
-              onClick={() => imageInputRef.current?.click()}
-            >
-              Change Picture
-            </button>
-          )}
           <button
-            type="submit"
-            className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 ml-2"
+            type="button"
+            className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/20"
+            onClick={() => imageInputRef.current?.click()}
           >
-            Upload Image
+            {preview ? 'Change Image' : 'Select Image'}
           </button>
-
+          {selectedFile && (
+            <>
+              <button
+                type="button"
+                className="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400 ml-2"
+                onClick={removeImage}
+              >
+                Remove
+              </button>
+              <button
+                type="submit"
+                className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 ml-2"
+                disabled={uploadMutation.isPending}
+              >
+                {uploadMutation.isPending ? 'Uploading...' : 'Upload Image'}
+              </button>
+            </>
+          )}
           <input
             type="file"
             accept="image/png, image/jpeg, image/jpg"

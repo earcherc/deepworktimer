@@ -1,32 +1,29 @@
 'use client';
 
-import { userAtom } from '@app/store/atoms';
-import { useAtom } from 'jotai';
 import { useForm } from 'react-hook-form';
-import { useDeleteCurrentUserMutation } from '@/graphql/graphql-types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useModalContext } from '@app/context/modal/modal-context';
+import { UsersService } from '@api';
 
 export default function DeleteAccountForm() {
-  const [, setUser] = useAtom(userAtom);
-  const [, deleteUser] = useDeleteCurrentUserMutation();
+  const queryClient = useQueryClient();
   const Router = useRouter();
   const { showModal, hideModal } = useModalContext();
 
   const { handleSubmit } = useForm();
 
-  const handleDelete = async () => {
-    try {
-      const result = await deleteUser({});
-      if (result.data && result.data.deleteCurrentUser) {
-        hideModal();
-        Router.push('/');
-        setUser(undefined);
-      }
-    } catch (error) {
+  const deleteUserMutation = useMutation({
+    mutationFn: () => UsersService.deleteCurrentUserUsersDelete(),
+    onSuccess: () => {
+      hideModal();
+      queryClient.setQueryData(['currentUser'], null);
+      Router.push('/');
+    },
+    onError: (error: any) => {
       console.error('Error deleting user:', error);
-    }
-  };
+    },
+  });
 
   const onSubmit = () => {
     showModal({
@@ -36,7 +33,7 @@ export default function DeleteAccountForm() {
       buttons: [
         {
           text: 'Delete Account',
-          onClick: handleDelete,
+          onClick: () => deleteUserMutation.mutate(),
           isPrimary: true,
         },
         {

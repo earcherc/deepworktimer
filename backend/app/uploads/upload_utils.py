@@ -6,6 +6,7 @@ from ..config import settings
 
 s3_client = boto3.client(
     "s3",
+    region_name='us-west-1',
     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY.get_secret_value(),
     config=Config(signature_version="s3v4"),
