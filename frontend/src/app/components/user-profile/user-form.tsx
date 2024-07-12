@@ -3,7 +3,7 @@
 import useToast from '@app/context/toasts/toast-context';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { UsersService, User } from '@api';
+import { UsersService, User, ApiError } from '@api';
 import { useEffect } from 'react';
 
 export default function UserForm() {
@@ -33,11 +33,15 @@ export default function UserForm() {
       queryClient.setQueryData(['currentUser'], updatedUser);
       addToast({ type: 'success', content: 'User profile updated successfully.' });
     },
-    onError: (error: any) => {
-      console.error('Error updating user:', error);
-      addToast({ type: 'error', content: error.message || 'An error occurred while updating the profile.' });
+    onError: (error: unknown) => {
+      let errorMessage = 'An error occurred while updating the profile';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
     },
   });
+
 
   const onSubmit = async (data: Partial<User>) => {
     const filteredData = Object.fromEntries(

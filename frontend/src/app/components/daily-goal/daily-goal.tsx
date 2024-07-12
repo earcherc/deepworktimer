@@ -8,7 +8,7 @@ import { useModalContext } from '@app/context/modal/modal-context';
 import useToast from '@app/context/toasts/toast-context';
 import DailyGoalCreate from './daily-goal-create';
 import classNames from 'classnames';
-import { DailyGoalsService, DailyGoal } from '@api';
+import { DailyGoalsService, DailyGoal, ApiError } from '@api';
 
 
 const DailyGoalComp = () => {
@@ -28,11 +28,15 @@ const DailyGoalComp = () => {
       queryClient.invalidateQueries({ queryKey: ['dailyGoals'] });
       addToast({ type: 'success', content: 'Goal updated successfully.' });
     },
-    onError: (error) => {
-      console.error('Failed to update goal:', error);
-      addToast({ type: 'error', content: 'Failed to update goal.' });
+    onError: (error: unknown) => {
+      let errorMessage = 'Failed to update goal';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
     },
   });
+
 
   const getTotalTime = (blockSize: number, quantity: number) => {
     const totalMinutes = blockSize * quantity;

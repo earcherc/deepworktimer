@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useModalContext } from '@app/context/modal/modal-context';
 import useToast from '@app/context/toasts/toast-context';
 import { useForm } from 'react-hook-form';
-import { StudyCategoryCreate, StudyCategoriesService } from '@api';
+import { StudyCategoryCreate, StudyCategoriesService, ApiError } from '@api';
 
 const StudyCategoryCreateComponent = () => {
   const { addToast } = useToast();
@@ -25,18 +25,22 @@ const StudyCategoryCreateComponent = () => {
 
   const createStudyCategoryMutation = useMutation({
     mutationFn: (formData: StudyCategoryCreate) =>
-      StudyCategoriesService.createStudyCategoryStudyCategoriesPost({ title: formData.title }), // Ensure this function exists in your API service
+      StudyCategoriesService.createStudyCategoryStudyCategoriesPost({ title: formData.title }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studyCategories'] });
       reset();
       hideModal();
       addToast({ type: 'success', content: 'Category created successfully.' });
     },
-    onError: (error) => {
-      console.error('Failed to create category:', error);
-      addToast({ type: 'error', content: 'Failed to create category.' });
+    onError: (error: unknown) => {
+      let errorMessage = 'Failed to create category';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
     },
   });
+
 
   const onSubmit = (formData: StudyCategoryCreate) => {
     createStudyCategoryMutation.mutate(formData);

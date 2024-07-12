@@ -8,7 +8,8 @@ import classNames from 'classnames';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AuthenticationService, User, UsersService } from '@api';
+import { ApiError, AuthenticationService, User, UsersService } from '@api';
+import useToast from '@app/context/toasts/toast-context';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -16,6 +17,7 @@ const navigation = [
 ];
 
 export default function Nav() {
+  const { addToast } = useToast();
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -23,15 +25,20 @@ export default function Nav() {
   const { data: user } = useQuery<User>({ queryKey: ['currentUser'], queryFn: () => UsersService.readCurrentUserUsersMeGet() });
 
   const logoutMutation = useMutation({
-    mutationFn: AuthenticationService.logoutAuthLogoutPost,
-    onSuccess: () => {
-      queryClient.setQueryData(['currentUser'], null);
-      router.push('/');
-    },
-    onError: (error) => {
-      console.error('Logout failed:', error);
-    },
-  });
+  mutationFn: AuthenticationService.logoutAuthLogoutPost,
+  onSuccess: () => {
+    queryClient.setQueryData(['currentUser'], null);
+    router.push('/');
+  },
+  onError: (error: unknown) => {
+    let errorMessage = 'An error occurred while logging out';
+    if (error instanceof ApiError) {
+      errorMessage = error.body?.detail || errorMessage;
+    }
+    addToast({ type: 'error', content: errorMessage });
+  },
+});
+
 
   const handleLogout = () => {
     logoutMutation.mutate();

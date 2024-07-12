@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useModalContext } from '@app/context/modal/modal-context';
 import useToast from '@app/context/toasts/toast-context';
 import { useForm } from 'react-hook-form';
-import { DailyGoalCreate, DailyGoalsService } from '@api';
+import { ApiError, DailyGoalCreate, DailyGoalsService } from '@api';
 
 const DailyGoalCreateComponent = () => {
   const { addToast } = useToast();
@@ -36,11 +36,15 @@ const DailyGoalCreateComponent = () => {
       hideModal();
       addToast({ type: 'success', content: 'Daily goal created successfully.' });
     },
-    onError: (error) => {
-      console.error('Failed to create daily goal:', error);
-      addToast({ type: 'error', content: 'Failed to create daily goal.' });
+    onError: (error: unknown) => {
+      let errorMessage = 'Failed to create daily goal';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
     },
   });
+
 
   const onSubmit = (formData: DailyGoalCreate) => {
     createDailyGoalMutation.mutate(formData);

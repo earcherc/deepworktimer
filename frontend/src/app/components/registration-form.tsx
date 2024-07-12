@@ -5,33 +5,35 @@ import classNames from 'classnames';
 import { useRouter } from 'next/navigation';
 import useToast from '../context/toasts/toast-context';
 import { useMutation } from '@tanstack/react-query';
-import { AuthenticationService } from '@api';
+import { ApiError, AuthenticationService } from '@api';
 
 const RegistrationForm = () => {
   const { addToast } = useToast();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const router = useRouter();
 
   const registrationMutation = useMutation({
     mutationFn: async (userData: { username: string; email: string; password: string }) => {
-      try {
-        const response = await AuthenticationService.registerAuthRegisterPost(userData);
-        return response;
-      } catch (error) {
-        if (error instanceof Error) {
-          throw error;
-        }
-        throw new Error('An error occurred while registering.');
-      }
+      const response = await AuthenticationService.registerAuthRegisterPost(userData);
+      return response;
     },
     onSuccess: () => {
       router.push('/login');
+      setErrorMessage(null);
     },
-    onError: (error: Error) => {
-      addToast({ type: 'error', content: error.message });
+    onError: (error: unknown) => {
+      let errorMessage = 'An error occurred while registering';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      setErrorMessage(errorMessage); 
+      addToast({ type: 'error', content: errorMessage });
     },
   });
 
@@ -115,8 +117,8 @@ const RegistrationForm = () => {
           </button>
         </div>
       </form>
-      {registrationMutation.isError && (
-        <div className="mt-2 text-red-500">{registrationMutation.error.message}</div>
+      {errorMessage && (
+        <div className="mt-2 text-red-500">{errorMessage}</div>
       )}
     </>
   );

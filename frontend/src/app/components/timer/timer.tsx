@@ -3,7 +3,7 @@
 import useToast from '@app/context/toasts/toast-context';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { StudyBlocksService, DailyGoalsService, StudyCategoriesService, StudyBlock, DailyGoal, StudyCategory } from '@api';
+import { StudyBlocksService, DailyGoalsService, StudyCategoriesService, StudyBlock, DailyGoal, StudyCategory, ApiError } from '@api';
 import { useTimer } from 'react-timer-hook';
 import { parseISO, differenceInSeconds } from 'date-fns';
 
@@ -40,13 +40,34 @@ const PomodoroTimer = () => {
   // Mutations
   const createStudyBlockMutation = useMutation({
     mutationFn: StudyBlocksService.createStudyBlockStudyBlocksPost,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['studyBlocks'] }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['studyBlocks'] });
+      setStudyBlockId(data.id);
+      addToast({ type: 'success', content: 'Study block created' });
+    },
+    onError: (error: unknown) => {
+      let errorMessage = 'Failed to create study block';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
+    },
   });
 
   const updateStudyBlockMutation = useMutation({
-    mutationFn: ({ id, block }: { id: number, block: Partial<StudyBlock> }) => 
+    mutationFn: ({ id, block }: { id: number, block: Partial<StudyBlock> }) =>
       StudyBlocksService.updateStudyBlockStudyBlocksStudyBlockIdPatch(id, block),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['studyBlocks'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['studyBlocks'] });
+      addToast({ type: 'success', content: 'Study block updated' });
+    },
+    onError: (error: unknown) => {
+      let errorMessage = 'Failed to update study block';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
+    },
   });
 
   // Timer setup
@@ -55,7 +76,7 @@ const PomodoroTimer = () => {
 
   const handleTimerExpiration = useCallback(async () => {
     if (studyBlockId) {
-      await endStudyBlock();
+      updateStudyBlockMutation.mutate({ id: studyBlockId, block: { end: new Date().toISOString() } });
     }
     restart(expiryTimestamp, false);
     setIsActive(false);
@@ -91,30 +112,42 @@ const PomodoroTimer = () => {
 
   // Handlers
   const startWorkSession = useCallback(() => {
-    createNewStudyBlock();
-    setIsActive(true);
-    start();
-  }, []);
+    if (activeDailyGoal && activeCategory) {
+      createStudyBlockMutation.mutate({
+        start: new Date().toISOString(),
+        is_countdown: isCountDown,
+        daily_goal_id: activeDailyGoal.id,
+        study_category_id: activeCategory.id,
+      });
+      setIsActive(true);
+      start();
+    }
+  }, [activeDailyGoal, activeCategory, isCountDown]);
 
-  const pauseTimer = useCallback(async () => {
+  const pauseTimer = useCallback(() => {
     if (isRunning && studyBlockId) {
-      await endStudyBlock();
+      updateStudyBlockMutation.mutate({ id: studyBlockId, block: { end: new Date().toISOString() } });
       pause();
       addToast({ type: 'info', content: 'Session paused' });
     }
   }, [isRunning, studyBlockId]);
 
-  const resumeTimer = useCallback(async () => {
-    if (!isRunning) {
-      await createNewStudyBlock();
+  const resumeTimer = useCallback(() => {
+    if (!isRunning && activeDailyGoal && activeCategory) {
+      createStudyBlockMutation.mutate({
+        start: new Date().toISOString(),
+        is_countdown: isCountDown,
+        daily_goal_id: activeDailyGoal?.id,
+        study_category_id: activeCategory?.id,
+      });
       resume();
       addToast({ type: 'info', content: 'Session resumed' });
     }
-  }, [isRunning]);
+  }, [isRunning, activeDailyGoal, activeCategory, isCountDown]);
 
-  const stopTimer = useCallback(async () => {
+  const stopTimer = useCallback(() => {
     if (studyBlockId) {
-      await endStudyBlock();
+      updateStudyBlockMutation.mutate({ id: studyBlockId, block: { end: new Date().toISOString() } });
     }
     restart(expiryTimestamp, false);
     setIsActive(false);
@@ -123,39 +156,6 @@ const PomodoroTimer = () => {
   }, [studyBlockId, expiryTimestamp]);
 
   // Helper functions
-  const createNewStudyBlock = async () => {
-    if (activeDailyGoal?.id && activeCategory?.id) {
-      try {
-        const data = await createStudyBlockMutation.mutateAsync({
-          user_id: 1, // TODO: Replace with actual user ID
-          start: new Date().toISOString(),
-          is_countdown: isCountDown,
-          daily_goal_id: activeDailyGoal.id,
-          study_category_id: activeCategory.id,
-        });
-
-        if (data?.id) {
-          setStudyBlockId(data.id);
-        }
-      } catch (error) {
-        addToast({ type: 'error', content: 'Failed to create study block' });
-      }
-    }
-  };
-
-  const endStudyBlock = async () => {
-    if (studyBlockId) {
-      try {
-        await updateStudyBlockMutation.mutateAsync({
-          id: studyBlockId,
-          block: { end: new Date().toISOString() }
-        });
-      } catch (error) {
-        addToast({ type: 'error', content: 'Failed to end study block' });
-      }
-    }
-  };
-
   const recoverIncompleteSession = () => {
     const latestIncompleteBlock = studyBlocksData?.filter((block: StudyBlock) => !block.end)
       .sort((a: StudyBlock, b: StudyBlock) => new Date(b.start).getTime() - new Date(a.start).getTime())[0];

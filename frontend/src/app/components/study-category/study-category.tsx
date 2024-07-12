@@ -8,7 +8,7 @@ import { useModalContext } from '@app/context/modal/modal-context';
 import useToast from '@app/context/toasts/toast-context';
 import StudyCategoryCreate from './study-category-create';
 import classNames from 'classnames';
-import { StudyCategoriesService, StudyCategory } from '@api'; 
+import { ApiError, StudyCategoriesService, StudyCategory } from '@api'; 
 
 const StudyCategoryComponent = () => {
   const { addToast } = useToast();
@@ -25,17 +25,21 @@ const StudyCategoryComponent = () => {
       if (category.id === undefined) {
         throw new Error("Category ID is undefined");
       }
-      return StudyCategoriesService.updateStudyCategoryStudyCategoriesStudyCategoryIdPatch(category.id, { is_active: true }); 
+      return StudyCategoriesService.updateStudyCategoryStudyCategoriesStudyCategoryIdPatch(category.id, { is_active: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studyCategories'] });
       addToast({ type: 'success', content: 'Category updated successfully.' });
     },
-    onError: (error) => {
-      console.error('Failed to update category:', error);
-      addToast({ type: 'error', content: 'Failed to update category.' });
+    onError: (error: unknown) => {
+      let errorMessage = 'Failed to update category';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
     },
   });
+
 
   const selectCategory = (selectedCategory: StudyCategory) => {
     updateStudyCategoryMutation.mutate(selectedCategory);

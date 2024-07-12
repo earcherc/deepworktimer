@@ -4,12 +4,14 @@ import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useModalContext } from '@app/context/modal/modal-context';
-import { UsersService } from '@api';
+import { ApiError, UsersService } from '@api';
+import useToast from '@app/context/toasts/toast-context';
 
 export default function DeleteAccountForm() {
   const queryClient = useQueryClient();
   const Router = useRouter();
   const { showModal, hideModal } = useModalContext();
+  const { addToast } = useToast();
 
   const { handleSubmit } = useForm();
 
@@ -20,10 +22,15 @@ export default function DeleteAccountForm() {
       queryClient.setQueryData(['currentUser'], null);
       Router.push('/');
     },
-    onError: (error: any) => {
-      console.error('Error deleting user:', error);
+    onError: (error: unknown) => {
+      let errorMessage = 'An error occurred while deleting user';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
     },
   });
+
 
   const onSubmit = () => {
     showModal({

@@ -3,7 +3,7 @@
 import useToast from '@app/context/toasts/toast-context';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
-import { AuthenticationService } from '@api';
+import { ApiError, AuthenticationService } from '@api';
 
 type FormData = {
   current_password: string;
@@ -26,11 +26,15 @@ export default function ChangePasswordForm() {
       addToast({ type: 'success', content: 'Password updated successfully' });
       reset();
     },
-    onError: (error: any) => {
-      console.error('Password change error:', error);
-      addToast({ type: 'error', content: error.message || 'An error occurred while changing password' });
+    onError: (error: unknown) => {
+      let errorMessage = 'An error occurred while changing password';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
     },
   });
+
 
   const onSubmit = async (data: FormData) => {
     if (data.new_password !== data.confirm_password) {
