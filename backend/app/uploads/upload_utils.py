@@ -1,13 +1,9 @@
 import uuid
-from datetime import datetime, timedelta
 import boto3
 from botocore.config import Config
 from ..config import settings
 from PIL import Image
 import io
-import logging
-
-logger = logging.getLogger(__name__)
 
 s3_client = boto3.client(
     "s3",
@@ -22,18 +18,14 @@ def generate_file_name(original_filename: str) -> str:
     return f"{uuid.uuid4()}.{extension}"
 
 def get_presigned_url_for_image(file_name: str, operation: str = "get_object", expiration: int = 3600) -> str:
-    try:
-        return s3_client.generate_presigned_url(
-            ClientMethod=operation,
-            Params={
-                "Bucket": settings.AWS_S3_BUCKET_NAME,
-                "Key": file_name,
-            },
-            ExpiresIn=expiration,
-        )
-    except Exception as e:
-        logger.error(f"Error getting presigned URL for image: {str(e)}")
-        raise
+    return s3_client.generate_presigned_url(
+        ClientMethod=operation,
+        Params={
+            "Bucket": settings.AWS_S3_BUCKET_NAME,
+            "Key": file_name,
+        },
+        ExpiresIn=expiration,
+    )
 
 def compress_image(image_data: bytes, max_size: int = 5 * 1024 * 1024) -> bytes:
     img = Image.open(io.BytesIO(image_data))
@@ -75,13 +67,9 @@ def generate_image_versions(image_data: bytes):
     }
 
 def upload_to_s3(file_data: bytes, file_name: str, content_type: str = 'image/jpeg'):
-    try:
-        s3_client.put_object(
-            Bucket=settings.AWS_S3_BUCKET_NAME,
-            Key=file_name,
-            Body=file_data,
-            ContentType=content_type
-        )
-    except Exception as e:
-        logger.error(f"Error uploading to S3: {str(e)}")
-        raise
+    s3_client.put_object(
+        Bucket=settings.AWS_S3_BUCKET_NAME,
+        Key=file_name,
+        Body=file_data,
+        ContentType=content_type
+    )

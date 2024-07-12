@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import useToast from '@app/context/toasts/toast-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Body_upload_profile_photo_upload_upload_profile_photo_post, UploadsService, User, UsersService } from '@api';
+import { ApiError, Body_upload_profile_photo_upload_upload_profile_photo_post, UploadsService, User, UsersService } from '@api';
 
 type FormData = {
   image: FileList;
@@ -38,8 +38,11 @@ const uploadMutation = useMutation({
     setPreview(null);
     setSelectedFile(null);
   },
-  onError: (error: any) => {
-    const errorMessage = error.response?.data?.detail || 'An error occurred while uploading the image';
+  onError: (error: unknown) => {
+    let errorMessage = 'An error occurred while uploading the image';
+    if (error instanceof ApiError) {
+      errorMessage = error.body?.detail || errorMessage;
+    }
     addToast({ type: 'error', content: errorMessage });
   },
 });
