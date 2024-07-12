@@ -12,8 +12,9 @@ from .auth_schemas import RegistrationRequest, LoginRequest, PasswordChangeReque
 from ..dependencies import get_redis
 from ..database import get_session
 from ..models import User as UserModel
-from ..uploads import get_presigned_url_for_image
+from ..uploads.upload_utils import get_presigned_url_for_image 
 from redis.asyncio import Redis
+from urllib.parse import urlparse
 
 router = APIRouter()
 
@@ -42,22 +43,19 @@ async def login(
     )
     if not user_id:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
-
     session_id = await create_session(redis, user_id)
     result = await session.execute(select(UserModel).where(UserModel.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-
     response.set_cookie(key="session_id", value=session_id, httponly=True, secure=False)
-
-    user_data = user.dict(exclude={"hashed_password"})
-
+    user_data = user.__dict__
+    user_data.pop("hashed_password", None)
     # Generate presigned URL for profile photo if it exists
     if user.profile_photo_url:
-        presigned_url = await get_presigned_url_for_image(user.profile_photo_url)
+        file_name = urlparse(user.profile_photo_url).path.lstrip("/")
+        presigned_url = await get_presigned_url_for_image(file_name)
         user_data["profile_photo_presigned_url"] = presigned_url
-
     return user_data
 
 

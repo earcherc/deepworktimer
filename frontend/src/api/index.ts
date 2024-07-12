@@ -7,6 +7,7 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { Body_upload_profile_photo_upload_upload_profile_photo_post } from './models/Body_upload_profile_photo_upload_upload_profile_photo_post';
 export type { DailyGoal } from './models/DailyGoal';
 export type { DailyGoalCreate } from './models/DailyGoalCreate';
 export type { DailyGoalUpdate } from './models/DailyGoalUpdate';

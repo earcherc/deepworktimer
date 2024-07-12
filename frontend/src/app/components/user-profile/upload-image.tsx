@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import useToast from '@app/context/toasts/toast-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { UploadsService } from '@api';
+import { Body_upload_profile_photo_upload_upload_profile_photo_post, UploadsService, User, UsersService } from '@api';
 
 type FormData = {
   image: FileList;
@@ -19,52 +19,39 @@ export default function ImageUploadForm() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: profilePhotoUrl } = useQuery({
-    queryKey: ['profilePhotoUrl'],
-    queryFn: () => UploadsService.getProfilePhotoUrlUploadGetProfilePhotoUrlGet(),
+  const { data: user } = useQuery<User>({
+    queryKey: ['currentUser'],
+    queryFn: () => UsersService.readCurrentUserUsersMeGet(),
   });
 
-  const uploadMutation = useMutation({
-    mutationFn: async (file: File) => {
-      try {
-        const { presigned_url, file_url } = await UploadsService.getUploadUrlUploadGetPresignedUrlPost(file.name);
-        console.log('Presigned URL:', presigned_url);
-        console.log('File URL:', file_url);
-        
-        const uploadResponse = await fetch(presigned_url, {
-          method: 'PUT',
-          body: file,
-          headers: {
-            'Content-Type': file.type,
-          },
-        });
+const uploadMutation = useMutation({
+  mutationFn: async (file: File) => {
+    const formData: Body_upload_profile_photo_upload_upload_profile_photo_post = {
+      file: file,
+    };
+    return UploadsService.uploadProfilePhotoUploadUploadProfilePhotoPost(formData);
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+    addToast({ type: 'success', content: 'Image uploaded successfully' });
+    reset();
+    setPreview(null);
+    setSelectedFile(null);
+    // You can use data.original_url, data.medium_url, or data.thumbnail_url here if needed
+  },
+  onError: (error: any) => {
+    console.error('Image upload error:', error);
+    addToast({ type: 'error', content: 'An error occurred while uploading the image' });
+  },
+});
 
-        if (!uploadResponse.ok) {
-          const errorText = await uploadResponse.text();
-          throw new Error(`Upload failed with status ${uploadResponse.status}: ${errorText}`);
-        }
-
-        await UploadsService.confirmUploadUploadConfirmUploadPost(file_url);
-
-        return file_url;
-      } catch (error) {
-        console.error('Detailed upload error:', error);
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profilePhotoUrl'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-      addToast({ type: 'success', content: 'Image uploaded successfully' });
-      reset();
-      setPreview(null);
-      setSelectedFile(null);
-    },
-    onError: (error: any) => {
-      console.error('Image upload error:', error);
-      addToast({ type: 'error', content: 'An error occurred while uploading the image' });
-    },
-  });
+  const onSubmit = async () => {
+    if (!selectedFile) {
+      addToast({ type: 'error', content: 'No image selected' });
+      return;
+    }
+    uploadMutation.mutate(selectedFile);
+  };
 
   const removeImage = () => {
     setPreview(null);
@@ -73,14 +60,6 @@ export default function ImageUploadForm() {
       imageInputRef.current.value = '';
     }
     setValue('image', null as unknown as FileList);
-  };
-
-  const onSubmit = async () => {
-    if (!selectedFile) {
-      addToast({ type: 'error', content: 'No image selected' });
-      return;
-    }
-    uploadMutation.mutate(selectedFile);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,17 +79,17 @@ export default function ImageUploadForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="pb-8">
       <div className="col-span-full flex items-center gap-x-8">
-        {preview ? (
+        {user?.profile_photo_url ? (
           <Image
-            src={preview}
+            src={user.profile_photo_url}
             alt="Preview Image"
             className="h-24 w-24 flex-none rounded-lg bg-gray-800 object-cover"
             width={96}
             height={96}
           />
-        ) : profilePhotoUrl?.profile_photo_presigned_url ? (
+        ) : preview ? (
           <Image
-            src={profilePhotoUrl.profile_photo_presigned_url}
+            src={preview}
             alt="Profile Image"
             className="h-24 w-24 flex-none rounded-lg bg-gray-800 object-cover"
             width={96}

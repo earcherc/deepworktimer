@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     AWS_ACCESS_KEY_ID: str
     AWS_SECRET_ACCESS_KEY: SecretStr
     AWS_S3_BUCKET_NAME: str
+    AWS_REGION: str = "us-west-1"
 
     # Redis settings
     REDIS_URL: str = "redis://redis:6379"

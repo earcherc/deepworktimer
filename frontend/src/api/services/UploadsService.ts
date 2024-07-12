@@ -2,59 +2,50 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Body_upload_profile_photo_upload_upload_profile_photo_post } from '../models/Body_upload_profile_photo_upload_upload_profile_photo_post';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class UploadsService {
     /**
-     * Get Upload Url
-     * @param filename
+     * Upload Profile Photo
+     * @param formData
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static getUploadUrlUploadGetPresignedUrlPost(
-        filename: string,
+    public static uploadProfilePhotoUploadUploadProfilePhotoPost(
+        formData: Body_upload_profile_photo_upload_upload_profile_photo_post,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/upload/get-presigned-url',
-            query: {
-                'filename': filename,
-            },
+            url: '/upload/upload-profile-photo',
+            formData: formData,
+            mediaType: 'multipart/form-data',
             errors: {
                 422: `Validation Error`,
             },
         });
     }
     /**
-     * Confirm Upload
-     * @param fileUrl
+     * Get Profile Photo View Url
      * @returns any Successful Response
      * @throws ApiError
      */
-    public static confirmUploadUploadConfirmUploadPost(
-        fileUrl: string,
-    ): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/upload/confirm-upload',
-            query: {
-                'file_url': fileUrl,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Get Profile Photo Url
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static getProfilePhotoUrlUploadGetProfilePhotoUrlGet(): CancelablePromise<any> {
+    public static getProfilePhotoViewUrlUploadGetProfilePhotoViewUrlGet(): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/upload/get-profile-photo-url',
+            url: '/upload/get-profile-photo-view-url',
+        });
+    }
+    /**
+     * Get Profile Photo Upload Url
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static getProfilePhotoUploadUrlUploadGetProfilePhotoUploadUrlGet(): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/upload/get-profile-photo-upload-url',
         });
     }
 }

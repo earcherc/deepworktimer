@@ -7,6 +7,8 @@ from ..schemas import UserCreate, UserUpdate, User as UserSchema
 from ..auth import hash_password
 from typing import List
 from .utils import get_current_user_id
+from ..uploads.upload_utils import get_presigned_url_for_image
+from urllib.parse import urlparse
 
 router = APIRouter()
 
@@ -31,7 +33,13 @@ async def read_current_user(db: AsyncSession = Depends(get_session), user_id: in
     db_user = result.scalar_one_or_none()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+    
+    user_dict = db_user.__dict__
+    if db_user.profile_photo_url:
+        file_name = urlparse(db_user.profile_photo_url).path.lstrip("/")
+        presigned_url = await get_presigned_url_for_image(file_name)
+        user_dict["profile_photo_url"] = presigned_url
+    return user_dict
 
 @router.get("/{user_id}", response_model=UserSchema)
 async def read_user(user_id: int, db: AsyncSession = Depends(get_session)):
