@@ -10,7 +10,10 @@
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnSave": true,
-        "terminal.integrated.inheritEnv": true
+        "terminal.integrated.inheritEnv": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": "always"
+        }
       },
       "extensions": [
         "dbaeumer.vscode-eslint",
@@ -27,7 +30,9 @@
         "drKnoxy.eslint-disable-snippets",
         "vscodevim.vim",
         "eamodio.gitlens",
-        "ecmel.vscode-html-css"
+        "ecmel.vscode-html-css",
+        "Vue.volar",
+        "GitHub.copilot"
       ]
     }
   },

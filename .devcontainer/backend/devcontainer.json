@@ -10,23 +10,28 @@
       "settings": {
         "python.pythonPath": "/usr/local/bin/python",
         "[python]": {
-          "editor.defaultFormatter": "ms-python.black-formatter"
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "always"
+          }
         },
         "python.formatting.provider": "black",
         "editor.formatOnSave": true,
-        "terminal.integrated.inheritEnv": true
+        "terminal.integrated.inheritEnv": true,
+        "isort.args": ["--profile", "black"]
       },
       "extensions": [
         "ms-python.python",
+        "ms-python.black-formatter",
         "ms-azuretools.vscode-docker",
         "ms-python.isort",
         "waderyan.gitblame",
         "yzhang.markdown-all-in-one",
         "christian-kohler.path-intellisense",
-        "drKnoxy.eslint-disable-snippets",
         "vscodevim.vim",
         "eamodio.gitlens",
-        "ecmel.vscode-html-css"
+        "ecmel.vscode-html-css",
+        "GitHub.copilot"
       ]
     }
   },
