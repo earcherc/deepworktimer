@@ -37,15 +37,13 @@ const uploadMutation = useMutation({
     reset();
     setPreview(null);
     setSelectedFile(null);
-    // You can use data.original_url, data.medium_url, or data.thumbnail_url here if needed
   },
   onError: (error: any) => {
-    console.error('Image upload error:', error);
     const errorMessage = error.response?.data?.detail || 'An error occurred while uploading the image';
     addToast({ type: 'error', content: errorMessage });
-},
+  },
 });
-
+  
   const onSubmit = async () => {
     if (!selectedFile) {
       addToast({ type: 'error', content: 'No image selected' });
