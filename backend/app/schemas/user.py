@@ -1,13 +1,16 @@
-from typing import Optional, Dict
-from pydantic import BaseModel, Field, EmailStr
 from datetime import date, datetime
 from enum import Enum
+from typing import Dict, Optional
+
+from pydantic import BaseModel, EmailStr, Field
+
 
 class Gender(str, Enum):
     MALE = "MALE"
     FEMALE = "FEMALE"
     OTHER = "OTHER"
     NOT_SPECIFIED = "NOT_SPECIFIED"
+
 
 class UserBase(BaseModel):
     username: str
@@ -27,8 +30,10 @@ class UserBase(BaseModel):
     language: Optional[str] = None
     status: Optional[str] = None
 
+
 class UserCreate(UserBase):
     password: str
+
 
 class UserUpdate(BaseModel):
     username: Optional[str] = None
@@ -46,6 +51,7 @@ class UserUpdate(BaseModel):
     timezone: Optional[str] = None
     language: Optional[str] = None
     status: Optional[str] = None
+
 
 class User(UserBase):
     id: int

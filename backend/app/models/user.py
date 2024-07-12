@@ -1,18 +1,21 @@
-from enum import Enum
-from sqlmodel import Field, Relationship, SQLModel
-from typing import Optional, List, TYPE_CHECKING
 from datetime import date, datetime
+from enum import Enum
+from typing import TYPE_CHECKING, List, Optional
+
+from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from .study_block import StudyBlock
     from .daily_goal import DailyGoal
+    from .study_block import StudyBlock
     from .study_category import StudyCategory
+
 
 class Gender(str, Enum):
     MALE = "MALE"
     FEMALE = "FEMALE"
     OTHER = "OTHER"
     NOT_SPECIFIED = "NOT_SPECIFIED"
+
 
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -45,5 +48,6 @@ class User(SQLModel, table=True):
         back_populates="user",
         sa_relationship_kwargs={"cascade": "delete"},
     )
+
 
 User.update_forward_refs()

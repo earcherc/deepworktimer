@@ -1,17 +1,19 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from redis.asyncio import Redis
-from contextlib import asynccontextmanager
-from .routers import (
-    daily_goal_router,
-    user_router,
-    study_block_router,
-    study_category_router,
-)
+
 from .auth import auth_router
-from .uploads import upload_router
 from .auth.auth_utils import get_user_id_from_session
 from .config import settings
+from .routers import (
+    daily_goal_router,
+    study_block_router,
+    study_category_router,
+    user_router,
+)
+from .uploads import upload_router
 
 
 @asynccontextmanager

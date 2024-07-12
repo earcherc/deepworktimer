@@ -1,3 +1,4 @@
+from .auth_routes import router as auth_router
 from .auth_utils import (
     create_session,
     delete_session,
@@ -5,4 +6,3 @@ from .auth_utils import (
     hash_password,
     verify_password,
 )
-from .auth_routes import router as auth_router

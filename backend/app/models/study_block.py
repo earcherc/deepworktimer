@@ -1,12 +1,12 @@
-from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
+from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from .user import User
     from .daily_goal import DailyGoal
     from .study_category import StudyCategory
+    from .user import User
 
 
 class StudyBlock(SQLModel, table=True):

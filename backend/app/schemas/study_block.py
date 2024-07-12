@@ -1,6 +1,8 @@
-from typing import Optional
-from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, Field
+
 
 class StudyBlockBase(BaseModel):
     start: datetime
@@ -8,13 +10,16 @@ class StudyBlockBase(BaseModel):
     rating: Optional[float] = Field(None, ge=0, le=5)
     is_countdown: bool = True
 
+
 class StudyBlockCreate(StudyBlockBase):
     daily_goal_id: int
     study_category_id: int
 
+
 class StudyBlockUpdate(BaseModel):
     end: Optional[datetime] = None
     rating: Optional[float] = Field(None, ge=0, le=5)
+
 
 class StudyBlock(StudyBlockBase):
     id: int

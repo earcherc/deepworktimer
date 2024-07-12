@@ -1,9 +1,11 @@
-from sqlmodel import SQLModel, Field, Relationship, UniqueConstraint
-from typing import Optional, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
+
+from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
 
 if TYPE_CHECKING:
-    from .user import User
     from .study_block import StudyBlock
+    from .user import User
+
 
 class StudyCategory(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -17,5 +19,6 @@ class StudyCategory(SQLModel, table=True):
 
     # Composite unique constraint
     __table_args__ = (UniqueConstraint("title", "user_id"),)
+
 
 StudyCategory.update_forward_refs()

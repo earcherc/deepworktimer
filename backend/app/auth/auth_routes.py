@@ -1,20 +1,22 @@
-from fastapi import APIRouter, Depends, Response, HTTPException, Request
+from urllib.parse import urlparse
+
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+
+from ..database import get_session
+from ..dependencies import get_redis
+from ..models import User as UserModel
+from ..uploads.upload_services import get_profile_photo_urls
+from .auth_schemas import LoginRequest, PasswordChangeRequest, RegistrationRequest
 from .auth_utils import (
     create_session,
-    verify_password,
     delete_session,
     get_user_id_from_session,
     hash_password,
+    verify_password,
 )
-from .auth_schemas import RegistrationRequest, LoginRequest, PasswordChangeRequest
-from ..dependencies import get_redis
-from ..database import get_session
-from ..models import User as UserModel
-from ..uploads.upload_services import get_profile_photo_urls 
-from redis.asyncio import Redis
-from urllib.parse import urlparse
 
 router = APIRouter()
 
@@ -52,7 +54,9 @@ async def login(
     user_data = user.__dict__
     user_data.pop("hashed_password", None)
     # Generate presigned URLs for profile photos if they exist
-    user_data["profile_photo_urls"] = await get_profile_photo_urls(user.profile_photo_key)
+    user_data["profile_photo_urls"] = await get_profile_photo_urls(
+        user.profile_photo_key
+    )
     return user_data
 
 

@@ -1,9 +1,11 @@
+import io
 import uuid
+
 import boto3
 from botocore.config import Config
-from ..config import settings
 from PIL import Image
-import io
+
+from ..config import settings
 
 s3_client = boto3.client(
     "s3",
@@ -13,11 +15,15 @@ s3_client = boto3.client(
     config=Config(signature_version="s3v4"),
 )
 
+
 def generate_file_name(original_filename: str) -> str:
     extension = original_filename.split(".")[-1]
     return f"{uuid.uuid4()}.{extension}"
 
-def get_presigned_url_for_image(file_name: str, operation: str = "get_object", expiration: int = 3600) -> str:
+
+def get_presigned_url_for_image(
+    file_name: str, operation: str = "get_object", expiration: int = 3600
+) -> str:
     return s3_client.generate_presigned_url(
         ClientMethod=operation,
         Params={
@@ -27,49 +33,52 @@ def get_presigned_url_for_image(file_name: str, operation: str = "get_object", e
         ExpiresIn=expiration,
     )
 
+
 def compress_image(image_data: bytes, max_size: int = 5 * 1024 * 1024) -> bytes:
     img = Image.open(io.BytesIO(image_data))
-    
-    if img.mode == 'RGBA':
-        img = img.convert('RGB')
-    
+
+    if img.mode == "RGBA":
+        img = img.convert("RGB")
+
     quality = 95
     output = io.BytesIO()
-    
+
     while True:
         output.seek(0)
-        img.save(output, format='JPEG', quality=quality)
+        img.save(output, format="JPEG", quality=quality)
         if output.tell() <= max_size:
             break
         quality -= 5
         if quality < 20:
             raise ValueError("Unable to compress image to desired size")
-    
+
     return output.getvalue()
+
 
 def generate_image_versions(image_data: bytes):
     img = Image.open(io.BytesIO(image_data))
-    
+
     medium = img.copy()
     medium.thumbnail((300, 300))
     medium_output = io.BytesIO()
-    medium.save(medium_output, format='JPEG', quality=85)
-    
+    medium.save(medium_output, format="JPEG", quality=85)
+
     thumbnail = img.copy()
     thumbnail.thumbnail((100, 100))
     thumbnail_output = io.BytesIO()
-    thumbnail.save(thumbnail_output, format='JPEG', quality=85)
-    
+    thumbnail.save(thumbnail_output, format="JPEG", quality=85)
+
     return {
-        'original': image_data,
-        'medium': medium_output.getvalue(),
-        'thumbnail': thumbnail_output.getvalue()
+        "original": image_data,
+        "medium": medium_output.getvalue(),
+        "thumbnail": thumbnail_output.getvalue(),
     }
 
-def upload_to_s3(file_data: bytes, file_name: str, content_type: str = 'image/jpeg'):
+
+def upload_to_s3(file_data: bytes, file_name: str, content_type: str = "image/jpeg"):
     s3_client.put_object(
         Bucket=settings.AWS_S3_BUCKET_NAME,
         Key=file_name,
         Body=file_data,
-        ContentType=content_type
+        ContentType=content_type,
     )
