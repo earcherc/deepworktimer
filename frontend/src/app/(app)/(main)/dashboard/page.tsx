@@ -1,7 +1,7 @@
 'use client';
 
+import TimerContainer from '@app/components/timer/timer-container';
 import Calendar from '@app/components/calendar/calendar';
-import PomodoroTimer from '@app/components/timer/timer';
 import Sidebar from '@app/components/sidebar/sidebar';
 
 const Dashboard = () => {
@@ -9,7 +9,7 @@ const Dashboard = () => {
     <div className="flex h-full p-4" style={{ height: 'calc(100vh - 4rem)' }}>
       <Sidebar />
       <div className="flex flex-grow flex-col overflow-hidden pl-4">
-        <PomodoroTimer />
+        <TimerContainer />
         <div className="mb-4" />
         <Calendar />
       </div>

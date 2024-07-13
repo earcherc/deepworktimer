@@ -1,134 +1,89 @@
-'use client';
-
-import {
-  ApiError,
-  DailyGoal,
-  DailyGoalsService,
-  StudyBlock,
-  StudyBlocksService,
-  StudyCategoriesService,
-  StudyCategory,
-} from '@api';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+// timer.tsx
+import { DailyGoal, StudyBlock, StudyBlockCreate, StudyBlockUpdate, StudyCategory } from '@api';
 import React, { useCallback, useEffect, useState } from 'react';
-import useToast from '@app/context/toasts/toast-context';
 import { differenceInSeconds, parseISO } from 'date-fns';
 import { useTimer } from 'react-timer-hook';
 
-const PomodoroTimer = () => {
-  const { addToast } = useToast();
-  const queryClient = useQueryClient();
+interface TimerProps {
+  activeCategory: StudyCategory | undefined;
+  activeDailyGoal: DailyGoal | undefined;
+  studyBlocksData: StudyBlock[] | undefined;
+  createStudyBlock: (block: StudyBlockCreate) => Promise<StudyBlock>;
+  updateStudyBlock: (params: { id: number; block: Partial<StudyBlockUpdate> }) => Promise<void>;
+  addToast: (toast: { type: string; content: string }) => void;
+}
 
-  // Queries
-  const { data: categoriesData } = useQuery({
-    queryKey: ['studyCategories'],
-    queryFn: () => StudyCategoriesService.readStudyCategoriesStudyCategoriesGet(),
-  });
-  const { data: dailyGoalsData } = useQuery({
-    queryKey: ['dailyGoals'],
-    queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet(),
-  });
-  const { data: studyBlocksData } = useQuery({
-    queryKey: ['studyBlocks'],
-    queryFn: () => StudyBlocksService.readStudyBlocksStudyBlocksGet(),
-  });
-
-  // Active data
-  const activeCategory = categoriesData?.find((cat: StudyCategory) => cat.is_active);
-  const activeDailyGoal = dailyGoalsData?.find((goal: DailyGoal) => goal.is_active);
-
-  // State
-  const [customDuration, setCustomDuration] = useState(0);
+const Timer: React.FC<TimerProps> = ({
+  activeCategory,
+  activeDailyGoal,
+  studyBlocksData,
+  createStudyBlock,
+  updateStudyBlock,
+  addToast,
+}) => {
+  const [customDuration, setCustomDuration] = useState(activeDailyGoal?.block_size || 0);
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [isCountDown, setIsCountDown] = useState(true);
   const [isEditingTime, setIsEditingTime] = useState(false);
 
-  // Mutations
-  const createStudyBlockMutation = useMutation({
-    mutationFn: StudyBlocksService.createStudyBlockStudyBlocksPost,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['studyBlocks'] });
-      setStudyBlockId(data.id);
-      addToast({ type: 'success', content: 'Study block created' });
-    },
-    onError: (error: unknown) => {
-      let errorMessage = 'Failed to create study block';
-      if (error instanceof ApiError) {
-        errorMessage = error.body?.detail || errorMessage;
-      }
-      addToast({ type: 'error', content: errorMessage });
-    },
-  });
-
-  const updateStudyBlockMutation = useMutation({
-    mutationFn: ({ id, block }: { id: number; block: Partial<StudyBlock> }) =>
-      StudyBlocksService.updateStudyBlockStudyBlocksStudyBlockIdPatch(id, block),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['studyBlocks'] });
-      addToast({ type: 'success', content: 'Study block updated' });
-    },
-    onError: (error: unknown) => {
-      let errorMessage = 'Failed to update study block';
-      if (error instanceof ApiError) {
-        errorMessage = error.body?.detail || errorMessage;
-      }
-      addToast({ type: 'error', content: errorMessage });
-    },
-  });
-
-  // Timer setup
   const expiryTimestamp = new Date();
   expiryTimestamp.setSeconds(expiryTimestamp.getSeconds() + customDuration);
 
   const handleTimerExpiration = useCallback(async () => {
     if (studyBlockId) {
-      updateStudyBlockMutation.mutate({ id: studyBlockId, block: { end: new Date().toISOString() } });
+      await updateStudyBlock({ id: studyBlockId, block: { end: new Date().toISOString() } });
     }
     restart(expiryTimestamp, false);
     setIsActive(false);
     setStudyBlockId(null);
-    addToast({ type: 'success', content: 'Session completed!' });
-  }, [studyBlockId, expiryTimestamp]);
+  }, [studyBlockId, expiryTimestamp, updateStudyBlock]);
 
-  const { seconds, minutes, hours, isRunning, start, restart } = useTimer({
+  const { seconds, minutes, hours, isRunning, start, restart, pause } = useTimer({
     expiryTimestamp,
     onExpire: handleTimerExpiration,
     autoStart: false,
   });
 
-  // Effects
   useEffect(() => {
     if (!isActive) {
       recoverIncompleteSession();
     }
   }, [studyBlocksData, isActive]);
 
-  // Handlers
-  const startWorkSession = useCallback(() => {
+  const startWorkSession = useCallback(async () => {
     if (activeDailyGoal && activeCategory) {
-      createStudyBlockMutation.mutate({
+      const newBlock = await createStudyBlock({
         start: new Date().toISOString(),
         is_countdown: isCountDown,
         daily_goal_id: activeDailyGoal.id,
         study_category_id: activeCategory.id,
       });
+      setStudyBlockId(newBlock.id);
       setIsActive(true);
-      start();
+      const newExpiryTimestamp = new Date();
+      newExpiryTimestamp.setSeconds(newExpiryTimestamp.getSeconds() + (isCountDown ? customDuration : 0));
+      restart(newExpiryTimestamp, true);
     }
-  }, [activeDailyGoal, activeCategory, isCountDown]);
+  }, [activeDailyGoal, activeCategory, isCountDown, createStudyBlock, customDuration, restart]);
 
-  const stopTimer = useCallback(() => {
+  const stopTimer = useCallback(async () => {
     if (studyBlockId) {
-      updateStudyBlockMutation.mutate({ id: studyBlockId, block: { end: new Date().toISOString() } });
+      await updateStudyBlock({ id: studyBlockId, block: { end: new Date().toISOString() } });
     }
-    restart(expiryTimestamp, false);
+    pause();
     setIsActive(false);
     setStudyBlockId(null);
-    addToast({ type: 'info', content: 'Session ended' });
-  }, [studyBlockId, expiryTimestamp]);
 
-  // Helper functions
+    if (isCountDown) {
+      restart(expiryTimestamp, false);
+    } else {
+      const newExpiryTimestamp = new Date();
+      newExpiryTimestamp.setSeconds(newExpiryTimestamp.getSeconds());
+      restart(newExpiryTimestamp, false);
+    }
+  }, [studyBlockId, expiryTimestamp, updateStudyBlock, isCountDown, pause, restart]);
+
   const recoverIncompleteSession = () => {
     const latestIncompleteBlock = studyBlocksData
       ?.filter((block: StudyBlock) => !block.end)
@@ -180,7 +135,6 @@ const PomodoroTimer = () => {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // Render
   return (
     <div className="rounded-lg bg-white p-4 shadow sm:p-6">
       <div className="flex flex-col items-center">
@@ -197,18 +151,20 @@ const PomodoroTimer = () => {
         ) : (
           <p
             className={`mb-8 text-5xl font-bold text-indigo-600 ${isCountDown && !isRunning ? 'cursor-pointer' : ''}`}
-            onClick={() => isCountDown && !isRunning && setIsEditingTime(true)}
+            onClick={handleTimeClick}
           >
-            {isCountDown ? formatTime(hours, minutes, seconds) : formatTime(0, 0, seconds)}
+            {isCountDown ? formatTime(hours, minutes, seconds) : formatTime(hours, minutes, seconds)}
           </p>
         )}
         <div className="flex space-x-3">
-          <button
-            onClick={() => setIsCountDown(!isCountDown)}
-            className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            Mode: {isCountDown ? 'Countdown' : 'Timer'}
-          </button>
+          {!isActive && (
+            <button
+              onClick={() => setIsCountDown(!isCountDown)}
+              className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Mode: {isCountDown ? 'Countdown' : 'Timer'}
+            </button>
+          )}
           {!isRunning && !studyBlockId && (
             <button
               onClick={startWorkSession}
@@ -217,7 +173,7 @@ const PomodoroTimer = () => {
               Start
             </button>
           )}
-          {isRunning && (
+          {isActive && (
             <button
               onClick={stopTimer}
               className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
@@ -231,4 +187,4 @@ const PomodoroTimer = () => {
   );
 };
 
-export default PomodoroTimer;
+export default Timer;
