@@ -24,6 +24,7 @@
     "react-hook-form": "^7.48.2",
     "react-query": "^3.39.3",
     "react-timer-hook": "^3.0.7",
+    "react-tooltip": "^5.27.1",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
