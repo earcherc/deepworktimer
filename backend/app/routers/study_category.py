@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from sqlmodel import and_, select, update
 
 from ..database import get_session
 from ..models import StudyCategory
@@ -74,28 +74,37 @@ async def update_study_category(
     db: AsyncSession = Depends(get_session),
     user_id: int = Depends(get_current_user_id),
 ):
-    result = await db.execute(
-        select(StudyCategory).where(
-            StudyCategory.id == study_category_id, StudyCategory.user_id == user_id
+    async with db.begin():
+        result = await db.execute(
+            select(StudyCategory).where(
+                StudyCategory.id == study_category_id, StudyCategory.user_id == user_id
+            )
         )
-    )
-    db_study_category = result.scalar_one_or_none()
-    if db_study_category is None:
-        raise HTTPException(status_code=404, detail="StudyCategory not found")
+        db_study_category = result.scalar_one_or_none()
+        if db_study_category is None:
+            raise HTTPException(status_code=404, detail="StudyCategory not found")
 
-    update_data = study_category.dict(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(db_study_category, key, value)
+        update_data = study_category.dict(exclude_unset=True)
 
-    try:
-        await db.commit()
-        await db.refresh(db_study_category)
-    except IntegrityError:
-        await db.rollback()
-        raise HTTPException(
-            status_code=400,
-            detail=f"Category with title '{study_category.title}' already exists for this user",
-        )
+        if update_data.get("is_active") == True:
+            await db.execute(
+                update(StudyCategory)
+                .where(
+                    and_(
+                        StudyCategory.user_id == user_id,
+                        StudyCategory.is_active == True,
+                    )
+                )
+                .values(is_active=False)
+            )
+
+        for key, value in update_data.items():
+            setattr(db_study_category, key, value)
+
+        await db.flush()
+
+    await db.commit()
+    await db.refresh(db_study_category)
     return db_study_category
 
 
