@@ -1,8 +1,5 @@
-// timer.tsx
 import { DailyGoal, StudyBlock, StudyBlockCreate, StudyBlockUpdate, StudyCategory } from '@api';
 import React, { useCallback, useEffect, useState } from 'react';
-import { differenceInSeconds, parseISO } from 'date-fns';
-import { useTimer } from 'react-timer-hook';
 
 interface TimerProps {
   activeCategory: StudyCategory | undefined;
@@ -10,7 +7,6 @@ interface TimerProps {
   studyBlocksData: StudyBlock[] | undefined;
   createStudyBlock: (block: StudyBlockCreate) => Promise<StudyBlock>;
   updateStudyBlock: (params: { id: number; block: Partial<StudyBlockUpdate> }) => Promise<void>;
-  addToast: (toast: { type: string; content: string }) => void;
 }
 
 const Timer: React.FC<TimerProps> = ({
@@ -19,40 +15,55 @@ const Timer: React.FC<TimerProps> = ({
   studyBlocksData,
   createStudyBlock,
   updateStudyBlock,
-  addToast,
 }) => {
-  const [customDuration, setCustomDuration] = useState(activeDailyGoal?.block_size || 0);
-  const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
+  const [time, setTime] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [isCountDown, setIsCountDown] = useState(true);
-  const [isEditingTime, setIsEditingTime] = useState(false);
+  const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
 
-  const expiryTimestamp = new Date();
-  expiryTimestamp.setSeconds(expiryTimestamp.getSeconds() + customDuration);
+  const getInitialTime = useCallback(() => {
+    return (activeDailyGoal?.block_size || 0) * 60; // Convert minutes to seconds
+  }, [activeDailyGoal]);
+
+  useEffect(() => {
+    if (isCountDown) {
+      setTime(getInitialTime());
+    }
+  }, [isCountDown, getInitialTime]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isActive) {
+      interval = setInterval(() => {
+        setTime((prevTime) => {
+          if (isCountDown) {
+            if (prevTime <= 0) {
+              clearInterval(interval!);
+              handleTimerExpiration();
+              return 0;
+            }
+            return prevTime - 1;
+          } else {
+            return prevTime + 1;
+          }
+        });
+      }, 1000);
+    } else if (!isActive && time !== 0) {
+      clearInterval(interval!);
+    }
+    return () => clearInterval(interval!);
+  }, [isActive, isCountDown]);
 
   const handleTimerExpiration = useCallback(async () => {
     if (studyBlockId) {
       await updateStudyBlock({ id: studyBlockId, block: { end: new Date().toISOString() } });
     }
-    restart(expiryTimestamp, false);
     setIsActive(false);
     setStudyBlockId(null);
-  }, [studyBlockId, expiryTimestamp, updateStudyBlock]);
+  }, [studyBlockId, updateStudyBlock]);
 
-  const { seconds, minutes, hours, isRunning, start, restart, pause } = useTimer({
-    expiryTimestamp,
-    onExpire: handleTimerExpiration,
-    autoStart: false,
-  });
-
-  useEffect(() => {
-    if (!isActive) {
-      recoverIncompleteSession();
-    }
-  }, [studyBlocksData, isActive]);
-
-  const startWorkSession = useCallback(async () => {
-    if (activeDailyGoal && activeCategory) {
+  const startTimer = async () => {
+    if (activeCategory && activeDailyGoal) {
       const newBlock = await createStudyBlock({
         start: new Date().toISOString(),
         is_countdown: isCountDown,
@@ -61,126 +72,59 @@ const Timer: React.FC<TimerProps> = ({
       });
       setStudyBlockId(newBlock.id);
       setIsActive(true);
-      const newExpiryTimestamp = new Date();
-      newExpiryTimestamp.setSeconds(newExpiryTimestamp.getSeconds() + (isCountDown ? customDuration : 0));
-      restart(newExpiryTimestamp, true);
+      setTime(isCountDown ? getInitialTime() : 0);
     }
-  }, [activeDailyGoal, activeCategory, isCountDown, createStudyBlock, customDuration, restart]);
+  };
 
-  const stopTimer = useCallback(async () => {
+  const stopTimer = async () => {
     if (studyBlockId) {
       await updateStudyBlock({ id: studyBlockId, block: { end: new Date().toISOString() } });
     }
-    pause();
     setIsActive(false);
     setStudyBlockId(null);
+    setTime(isCountDown ? getInitialTime() : 0);
+  };
 
-    if (isCountDown) {
-      restart(expiryTimestamp, false);
-    } else {
-      const newExpiryTimestamp = new Date();
-      newExpiryTimestamp.setSeconds(newExpiryTimestamp.getSeconds());
-      restart(newExpiryTimestamp, false);
+  const toggleMode = () => {
+    setIsCountDown(!isCountDown);
+    setTime(isCountDown ? 0 : getInitialTime());
+  };
+
+  const formatTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
-  }, [studyBlockId, expiryTimestamp, updateStudyBlock, isCountDown, pause, restart]);
-
-  const recoverIncompleteSession = () => {
-    const latestIncompleteBlock = studyBlocksData
-      ?.filter((block: StudyBlock) => !block.end)
-      .sort((a: StudyBlock, b: StudyBlock) => new Date(b.start).getTime() - new Date(a.start).getTime())[0];
-
-    if (latestIncompleteBlock?.id) {
-      setIsActive(true);
-      setStudyBlockId(latestIncompleteBlock.id);
-      setIsCountDown(latestIncompleteBlock.is_countdown ?? true);
-      const startTimestamp = parseISO(latestIncompleteBlock.start).getTime();
-      const nowTimestamp = Date.now();
-      const elapsed = differenceInSeconds(nowTimestamp, startTimestamp);
-      const remainingTimeInSeconds = isCountDown ? Math.max(0, customDuration - elapsed) : elapsed;
-      const newExpiryTimestamp = new Date();
-      newExpiryTimestamp.setSeconds(newExpiryTimestamp.getSeconds() + remainingTimeInSeconds);
-      restart(newExpiryTimestamp, true);
-    } else {
-      restart(expiryTimestamp, false);
-    }
-  };
-
-  const setCustomTimerDuration = (durationInSeconds: number) => {
-    setCustomDuration(durationInSeconds);
-    const newExpiryTimestamp = new Date();
-    newExpiryTimestamp.setSeconds(newExpiryTimestamp.getSeconds() + durationInSeconds);
-    restart(newExpiryTimestamp, false);
-  };
-
-  const handleTimeClick = () => {
-    if (!isRunning) {
-      setIsEditingTime(true);
-    }
-  };
-
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const [h, m, s] = e.target.value.split(':').map(Number);
-    const totalSeconds = h * 3600 + m * 60 + s;
-    if (totalSeconds <= 32400) {
-      // 9 hours in seconds
-      setCustomTimerDuration(totalSeconds);
-    }
-  };
-
-  const handleTimeBlur = () => {
-    setIsEditingTime(false);
-  };
-
-  const formatTime = (h: number, m: number, s: number) => {
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
   return (
     <div className="rounded-lg bg-white p-4 shadow sm:p-6">
       <div className="flex flex-col items-center">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">{isCountDown ? 'Countdown' : 'Timer'}</h2>
-        {isCountDown && isEditingTime ? (
-          <input
-            type="text"
-            value={formatTime(hours, minutes, seconds)}
-            onChange={handleTimeChange}
-            onBlur={handleTimeBlur}
-            className="mb-8 text-5xl font-bold text-indigo-600 bg-transparent border-b border-indigo-600 focus:outline-none"
-            autoFocus
-          />
-        ) : (
-          <p
-            className={`mb-8 text-5xl font-bold text-indigo-600 ${isCountDown && !isRunning ? 'cursor-pointer' : ''}`}
-            onClick={handleTimeClick}
-          >
-            {isCountDown ? formatTime(hours, minutes, seconds) : formatTime(hours, minutes, seconds)}
-          </p>
-        )}
+        <h2 className="mb-4 text-xl font-semibold text-gray-900">{isCountDown ? 'Timer' : 'Stopwatch'}</h2>
+        <p className="mb-8 text-5xl font-bold text-indigo-600">{formatTime(time)}</p>
         <div className="flex space-x-3">
           {!isActive && (
             <button
-              onClick={() => setIsCountDown(!isCountDown)}
+              onClick={toggleMode}
               className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              Mode: {isCountDown ? 'Countdown' : 'Timer'}
+              {isCountDown ? 'Switch to Stopwatch' : 'Switch to Timer'}
             </button>
           )}
-          {!isRunning && !studyBlockId && (
-            <button
-              onClick={startWorkSession}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              Start
-            </button>
-          )}
-          {isActive && (
-            <button
-              onClick={stopTimer}
-              className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-            >
-              Stop
-            </button>
-          )}
+          <button
+            onClick={isActive ? stopTimer : startTimer}
+            className={`rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              isActive
+                ? 'bg-red-500 hover:bg-red-600 focus:ring-red-500'
+                : 'bg-indigo-600 hover:bg-indigo-500 focus:ring-indigo-500'
+            }`}
+          >
+            {isActive ? 'Stop' : 'Start'}
+          </button>
         </div>
       </div>
     </div>

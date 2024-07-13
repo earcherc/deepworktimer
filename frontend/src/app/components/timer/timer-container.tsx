@@ -1,4 +1,3 @@
-// timer-container.tsx
 import {
   ApiError,
   DailyGoalsService,
@@ -37,7 +36,6 @@ const TimerContainer: React.FC = () => {
     mutationFn: StudyBlocksService.createStudyBlockStudyBlocksPost,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['studyBlocks'] });
-      addToast({ type: 'success', content: 'Study block created' });
       return data;
     },
     onError: (error: unknown) => {
@@ -54,7 +52,6 @@ const TimerContainer: React.FC = () => {
       StudyBlocksService.updateStudyBlockStudyBlocksStudyBlockIdPatch(id, block),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studyBlocks'] });
-      addToast({ type: 'success', content: 'Study block updated' });
     },
     onError: (error: unknown) => {
       let errorMessage = 'Failed to update study block';
@@ -87,7 +84,6 @@ const TimerContainer: React.FC = () => {
       studyBlocksData={studyBlocksData}
       createStudyBlock={createStudyBlock}
       updateStudyBlock={updateStudyBlock}
-      addToast={addToast}
     />
   );
 };
