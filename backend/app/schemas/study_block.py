@@ -8,7 +8,7 @@ class StudyBlockBase(BaseModel):
     start: datetime
     end: Optional[datetime] = None
     rating: Optional[float] = Field(None, ge=0, le=5)
-    is_countdown: bool = True
+    is_countdown: bool = Field(True)
 
 
 class StudyBlockCreate(StudyBlockBase):
