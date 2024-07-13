@@ -33,7 +33,6 @@ const DailyGoalCreateComponent = () => {
       queryClient.invalidateQueries({ queryKey: ['dailyGoals'] });
       reset();
       hideModal();
-      addToast({ type: 'success', content: 'Daily goal created successfully.' });
     },
     onError: (error: unknown) => {
       let errorMessage = 'Failed to create daily goal';

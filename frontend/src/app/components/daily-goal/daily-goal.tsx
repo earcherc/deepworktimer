@@ -26,7 +26,6 @@ const DailyGoalComponent = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dailyGoals'] });
-      addToast({ type: 'success', content: 'Goal updated successfully.' });
     },
     onError: (error: unknown) => {
       let errorMessage = 'Failed to update goal';

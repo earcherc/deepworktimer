@@ -1,11 +1,10 @@
 'use client';
 
-import { StudyCategoryCreate, StudyCategoriesService, ApiError } from '@api';
+import { ApiError, StudyCategoriesService, StudyCategoryCreate } from '@api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useModalContext } from '@app/context/modal/modal-context';
 import useToast from '@app/context/toasts/toast-context';
 import { useForm } from 'react-hook-form';
-import React from 'react';
 
 const StudyCategoryCreateComponent = () => {
   const { addToast } = useToast();
@@ -30,7 +29,6 @@ const StudyCategoryCreateComponent = () => {
       queryClient.invalidateQueries({ queryKey: ['studyCategories'] });
       reset();
       hideModal();
-      addToast({ type: 'success', content: 'Category created successfully.' });
     },
     onError: (error: unknown) => {
       let errorMessage = 'Failed to create category';
