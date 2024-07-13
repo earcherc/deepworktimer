@@ -1,6 +1,6 @@
 'use client';
 
-import { StudyBlocksService, DailyGoalsService, StudyCategoriesService, UsersService } from '@api';
+import { DailyGoalsService, StudyBlocksService, StudyCategoriesService, UsersService } from '@api';
 import { useQuery } from '@tanstack/react-query';
 import Nav from '@app/components/nav';
 

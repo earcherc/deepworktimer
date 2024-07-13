@@ -1,16 +1,16 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { useModalContext } from '@app/context/modal/modal-context';
-import { DailyGoalsService, DailyGoal, ApiError } from '@api';
+import { ApiError, DailyGoal, DailyGoalsService } from '@api';
 import useToast from '@app/context/toasts/toast-context';
 import { Menu, Transition } from '@headlessui/react';
 import DailyGoalCreate from './daily-goal-create';
 import classNames from 'classnames';
 import React from 'react';
 
-const DailyGoalComp = () => {
+const DailyGoalComponent = () => {
   const { addToast } = useToast();
   const { showModal } = useModalContext();
   const queryClient = useQueryClient();
@@ -127,4 +127,4 @@ const DailyGoalComp = () => {
   );
 };
 
-export default DailyGoalComp;
+export default DailyGoalComponent;

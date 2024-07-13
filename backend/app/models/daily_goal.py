@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional
 
+from sqlalchemy import UniqueConstraint
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -19,6 +20,12 @@ class DailyGoal(SQLModel, table=True):
     # Relationships
     user: "User" = Relationship(back_populates="daily_goals")
     study_blocks: List["StudyBlock"] = Relationship(back_populates="daily_goal")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id", "quantity", "block_size", name="uq_user_quantity_block_size"
+        ),
+    )
 
 
 DailyGoal.update_forward_refs()
