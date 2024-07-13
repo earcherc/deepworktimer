@@ -1,18 +1,18 @@
 'use client';
 
 import {
-  StudyBlocksService,
-  DailyGoalsService,
-  StudyCategoriesService,
-  StudyBlock,
-  DailyGoal,
-  StudyCategory,
   ApiError,
+  DailyGoal,
+  DailyGoalsService,
+  StudyBlock,
+  StudyBlocksService,
+  StudyCategoriesService,
+  StudyCategory,
 } from '@api';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import React, { useEffect, useState, useCallback } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import React, { useCallback, useEffect, useState } from 'react';
 import useToast from '@app/context/toasts/toast-context';
-import { parseISO, differenceInSeconds } from 'date-fns';
+import { differenceInSeconds, parseISO } from 'date-fns';
 import { useTimer } from 'react-timer-hook';
 
 const PomodoroTimer = () => {
@@ -36,10 +36,9 @@ const PomodoroTimer = () => {
   // Active data
   const activeCategory = categoriesData?.find((cat: StudyCategory) => cat.is_active);
   const activeDailyGoal = dailyGoalsData?.find((goal: DailyGoal) => goal.is_active);
-  const defaultWorkTimeInSeconds = (activeDailyGoal?.block_size || 25) * 60;
 
   // State
-  const [customDuration, setCustomDuration] = useState(defaultWorkTimeInSeconds);
+  const [customDuration, setCustomDuration] = useState(0);
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [isCountDown, setIsCountDown] = useState(true);
@@ -89,20 +88,16 @@ const PomodoroTimer = () => {
     restart(expiryTimestamp, false);
     setIsActive(false);
     setStudyBlockId(null);
-    addToast({ type: 'success', content: 'Pomodoro session completed!' });
+    addToast({ type: 'success', content: 'Session completed!' });
   }, [studyBlockId, expiryTimestamp]);
 
-  const { seconds, minutes, hours, isRunning, start, pause, resume, restart } = useTimer({
+  const { seconds, minutes, hours, isRunning, start, restart } = useTimer({
     expiryTimestamp,
     onExpire: handleTimerExpiration,
     autoStart: false,
   });
 
   // Effects
-  useEffect(() => {
-    setCustomDuration(defaultWorkTimeInSeconds);
-  }, [defaultWorkTimeInSeconds]);
-
   useEffect(() => {
     if (!isActive) {
       recoverIncompleteSession();
@@ -122,27 +117,6 @@ const PomodoroTimer = () => {
       start();
     }
   }, [activeDailyGoal, activeCategory, isCountDown]);
-
-  const pauseTimer = useCallback(() => {
-    if (isRunning && studyBlockId) {
-      updateStudyBlockMutation.mutate({ id: studyBlockId, block: { end: new Date().toISOString() } });
-      pause();
-      addToast({ type: 'info', content: 'Session paused' });
-    }
-  }, [isRunning, studyBlockId]);
-
-  const resumeTimer = useCallback(() => {
-    if (!isRunning && activeDailyGoal && activeCategory) {
-      createStudyBlockMutation.mutate({
-        start: new Date().toISOString(),
-        is_countdown: isCountDown,
-        daily_goal_id: activeDailyGoal?.id,
-        study_category_id: activeCategory?.id,
-      });
-      resume();
-      addToast({ type: 'info', content: 'Session resumed' });
-    }
-  }, [isRunning, activeDailyGoal, activeCategory, isCountDown]);
 
   const stopTimer = useCallback(() => {
     if (studyBlockId) {
@@ -167,7 +141,7 @@ const PomodoroTimer = () => {
       const startTimestamp = parseISO(latestIncompleteBlock.start).getTime();
       const nowTimestamp = Date.now();
       const elapsed = differenceInSeconds(nowTimestamp, startTimestamp);
-      const remainingTimeInSeconds = isCountDown ? Math.max(0, defaultWorkTimeInSeconds - elapsed) : elapsed;
+      const remainingTimeInSeconds = isCountDown ? Math.max(0, customDuration - elapsed) : elapsed;
       const newExpiryTimestamp = new Date();
       newExpiryTimestamp.setSeconds(newExpiryTimestamp.getSeconds() + remainingTimeInSeconds);
       restart(newExpiryTimestamp, true);
@@ -210,8 +184,8 @@ const PomodoroTimer = () => {
   return (
     <div className="rounded-lg bg-white p-4 shadow sm:p-6">
       <div className="flex flex-col items-center">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">{isRunning ? 'Focus Time' : 'Pomodoro Timer'}</h2>
-        {isEditingTime ? (
+        <h2 className="mb-4 text-xl font-semibold text-gray-900">{isCountDown ? 'Countdown' : 'Timer'}</h2>
+        {isCountDown && isEditingTime ? (
           <input
             type="text"
             value={formatTime(hours, minutes, seconds)}
@@ -221,43 +195,34 @@ const PomodoroTimer = () => {
             autoFocus
           />
         ) : (
-          <p className="mb-8 text-5xl font-bold text-indigo-600 cursor-pointer" onClick={handleTimeClick}>
-            {formatTime(hours, minutes, seconds)}
+          <p
+            className={`mb-8 text-5xl font-bold text-indigo-600 ${isCountDown && !isRunning ? 'cursor-pointer' : ''}`}
+            onClick={() => isCountDown && !isRunning && setIsEditingTime(true)}
+          >
+            {isCountDown ? formatTime(hours, minutes, seconds) : formatTime(0, 0, seconds)}
           </p>
         )}
-        <div className="flex space-x-3 mb-4">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={isCountDown}
-              onChange={(e) => setIsCountDown(e.target.checked)}
-              className="mr-2"
-            />
-            Countdown
-          </label>
-        </div>
         <div className="flex space-x-3">
+          <button
+            onClick={() => setIsCountDown(!isCountDown)}
+            className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Mode: {isCountDown ? 'Countdown' : 'Timer'}
+          </button>
           {!isRunning && !studyBlockId && (
             <button
               onClick={startWorkSession}
-              className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               Start
             </button>
           )}
           {isRunning && (
-            <button onClick={pauseTimer} className="timer-button bg-yellow-500 hover:bg-yellow-400">
-              Pause
-            </button>
-          )}
-          {!isRunning && studyBlockId && (
-            <button onClick={resumeTimer} className="timer-button bg-green-500 hover:bg-green-400">
-              Resume
-            </button>
-          )}
-          {studyBlockId && (
-            <button onClick={stopTimer} className="timer-button bg-red-500 hover:bg-red-400">
-              End Session
+            <button
+              onClick={stopTimer}
+              className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            >
+              Stop
             </button>
           )}
         </div>

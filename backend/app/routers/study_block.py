@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -19,7 +20,12 @@ async def create_study_block(
     db: AsyncSession = Depends(get_session),
     user_id: int = Depends(get_current_user_id),
 ):
-    db_study_block = StudyBlock(**study_block.dict(), user_id=user_id)
+    study_block_dict = study_block.dict()
+
+    if study_block_dict["start"].tzinfo is not None:
+        study_block_dict["start"] = study_block_dict["start"].replace(tzinfo=None)
+
+    db_study_block = StudyBlock(**study_block_dict, user_id=user_id)
     db.add(db_study_block)
     await db.commit()
     await db.refresh(db_study_block)
@@ -72,10 +78,18 @@ async def update_study_block(
         )
     )
     db_study_block = result.scalar_one_or_none()
+
     if db_study_block is None:
         raise HTTPException(status_code=404, detail="StudyBlock not found")
 
     update_data = study_block.dict(exclude_unset=True)
+
+    # Direct handling of datetime objects for "start" and "end"
+    if "start" in update_data and update_data["start"].tzinfo is not None:
+        update_data["start"] = update_data["start"].replace(tzinfo=None)
+    if "end" in update_data and update_data["end"].tzinfo is not None:
+        update_data["end"] = update_data["end"].replace(tzinfo=None)
+
     for key, value in update_data.items():
         setattr(db_study_block, key, value)
 
