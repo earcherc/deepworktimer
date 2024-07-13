@@ -1,5 +1,4 @@
 'use client';
-
 import { StudyBlock as StudyBlockType } from '@api';
 import React, { useEffect, useState } from 'react';
 
@@ -13,17 +12,12 @@ const timeToGridRow = (start: string, end: string | undefined): string => {
   return `${gridRowStart} / ${gridRowEnd}`;
 };
 
-const formatTime = (dateString: string): string => {
-  const options: Intl.DateTimeFormatOptions = {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: 'UTC',
-  };
-  return new Date(dateString).toLocaleTimeString([], options).toUpperCase();
+const formatTime = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
-const StudyBlock: React.FC<{ block: StudyBlockType }> = ({ block }) => {
+const StudyBlockComponent: React.FC<{ block: StudyBlockType }> = ({ block }) => {
   const { start, end } = block;
   const [gridPosition, setGridPosition] = useState(timeToGridRow(start, end));
   const [currentEndTime, setCurrentEndTime] = useState(end ? formatTime(end) : 'In Progress');
@@ -34,7 +28,6 @@ const StudyBlock: React.FC<{ block: StudyBlockType }> = ({ block }) => {
         setGridPosition(timeToGridRow(start, undefined));
         setCurrentEndTime(formatTime(new Date().toISOString()));
       }, 60000); // Update every minute
-
       return () => clearInterval(timer);
     }
   }, [start, end]);
@@ -56,4 +49,4 @@ const StudyBlock: React.FC<{ block: StudyBlockType }> = ({ block }) => {
   );
 };
 
-export default StudyBlock;
+export default StudyBlockComponent;

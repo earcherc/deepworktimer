@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import UniqueConstraint
@@ -14,7 +14,7 @@ class DailyGoal(SQLModel, table=True):
     quantity: int
     block_size: int
     is_active: bool = Field(default=False)
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
     user_id: int = Field(foreign_key="user.id", index=True)
 
     # Relationships

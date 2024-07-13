@@ -1,25 +1,76 @@
-import { DailyGoal, StudyBlock, StudyBlockCreate, StudyBlockUpdate, StudyCategory } from '@api';
+import {
+  ApiError,
+  DailyGoal,
+  DailyGoalsService,
+  StudyBlock,
+  StudyBlocksService,
+  StudyBlockUpdate,
+  StudyCategoriesService,
+  StudyCategory,
+} from '@api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { useCallback, useEffect, useState } from 'react';
+import { getTodayDateRange } from '../../../utils/dateUtils';
+import useToast from '@app/context/toasts/toast-context';
 
-interface TimerProps {
-  activeCategory: StudyCategory | undefined;
-  activeDailyGoal: DailyGoal | undefined;
-  studyBlocksData: StudyBlock[] | undefined;
-  createStudyBlock: (block: StudyBlockCreate) => Promise<StudyBlock>;
-  updateStudyBlock: (params: { id: number; block: Partial<StudyBlockUpdate> }) => Promise<void>;
-}
+const Timer: React.FC = () => {
+  const { addToast } = useToast();
+  const queryClient = useQueryClient();
 
-const Timer: React.FC<TimerProps> = ({
-  activeCategory,
-  activeDailyGoal,
-  studyBlocksData,
-  createStudyBlock,
-  updateStudyBlock,
-}) => {
   const [time, setTime] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [isCountDown, setIsCountDown] = useState(true);
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
+
+  const { data: categoriesData } = useQuery<StudyCategory[]>({
+    queryKey: ['studyCategories'],
+    queryFn: () => StudyCategoriesService.readStudyCategoriesStudyCategoriesGet(),
+  });
+
+  const { data: dailyGoalsData } = useQuery<DailyGoal[]>({
+    queryKey: ['dailyGoals'],
+    queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet(),
+  });
+
+  const dateRange = getTodayDateRange();
+
+  const { data: studyBlocksData } = useQuery<StudyBlock[]>({
+    queryKey: ['studyBlocks', dateRange.start_time, dateRange.end_time],
+    queryFn: () => StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange),
+  });
+
+  const activeCategory = categoriesData?.find((cat) => cat.is_active);
+  const activeDailyGoal = dailyGoalsData?.find((goal) => goal.is_active);
+
+  const createStudyBlockMutation = useMutation({
+    mutationFn: StudyBlocksService.createStudyBlockStudyBlocksPost,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['studyBlocks'] });
+      return data;
+    },
+    onError: (error: unknown) => {
+      let errorMessage = 'Failed to create study block';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
+    },
+  });
+
+  const updateStudyBlockMutation = useMutation({
+    mutationFn: ({ id, block }: { id: number; block: StudyBlockUpdate }) =>
+      StudyBlocksService.updateStudyBlockStudyBlocksStudyBlockIdPatch(id, block),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['studyBlocks'] });
+    },
+    onError: (error: unknown) => {
+      let errorMessage = 'Failed to update study block';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
+      addToast({ type: 'error', content: errorMessage });
+    },
+  });
 
   const getInitialTime = useCallback(() => {
     return (activeDailyGoal?.block_size || 0) * 60; // Convert minutes to seconds
@@ -56,15 +107,18 @@ const Timer: React.FC<TimerProps> = ({
 
   const handleTimerExpiration = useCallback(async () => {
     if (studyBlockId) {
-      await updateStudyBlock({ id: studyBlockId, block: { end: new Date().toISOString() } });
+      await updateStudyBlockMutation.mutateAsync({
+        id: studyBlockId,
+        block: { end: new Date().toISOString() },
+      });
     }
     setIsActive(false);
     setStudyBlockId(null);
-  }, [studyBlockId, updateStudyBlock]);
+  }, [studyBlockId, updateStudyBlockMutation]);
 
   const startTimer = async () => {
     if (activeCategory && activeDailyGoal) {
-      const newBlock = await createStudyBlock({
+      const newBlock = await createStudyBlockMutation.mutateAsync({
         start: new Date().toISOString(),
         is_countdown: isCountDown,
         daily_goal_id: activeDailyGoal.id,
@@ -78,7 +132,10 @@ const Timer: React.FC<TimerProps> = ({
 
   const stopTimer = async () => {
     if (studyBlockId) {
-      await updateStudyBlock({ id: studyBlockId, block: { end: new Date().toISOString() } });
+      await updateStudyBlockMutation.mutateAsync({
+        id: studyBlockId,
+        block: { end: new Date().toISOString() },
+      });
     }
     setIsActive(false);
     setStudyBlockId(null);

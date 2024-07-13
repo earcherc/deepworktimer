@@ -1,14 +1,15 @@
 from datetime import datetime, timezone
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+
 from ..database import get_session
-from ..models import StudyBlock
-from ..schemas import StudyBlock as StudyBlockSchema
-from ..schemas import StudyBlockCreate, StudyBlockUpdate
+from ..models.study_block import StudyBlock
+from ..schemas.study_block import StudyBlock as StudyBlockSchema
+from ..schemas.study_block import StudyBlockCreate, StudyBlockUpdate, StudyBlockQuery
 from .utils import get_current_user_id
 
 router = APIRouter()
@@ -20,8 +21,21 @@ async def create_study_block(
     db: AsyncSession = Depends(get_session),
     user_id: int = Depends(get_current_user_id),
 ):
-    study_block_dict = study_block.dict()
+    # Check for existing unfinished block
+    query = select(StudyBlock).where(
+        StudyBlock.user_id == user_id, StudyBlock.end == None
+    )
+    result = await db.execute(query)
+    existing_unfinished_block = result.scalar_one_or_none()
 
+    if existing_unfinished_block:
+        raise HTTPException(
+            status_code=400,
+            detail="An unfinished study block already exists. Please finish or delete it before creating a new one.",
+        )
+
+    # If no unfinished block exists, create the new block
+    study_block_dict = study_block.dict()
     if study_block_dict["start"].tzinfo is not None:
         study_block_dict["start"] = study_block_dict["start"].replace(tzinfo=None)
 
@@ -49,19 +63,29 @@ async def read_study_block(
     return db_study_block
 
 
-@router.get("/", response_model=List[StudyBlockSchema])
-async def read_study_blocks(
-    skip: int = 0,
-    limit: int = 10,
+@router.post("/query", response_model=List[StudyBlockSchema])
+async def query_study_blocks(
+    query: StudyBlockQuery = Body(...),
     db: AsyncSession = Depends(get_session),
     user_id: int = Depends(get_current_user_id),
 ):
-    result = await db.execute(
-        select(StudyBlock)
-        .where(StudyBlock.user_id == user_id)
-        .offset(skip)
-        .limit(limit)
-    )
+    db_query = select(StudyBlock).where(StudyBlock.user_id == user_id)
+
+    if query.start_time:
+        start_time = datetime.fromisoformat(query.start_time)
+        db_query = db_query.where(StudyBlock.start >= start_time)
+    if query.end_time:
+        end_time = datetime.fromisoformat(query.end_time)
+        db_query = db_query.where(StudyBlock.start <= end_time)
+
+    db_query = db_query.order_by(StudyBlock.start.desc())
+
+    if query.skip is not None:
+        db_query = db_query.offset(query.skip)
+    if query.limit is not None:
+        db_query = db_query.limit(query.limit)
+
+    result = await db.execute(db_query)
     return result.scalars().all()
 
 

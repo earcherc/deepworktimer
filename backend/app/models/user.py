@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone as timezoneDT
 from enum import Enum
 from typing import TYPE_CHECKING, List, Optional
 
@@ -35,7 +35,7 @@ class User(SQLModel, table=True):
     timezone: Optional[str] = None
     language: Optional[str] = None
     status: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.now(timezoneDT.utc))
 
     # Relationships
     study_blocks: List["StudyBlock"] = Relationship(

@@ -1,17 +1,19 @@
 'use client';
-
-import { StudyBlocksService, StudyBlock as StudyBlockType } from '@api';
+import { getTodayDateRange } from '../../../utils/dateUtils';
+import { StudyBlock, StudyBlocksService } from '@api';
 import { useQuery } from '@tanstack/react-query';
+import StudyBlockComponent from './study-block';
 import { Fragment, useRef } from 'react';
-import StudyBlock from './study-block';
 
 export default function Calendar() {
   const container = useRef<HTMLDivElement>(null);
   const containerOffset = useRef<HTMLDivElement>(null);
 
-  const { data: studyBlocks = [] } = useQuery<StudyBlockType[]>({
-    queryKey: ['studyBlocks'],
-    queryFn: () => StudyBlocksService.readStudyBlocksStudyBlocksGet(),
+  const dateRange = getTodayDateRange();
+
+  const { data: studyBlocksData } = useQuery<StudyBlock[]>({
+    queryKey: ['studyBlocks', dateRange.start_time, dateRange.end_time],
+    queryFn: () => StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange),
   });
 
   return (
@@ -43,9 +45,7 @@ export default function Calendar() {
                 className="col-start-1 col-end-2 row-start-1 grid grid-cols-1"
                 style={{ gridTemplateRows: '1.75rem repeat(1440, minmax(1px, auto))' }}
               >
-                {studyBlocks.map((block) => (
-                  <StudyBlock key={block.id} block={block} />
-                ))}
+                {studyBlocksData?.map((block) => <StudyBlockComponent key={block.id} block={block} />)}
               </ol>
             </div>
           </div>

@@ -18,6 +18,7 @@ export type { PasswordChangeRequest } from './models/PasswordChangeRequest';
 export type { RegistrationRequest } from './models/RegistrationRequest';
 export type { StudyBlock } from './models/StudyBlock';
 export type { StudyBlockCreate } from './models/StudyBlockCreate';
+export type { StudyBlockQuery } from './models/StudyBlockQuery';
 export type { StudyBlockUpdate } from './models/StudyBlockUpdate';
 export type { StudyCategory } from './models/StudyCategory';
 export type { StudyCategoryCreate } from './models/StudyCategoryCreate';

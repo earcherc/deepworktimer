@@ -32,7 +32,7 @@ class StudyBlock(StudyBlockBase):
 
 
 class StudyBlockQuery(BaseModel):
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    skip: int = Field(0, ge=0)
-    limit: int = Field(100, ge=1, le=1000)
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    skip: Optional[int] = Field(default=0, ge=0)
+    limit: Optional[int] = Field(default=100, ge=1, le=1000)

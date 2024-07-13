@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Optional
 
 from sqlmodel import Field, Relationship, SQLModel
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 class StudyBlock(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    start: datetime = Field(...)
+    start: datetime = Field(default_factory=datetime.now(timezone.utc))
     end: Optional[datetime] = Field(default=None)
     rating: Optional[float] = Field(default=None, ge=0, le=5)
     is_countdown: bool = Field(default=True)

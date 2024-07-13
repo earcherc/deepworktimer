@@ -4,34 +4,12 @@
 /* eslint-disable */
 import type { StudyBlock } from '../models/StudyBlock';
 import type { StudyBlockCreate } from '../models/StudyBlockCreate';
+import type { StudyBlockQuery } from '../models/StudyBlockQuery';
 import type { StudyBlockUpdate } from '../models/StudyBlockUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class StudyBlocksService {
-    /**
-     * Read Study Blocks
-     * @param skip
-     * @param limit
-     * @returns StudyBlock Successful Response
-     * @throws ApiError
-     */
-    public static readStudyBlocksStudyBlocksGet(
-        skip?: number,
-        limit: number = 10,
-    ): CancelablePromise<Array<StudyBlock>> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/study-blocks/',
-            query: {
-                'skip': skip,
-                'limit': limit,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
     /**
      * Create Study Block
      * @param requestBody
@@ -108,6 +86,25 @@ export class StudyBlocksService {
             path: {
                 'study_block_id': studyBlockId,
             },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Query Study Blocks
+     * @param requestBody
+     * @returns StudyBlock Successful Response
+     * @throws ApiError
+     */
+    public static queryStudyBlocksStudyBlocksQueryPost(
+        requestBody: StudyBlockQuery,
+    ): CancelablePromise<Array<StudyBlock>> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/study-blocks/query',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
