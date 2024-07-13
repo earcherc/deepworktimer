@@ -1,5 +1,3 @@
-from urllib.parse import urlparse
-
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,7 +5,7 @@ from sqlalchemy.future import select
 
 from ..database import get_session
 from ..dependencies import get_redis
-from ..models import User as UserModel
+from ..models.user import User as UserModel
 from ..uploads.upload_services import get_profile_photo_urls
 from .auth_schemas import LoginRequest, PasswordChangeRequest, RegistrationRequest
 from .auth_utils import (

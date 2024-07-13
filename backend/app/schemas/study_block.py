@@ -29,3 +29,10 @@ class StudyBlock(StudyBlockBase):
 
     class Config:
         orm_mode = True
+
+
+class StudyBlockQuery(BaseModel):
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    skip: int = Field(0, ge=0)
+    limit: int = Field(100, ge=1, le=1000)

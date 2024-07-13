@@ -4,9 +4,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import and_, select, update
 from ..database import get_session
-from ..models import DailyGoal
-from ..schemas import DailyGoal as DailyGoalSchema
-from ..schemas import DailyGoalCreate, DailyGoalUpdate
+from ..models.daily_goal import DailyGoal
+from ..schemas.daily_goal import DailyGoal as DailyGoalSchema
+from ..schemas.daily_goal import DailyGoalCreate, DailyGoalUpdate
 from .utils import get_current_user_id
 
 router = APIRouter()

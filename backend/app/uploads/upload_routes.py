@@ -8,7 +8,7 @@ from sqlalchemy.future import select
 from ..auth.auth_utils import get_user_id_from_session
 from ..database import get_session
 from ..dependencies import get_redis
-from ..models import User
+from ..models.user import User
 from .upload_services import (
     generate_profile_photo_upload_url,
     generate_profile_photo_view_url,

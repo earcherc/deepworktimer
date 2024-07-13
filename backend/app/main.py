@@ -4,16 +4,14 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from redis.asyncio import Redis
 
-from .auth import auth_router
 from .auth.auth_utils import get_user_id_from_session
 from .config import settings
-from .routers import (
-    daily_goal_router,
-    study_block_router,
-    study_category_router,
-    user_router,
-)
-from .uploads import upload_router
+from .routers.daily_goal import router as daily_goal_router
+from .routers.study_category import router as study_category_router
+from .routers.user import router as user_router
+from .routers.study_block import router as study_block_router
+from .uploads.upload_routes import router as upload_router
+from .auth.auth_routes import router as auth_router
 
 
 @asynccontextmanager

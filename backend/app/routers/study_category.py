@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import and_, select, update
 
 from ..database import get_session
-from ..models import StudyCategory
-from ..schemas import StudyCategory as StudyCategorySchema
-from ..schemas import StudyCategoryCreate, StudyCategoryUpdate
+from ..models.study_category import StudyCategory
+from ..schemas.study_category import StudyCategory as StudyCategorySchema
+from ..schemas.study_category import StudyCategoryCreate, StudyCategoryUpdate
 from .utils import get_current_user_id
 
 router = APIRouter()

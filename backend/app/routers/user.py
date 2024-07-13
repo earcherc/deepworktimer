@@ -4,11 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from ..auth import hash_password
+from ..auth.auth_utils import hash_password
 from ..database import get_session
-from ..models import User
-from ..schemas import User as UserSchema
-from ..schemas import UserCreate, UserUpdate
+from ..models.user import User
+from ..schemas.user import User as UserSchema
+from ..schemas.user import UserCreate, UserUpdate
 from ..uploads.upload_services import get_profile_photo_urls
 from .utils import get_current_user_id
 
