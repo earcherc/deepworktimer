@@ -8,16 +8,16 @@ import {
   StudyCategoriesService,
   StudyCategory,
 } from '@api';
-import useToast from '@app/context/toasts/toast-context';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getTodayDateRange } from '../../../utils/dateUtils';
+import useToast from '@app/context/toasts/toast-context';
 
-const Timer: React.FC = () => {
+const Timer = () => {
   const { addToast } = useToast();
   const queryClient = useQueryClient();
 
-  const [time, setTime] = useState(() => 0);
+  const [time, setTime] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [isCountDown, setIsCountDown] = useState(true);
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
@@ -50,7 +50,6 @@ const Timer: React.FC = () => {
     mutationFn: StudyBlocksService.createStudyBlockStudyBlocksPost,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['studyBlocks'] });
-      console.log('Study block created:', data);
       return data;
     },
     onError: (error: unknown) => {
@@ -68,7 +67,6 @@ const Timer: React.FC = () => {
       StudyBlocksService.updateStudyBlockStudyBlocksStudyBlockIdPatch(id, block),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studyBlocks'] });
-      console.log('Study block updated');
     },
     onError: (error: unknown) => {
       let errorMessage = 'Failed to update study block';
@@ -90,12 +88,9 @@ const Timer: React.FC = () => {
 
   useEffect(() => {
     if (!initialCheckPerformed.current && studyBlocksData && studyBlocksData.length > 0 && activeDailyGoal) {
-      console.log('Performing initial check');
       const latestBlock = studyBlocksData[0];
-      console.log('Latest block:', latestBlock);
 
       if (!latestBlock.end) {
-        console.log('Active block found');
         setIsActive(true);
         if (latestBlock.is_countdown !== undefined) setIsCountDown(latestBlock.is_countdown);
         setStudyBlockId(latestBlock.id);
@@ -109,23 +104,14 @@ const Timer: React.FC = () => {
         const elapsedMilliseconds = adjustedNow - startTime;
         timerStartTime.current = startTime;
 
-        console.log('Start time:', new Date(startTime).toUTCString());
-        console.log('Adjusted current time:', new Date(adjustedNow).toUTCString());
-        console.log('Elapsed milliseconds:', elapsedMilliseconds);
-
         if (latestBlock.is_countdown) {
-          console.log('Countdown mode');
           const initialTime = activeDailyGoal.block_size * 60 * 1000;
           const remainingTime = Math.max(initialTime - elapsedMilliseconds, 0);
           setTime(Math.floor(remainingTime / 1000));
-          console.log('Initial time:', initialTime);
-          console.log('Remaining time:', remainingTime);
         } else {
-          console.log('Stopwatch mode');
           setTime(Math.floor(elapsedMilliseconds / 1000));
         }
       } else {
-        console.log('No active block found');
         setTime(getInitialTime());
       }
 
@@ -134,44 +120,33 @@ const Timer: React.FC = () => {
   }, [studyBlocksData, activeDailyGoal, getInitialTime, getAdjustedNow]);
 
   useEffect(() => {
-    console.log('Timer effect triggered');
-    console.log('isActive:', isActive);
-    console.log('isCountDown:', isCountDown);
-    console.log('timerStartTime:', timerStartTime.current);
-
     let interval: NodeJS.Timeout | null = null;
     if (isActive && timerStartTime.current) {
       interval = setInterval(() => {
         const adjustedNow = getAdjustedNow();
         const elapsedMilliseconds = adjustedNow - timerStartTime.current!;
-        console.log('Adjusted current time:', new Date(adjustedNow).toUTCString());
-        console.log('Elapsed milliseconds:', elapsedMilliseconds);
 
         if (isCountDown) {
           const initialTime = getInitialTime() * 1000;
           const remainingTime = Math.max(initialTime - elapsedMilliseconds, 0);
           setTime(Math.floor(remainingTime / 1000));
-          console.log('Countdown - Remaining time:', remainingTime);
           if (remainingTime <= 0) {
             clearInterval(interval!);
             handleTimerExpiration();
           }
         } else {
           setTime(Math.floor(elapsedMilliseconds / 1000));
-          console.log('Stopwatch - Elapsed time:', elapsedMilliseconds);
         }
       }, 1000);
     }
     return () => {
       if (interval) {
-        console.log('Clearing interval');
         clearInterval(interval);
       }
     };
   }, [isActive, isCountDown, getInitialTime, getAdjustedNow]);
 
   const handleTimerExpiration = useCallback(async () => {
-    console.log('Timer expired');
     if (studyBlockId) {
       await updateStudyBlockMutation.mutateAsync({
         id: studyBlockId,
@@ -183,7 +158,6 @@ const Timer: React.FC = () => {
   }, [studyBlockId, updateStudyBlockMutation, getAdjustedNow]);
 
   const startTimer = async () => {
-    console.log('Starting timer');
     if (activeCategory && activeDailyGoal) {
       const now = getAdjustedNow();
       timerStartTime.current = now;
@@ -196,12 +170,10 @@ const Timer: React.FC = () => {
       setStudyBlockId(newBlock.id);
       setIsActive(true);
       setTime(isCountDown ? getInitialTime() : 0);
-      console.log('New block created:', newBlock);
     }
   };
 
   const stopTimer = async () => {
-    console.log('Stopping timer');
     if (studyBlockId) {
       await updateStudyBlockMutation.mutateAsync({
         id: studyBlockId,
@@ -214,7 +186,6 @@ const Timer: React.FC = () => {
   };
 
   const toggleMode = () => {
-    console.log('Toggling mode');
     setIsCountDown(!isCountDown);
     setTime(isCountDown ? 0 : getInitialTime());
   };
@@ -229,8 +200,6 @@ const Timer: React.FC = () => {
     }
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
-
-  console.log('Render - Current state:', { time, isActive, isCountDown, studyBlockId });
 
   return (
     <div className="rounded-lg bg-white p-4 shadow sm:p-6">
