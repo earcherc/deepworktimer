@@ -8,3 +8,7 @@ export function getTodayDateRange() {
     end_time: endDate.toISOString().split('T')[0],
   };
 }
+
+export function getCurrentUTCTimeWithoutTZ(): string {
+  return new Date().toISOString().slice(0, -1);
+}

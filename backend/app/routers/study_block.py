@@ -23,7 +23,7 @@ async def create_study_block(
 ):
     # Check for existing unfinished block
     query = select(StudyBlock).where(
-        StudyBlock.user_id == user_id, StudyBlock.end == None
+        StudyBlock.user_id == user_id, StudyBlock.end_time == None
     )
     result = await db.execute(query)
     existing_unfinished_block = result.scalar_one_or_none()
@@ -97,17 +97,10 @@ async def update_study_block(
         )
     )
     db_study_block = result.scalar_one_or_none()
-
     if db_study_block is None:
         raise HTTPException(status_code=404, detail="StudyBlock not found")
 
     update_data = study_block.dict(exclude_unset=True)
-
-    # Direct handling of datetime objects for "start" and "end"
-    if "start" in update_data and update_data["start"].tzinfo is not None:
-        update_data["start"] = update_data["start"].replace(tzinfo=None)
-    if "end" in update_data and update_data["end"].tzinfo is not None:
-        update_data["end"] = update_data["end"].replace(tzinfo=None)
 
     for key, value in update_data.items():
         setattr(db_study_block, key, value)

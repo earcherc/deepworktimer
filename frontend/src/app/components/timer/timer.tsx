@@ -8,10 +8,10 @@ import {
   StudyCategoriesService,
   StudyCategory,
 } from '@api';
+import { getCurrentUTCTimeWithoutTZ, getTodayDateRange } from '../../../utils/dateUtils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { getTodayDateRange } from '../../../utils/dateUtils';
 import useToast from '@app/context/toasts/toast-context';
+import { useEffect, useRef, useState } from 'react';
 
 const Timer = () => {
   const { addToast } = useToast();
@@ -23,8 +23,9 @@ const Timer = () => {
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
 
   const initialCheckPerformed = useRef(false);
-  const timerStartTime = useRef<number | null>(null);
-  const serverClientTimeDiff = useRef<number | null>(null);
+
+  const dateRange = getTodayDateRange();
+  const currentTime = Date.now();
 
   const { data: categoriesData } = useQuery<StudyCategory[]>({
     queryKey: ['studyCategories'],
@@ -36,15 +37,15 @@ const Timer = () => {
     queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet(),
   });
 
-  const dateRange = getTodayDateRange();
-
   const { data: studyBlocksData } = useQuery<StudyBlock[]>({
     queryKey: ['studyBlocks', dateRange.start_time, dateRange.end_time],
     queryFn: () => StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange),
   });
 
-  const activeCategory = categoriesData?.find((cat) => cat.is_active);
-  const activeDailyGoal = dailyGoalsData?.find((goal) => goal.is_active);
+  const activeCategory = categoriesData?.find((cat) => cat.is_selected);
+  const activeDailyGoal = dailyGoalsData?.find((goal) => goal.is_selected);
+  // Get block size in seconds
+  const activeBlockSize = (activeDailyGoal && activeDailyGoal.block_size * 60) || 0;
 
   const createStudyBlockMutation = useMutation({
     mutationFn: StudyBlocksService.createStudyBlockStudyBlocksPost,
@@ -78,98 +79,82 @@ const Timer = () => {
     },
   });
 
-  const getInitialTime = useCallback(() => {
-    return (activeDailyGoal?.block_size || 0) * 60; // Convert minutes to seconds
-  }, [activeDailyGoal]);
-
-  const getAdjustedNow = useCallback(() => {
-    return Date.now() + (serverClientTimeDiff.current || 0);
-  }, []);
-
   useEffect(() => {
-    if (!initialCheckPerformed.current && studyBlocksData && studyBlocksData.length > 0 && activeDailyGoal) {
-      const latestBlock = studyBlocksData[0];
+    if (!initialCheckPerformed.current && studyBlocksData && studyBlocksData.length > 0 && dailyGoalsData) {
+      const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
 
-      if (!latestBlock.end) {
+      if (incompleteBlock) {
         setIsActive(true);
-        if (latestBlock.is_countdown !== undefined) setIsCountDown(latestBlock.is_countdown);
-        setStudyBlockId(latestBlock.id);
+        setStudyBlockId(incompleteBlock.id);
+        if (incompleteBlock.is_countdown) setIsCountDown(incompleteBlock.is_countdown);
 
-        const startTime = new Date(latestBlock.start).getTime();
-        const clientNow = Date.now();
-        const serverNow = new Date(latestBlock.start).getTime();
-        serverClientTimeDiff.current = serverNow - clientNow;
+        const startTime = new Date(incompleteBlock.start_time).getTime();
+        const elapsedMilliseconds = currentTime - startTime;
 
-        const adjustedNow = getAdjustedNow();
-        const elapsedMilliseconds = adjustedNow - startTime;
-        timerStartTime.current = startTime;
-
-        if (latestBlock.is_countdown) {
-          const initialTime = activeDailyGoal.block_size * 60 * 1000;
-          const remainingTime = Math.max(initialTime - elapsedMilliseconds, 0);
+        if (incompleteBlock.is_countdown) {
+          const initialBlockTime = activeBlockSize * 1000;
+          const remainingTime = Math.max(initialBlockTime - elapsedMilliseconds, 0);
           setTime(Math.floor(remainingTime / 1000));
-        } else {
-          setTime(Math.floor(elapsedMilliseconds / 1000));
-        }
-      } else {
-        setTime(getInitialTime());
-      }
 
-      initialCheckPerformed.current = true;
-    }
-  }, [studyBlocksData, activeDailyGoal, getInitialTime, getAdjustedNow]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (isActive && timerStartTime.current) {
-      interval = setInterval(() => {
-        const adjustedNow = getAdjustedNow();
-        const elapsedMilliseconds = adjustedNow - timerStartTime.current!;
-
-        if (isCountDown) {
-          const initialTime = getInitialTime() * 1000;
-          const remainingTime = Math.max(initialTime - elapsedMilliseconds, 0);
-          setTime(Math.floor(remainingTime / 1000));
           if (remainingTime <= 0) {
-            clearInterval(interval!);
             handleTimerExpiration();
           }
         } else {
           setTime(Math.floor(elapsedMilliseconds / 1000));
         }
-      }, 1000);
-    }
-    return () => {
-      if (interval) {
-        clearInterval(interval);
+      } else {
+        setTime(activeBlockSize);
       }
-    };
-  }, [isActive, isCountDown, getInitialTime, getAdjustedNow]);
 
-  const handleTimerExpiration = useCallback(async () => {
+      initialCheckPerformed.current = true;
+    }
+  }, [studyBlocksData, activeDailyGoal, dailyGoalsData]);
+
+  const handleTimerExpiration = async () => {
     if (studyBlockId) {
       await updateStudyBlockMutation.mutateAsync({
         id: studyBlockId,
-        block: { end: new Date(getAdjustedNow()).toISOString() },
+        block: { end_time: getCurrentUTCTimeWithoutTZ() },
       });
     }
     setIsActive(false);
     setStudyBlockId(null);
-  }, [studyBlockId, updateStudyBlockMutation, getAdjustedNow]);
+  };
+
+  useEffect(() => {
+    const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
+
+    const interval = setInterval(() => {
+      const currentTime = Date.now();
+      const startTime = new Date(incompleteBlock.start_time).getTime();
+      const elapsedMilliseconds = currentTime - startTime;
+
+      if (isCountDown) {
+        const initialBlockTime = activeBlockSize * 1000;
+        const remainingTime = Math.max(initialBlockTime - elapsedMilliseconds, 0);
+        setTime(Math.floor(remainingTime / 1000));
+        if (remainingTime <= 0) {
+          clearInterval(interval);
+          handleTimerExpiration();
+        }
+      } else {
+        setTime(Math.floor(elapsedMilliseconds / 1000));
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [studyBlocksData]);
 
   const startTimer = async () => {
-    if (activeCategory && activeDailyGoal) {
-      const now = getAdjustedNow();
-      timerStartTime.current = now;
+    if (activeDailyGoal && activeCategory) {
       const newBlock = await createStudyBlockMutation.mutateAsync({
-        start: new Date(now).toISOString(),
         is_countdown: isCountDown,
         daily_goal_id: activeDailyGoal.id,
         study_category_id: activeCategory.id,
       });
       setStudyBlockId(newBlock.id);
       setIsActive(true);
-      setTime(isCountDown ? getInitialTime() : 0);
+      setTime(isCountDown ? activeBlockSize : 0);
     }
   };
 
@@ -177,17 +162,17 @@ const Timer = () => {
     if (studyBlockId) {
       await updateStudyBlockMutation.mutateAsync({
         id: studyBlockId,
-        block: { end: new Date(getAdjustedNow()).toISOString() },
+        block: { end_time: getCurrentUTCTimeWithoutTZ() },
       });
+      setIsActive(false);
+      setStudyBlockId(null);
+      setTime(isCountDown ? activeBlockSize : 0);
     }
-    setIsActive(false);
-    setStudyBlockId(null);
-    setTime(isCountDown ? getInitialTime() : 0);
   };
 
   const toggleMode = () => {
     setIsCountDown(!isCountDown);
-    setTime(isCountDown ? 0 : getInitialTime());
+    setTime(isCountDown ? 0 : activeBlockSize);
   };
 
   const formatTime = (totalSeconds: number) => {
@@ -209,6 +194,7 @@ const Timer = () => {
         <div className="flex space-x-3">
           {!isActive && (
             <button
+              disabled={!activeCategory && !activeDailyGoal}
               onClick={toggleMode}
               className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
@@ -217,6 +203,7 @@ const Timer = () => {
           )}
           <button
             onClick={isActive ? stopTimer : startTimer}
+            disabled={!activeCategory && !activeDailyGoal}
             className={`rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
               isActive
                 ? 'bg-red-500 hover:bg-red-600 focus:ring-red-500'
