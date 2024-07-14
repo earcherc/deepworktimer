@@ -35,9 +35,7 @@
         "drKnoxy.eslint-disable-snippets",
         "vscodevim.vim",
         "eamodio.gitlens",
-        "ecmel.vscode-html-css",
-        "Vue.volar",
-        "GitHub.copilot"
+        "ecmel.vscode-html-css"
       ]
     }
   },

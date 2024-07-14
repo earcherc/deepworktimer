@@ -30,8 +30,7 @@
         "christian-kohler.path-intellisense",
         "vscodevim.vim",
         "eamodio.gitlens",
-        "ecmel.vscode-html-css",
-        "GitHub.copilot"
+        "ecmel.vscode-html-css"
       ]
     }
   },
