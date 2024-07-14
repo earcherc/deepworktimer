@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import useToast from '@app/context/toasts/toast-context';
-import { UsersService, User, ApiError } from '@api';
+import { ApiError, User, UsersService } from '@api';
 import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 
@@ -145,104 +145,6 @@ export default function UserForm() {
             <textarea
               id="bio"
               {...register('bio')}
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-            />
-          </div>
-        </div>
-
-        <div className="col-span-3">
-          <label htmlFor="job_title" className="block text-sm font-medium leading-6 text-white">
-            Job Title
-          </label>
-          <div className="mt-2">
-            <input
-              type="text"
-              id="job_title"
-              {...register('job_title')}
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-            />
-          </div>
-        </div>
-
-        <div className="col-span-3">
-          <label htmlFor="personal_title" className="block text-sm font-medium leading-6 text-white">
-            Personal Title
-          </label>
-          <div className="mt-2">
-            <input
-              type="text"
-              id="personal_title"
-              {...register('personal_title')}
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-            />
-          </div>
-        </div>
-
-        <div className="col-span-3">
-          <label htmlFor="latitude" className="block text-sm font-medium leading-6 text-white">
-            Latitude
-          </label>
-          <div className="mt-2">
-            <input
-              type="number"
-              id="latitude"
-              {...register('latitude')}
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-            />
-          </div>
-        </div>
-
-        <div className="col-span-3">
-          <label htmlFor="longitude" className="block text-sm font-medium leading-6 text-white">
-            Longitude
-          </label>
-          <div className="mt-2">
-            <input
-              type="number"
-              id="longitude"
-              {...register('longitude')}
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-            />
-          </div>
-        </div>
-
-        <div className="col-span-3">
-          <label htmlFor="timezone" className="block text-sm font-medium leading-6 text-white">
-            Timezone
-          </label>
-          <div className="mt-2">
-            <input
-              type="text"
-              id="timezone"
-              {...register('timezone')}
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-            />
-          </div>
-        </div>
-
-        <div className="col-span-3">
-          <label htmlFor="language" className="block text-sm font-medium leading-6 text-white">
-            Language
-          </label>
-          <div className="mt-2">
-            <input
-              type="text"
-              id="language"
-              {...register('language')}
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-            />
-          </div>
-        </div>
-
-        <div className="col-span-full">
-          <label htmlFor="status" className="block text-sm font-medium leading-6 text-white">
-            Status
-          </label>
-          <div className="mt-2">
-            <input
-              type="text"
-              id="status"
-              {...register('status')}
               className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>

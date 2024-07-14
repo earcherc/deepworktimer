@@ -26,7 +26,7 @@ const StudyCategoryComponent = () => {
         throw new Error('Category ID is undefined');
       }
       return StudyCategoriesService.updateStudyCategoryStudyCategoriesStudyCategoryIdPatch(category.id, {
-        is_active: true,
+        is_selected: true,
       });
     },
     onSuccess: () => {
@@ -53,7 +53,7 @@ const StudyCategoryComponent = () => {
     });
   };
 
-  const activeCategory = categories.find((cat) => cat.is_active);
+  const activeCategory = categories.find((cat) => cat.is_selected);
 
   return (
     <Menu as="div" className="relative rounded-lg bg-white p-4 shadow sm:p-6">

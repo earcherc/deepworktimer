@@ -44,7 +44,7 @@ const DailyGoalComponent = () => {
   };
 
   const selectGoal = (activeGoal: DailyGoal) => {
-    updateDailyGoalMutation.mutate({ ...activeGoal, is_active: true });
+    updateDailyGoalMutation.mutate({ ...activeGoal, is_selected: true });
   };
 
   const openCreateGoalModal = () => {
@@ -55,7 +55,7 @@ const DailyGoalComponent = () => {
     });
   };
 
-  const activeGoal = goals.find((goal) => goal.is_active);
+  const activeGoal = goals.find((goal) => goal.is_selected);
 
   return (
     <Menu as="div" className="relative rounded-lg bg-white p-4 shadow sm:p-6">
