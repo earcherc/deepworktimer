@@ -9,6 +9,6 @@ export function getTodayDateRange() {
   };
 }
 
-export function getCurrentUTCTimeWithoutTZ(): string {
+export function getCurrentUTC(): string {
   return new Date().toISOString().slice(0, -1);
 }

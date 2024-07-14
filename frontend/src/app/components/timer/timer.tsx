@@ -8,8 +8,8 @@ import {
   StudyCategoriesService,
   StudyCategory,
 } from '@api';
-import { getCurrentUTCTimeWithoutTZ, getTodayDateRange } from '../../../utils/dateUtils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getCurrentUTC, getTodayDateRange } from '../../../utils/dateUtils';
 import useToast from '@app/context/toasts/toast-context';
 import { useEffect, useRef, useState } from 'react';
 
@@ -114,7 +114,7 @@ const Timer = () => {
     if (studyBlockId) {
       await updateStudyBlockMutation.mutateAsync({
         id: studyBlockId,
-        block: { end_time: getCurrentUTCTimeWithoutTZ() },
+        block: { end_time: getCurrentUTC() },
       });
     }
     setIsActive(false);
@@ -131,7 +131,7 @@ const Timer = () => {
     console.log('Is countdown:', isCountDown);
     console.log('Active block size:', activeBlockSize);
 
-    const startTime = new Date(incompleteBlock.start_time).getTime();
+    const startTime = new Date(incompleteBlock.start_time + 'Z').getTime();
     console.log('Start time:', new Date(startTime).toISOString());
 
     const updateTimer = () => {
@@ -181,7 +181,7 @@ const Timer = () => {
     if (studyBlockId) {
       await updateStudyBlockMutation.mutateAsync({
         id: studyBlockId,
-        block: { end_time: getCurrentUTCTimeWithoutTZ() },
+        block: { end_time: getCurrentUTC() },
       });
       setIsActive(false);
       setStudyBlockId(null);
