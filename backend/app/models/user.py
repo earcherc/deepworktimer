@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone as timezoneDT
+from datetime import date, datetime, timezone
 from enum import Enum
 from typing import TYPE_CHECKING, List, Optional
 
@@ -23,19 +23,13 @@ class User(SQLModel, table=True):
     email: str = Field(index=True, unique=True)
     hashed_password: str
     bio: Optional[str] = None
-    job_title: Optional[str] = None
-    personal_title: Optional[str] = None
     date_of_birth: Optional[date] = None
-    latitude: Optional[float] = Field(default=None, ge=-90, le=90)
-    longitude: Optional[float] = Field(default=None, ge=-180, le=180)
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     gender: Optional[Gender] = None
     profile_photo_key: Optional[str] = None
-    timezone: Optional[str] = None
-    language: Optional[str] = None
-    status: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.now(timezoneDT.utc))
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     # Relationships
     study_blocks: List["StudyBlock"] = Relationship(
@@ -45,8 +39,7 @@ class User(SQLModel, table=True):
         back_populates="user", sa_relationship_kwargs={"cascade": "delete"}
     )
     study_categories: List["StudyCategory"] = Relationship(
-        back_populates="user",
-        sa_relationship_kwargs={"cascade": "delete"},
+        back_populates="user", sa_relationship_kwargs={"cascade": "delete"}
     )
 
 

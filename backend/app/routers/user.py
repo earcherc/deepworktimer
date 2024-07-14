@@ -7,8 +7,7 @@ from sqlalchemy.future import select
 from ..auth.auth_utils import hash_password
 from ..database import get_session
 from ..models.user import User
-from ..schemas.user import User as UserSchema
-from ..schemas.user import UserCreate, UserUpdate
+from ..schemas.user import UserCreate, UserUpdate, User as UserSchema
 from ..uploads.upload_services import get_profile_photo_urls
 from .utils import get_current_user_id
 

@@ -13,8 +13,8 @@ class DailyGoal(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     quantity: int
     block_size: int
-    is_active: bool = Field(default=False)
-    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    is_selected: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     user_id: int = Field(foreign_key="user.id", index=True)
 
     # Relationships

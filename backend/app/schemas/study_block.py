@@ -5,9 +5,6 @@ from pydantic import BaseModel, Field
 
 
 class StudyBlockBase(BaseModel):
-    start: datetime
-    end: Optional[datetime] = None
-    rating: Optional[float] = Field(None, ge=0, le=5)
     is_countdown: bool = Field(True)
 
 
@@ -23,6 +20,9 @@ class StudyBlockUpdate(BaseModel):
 
 class StudyBlock(StudyBlockBase):
     id: int
+    start: datetime
+    end: Optional[datetime] = None
+    rating: Optional[float] = None
     user_id: int
     daily_goal_id: int
     study_category_id: int

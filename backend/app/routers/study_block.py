@@ -27,19 +27,14 @@ async def create_study_block(
     )
     result = await db.execute(query)
     existing_unfinished_block = result.scalar_one_or_none()
-
     if existing_unfinished_block:
         raise HTTPException(
             status_code=400,
             detail="An unfinished study block already exists. Please finish or delete it before creating a new one.",
         )
 
-    # If no unfinished block exists, create the new block
-    study_block_dict = study_block.dict()
-    if study_block_dict["start"].tzinfo is not None:
-        study_block_dict["start"] = study_block_dict["start"].replace(tzinfo=None)
-
-    db_study_block = StudyBlock(**study_block_dict, user_id=user_id)
+    # Create the new block
+    db_study_block = StudyBlock(**study_block.dict(), user_id=user_id)
     db.add(db_study_block)
     await db.commit()
     await db.refresh(db_study_block)
