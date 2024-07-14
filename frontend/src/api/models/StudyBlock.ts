@@ -3,11 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 export type StudyBlock = {
-    start: string;
-    end?: string;
-    rating?: number;
     is_countdown?: boolean;
     id: number;
+    start_time: string;
+    end_time?: string;
+    rating?: number;
     user_id: number;
     daily_goal_id: number;
     study_category_id: number;

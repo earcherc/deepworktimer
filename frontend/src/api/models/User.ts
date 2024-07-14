@@ -7,20 +7,14 @@ export type User = {
     username: string;
     email: string;
     bio?: string;
-    job_title?: string;
-    personal_title?: string;
     date_of_birth?: string;
-    latitude?: number;
-    longitude?: number;
     first_name?: string;
     last_name?: string;
     gender?: Gender;
     profile_photo_key?: string;
     profile_photo_urls?: Record<string, string>;
-    timezone?: string;
-    language?: string;
-    status?: string;
     id: number;
     created_at: string;
+    is_active: boolean;
 };
 

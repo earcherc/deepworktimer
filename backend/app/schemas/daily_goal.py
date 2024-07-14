@@ -8,22 +8,19 @@ from pydantic import BaseModel, Field
 class DailyGoalBase(BaseModel):
     quantity: int
     block_size: int
-    is_active: bool = Field(default=False)
+    is_selected: bool = Field(default=False)
 
 
-# Model for creating a new DailyGoal
 class DailyGoalCreate(DailyGoalBase):
     pass
 
 
-# Model for updating an existing DailyGoal
 class DailyGoalUpdate(BaseModel):
     quantity: Optional[int] = None
     block_size: Optional[int] = None
-    is_active: Optional[bool] = None
+    is_selected: Optional[bool] = None
 
 
-# Full DailyGoal model (for responses)
 class DailyGoal(DailyGoalBase):
     id: int
     user_id: int

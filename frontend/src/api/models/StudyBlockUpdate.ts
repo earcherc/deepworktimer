@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type StudyBlockUpdate = {
-    end?: string;
+    end_time?: string;
     rating?: number;
 };
 

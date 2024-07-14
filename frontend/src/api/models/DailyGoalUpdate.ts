@@ -5,6 +5,6 @@
 export type DailyGoalUpdate = {
     quantity?: number;
     block_size?: number;
-    is_active?: boolean;
+    is_selected?: boolean;
 };
 

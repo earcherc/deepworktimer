@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type StudyCategory = {
     title: string;
-    is_active?: boolean;
+    is_selected?: boolean;
     id: number;
     user_id: number;
 };

@@ -4,6 +4,6 @@
 /* eslint-disable */
 export type StudyCategoryCreate = {
     title: string;
-    is_active?: boolean;
+    is_selected?: boolean;
 };
 

@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 class StudyCategoryBase(BaseModel):
     title: str
-    is_active: bool = Field(default=False)
+    is_selected: bool = Field(default=False)
 
 
 class StudyCategoryCreate(StudyCategoryBase):
@@ -14,7 +14,7 @@ class StudyCategoryCreate(StudyCategoryBase):
 
 class StudyCategoryUpdate(BaseModel):
     title: Optional[str] = None
-    is_active: Optional[bool] = None
+    is_selected: Optional[bool] = None
 
 
 class StudyCategory(StudyCategoryBase):

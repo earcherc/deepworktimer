@@ -3,9 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export type StudyBlockCreate = {
-    start: string;
-    end?: string;
-    rating?: number;
     is_countdown?: boolean;
     daily_goal_id: number;
     study_category_id: number;
