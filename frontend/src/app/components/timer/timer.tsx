@@ -122,11 +122,15 @@ const Timer = () => {
   };
 
   useEffect(() => {
-    const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
+    if (!studyBlocksData || !isActive) return;
 
-    const interval = setInterval(() => {
+    const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
+    if (!incompleteBlock) return;
+
+    const startTime = new Date(incompleteBlock.start_time).getTime();
+
+    const updateTimer = () => {
       const currentTime = Date.now();
-      const startTime = new Date(incompleteBlock.start_time).getTime();
       const elapsedMilliseconds = currentTime - startTime;
 
       if (isCountDown) {
@@ -134,16 +138,18 @@ const Timer = () => {
         const remainingTime = Math.max(initialBlockTime - elapsedMilliseconds, 0);
         setTime(Math.floor(remainingTime / 1000));
         if (remainingTime <= 0) {
-          clearInterval(interval);
           handleTimerExpiration();
         }
       } else {
         setTime(Math.floor(elapsedMilliseconds / 1000));
       }
-    }, 1000);
+    };
+
+    updateTimer(); // Update immediately
+    const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
-  }, [studyBlocksData]);
+  }, [studyBlocksData, isActive, isCountDown, activeBlockSize, handleTimerExpiration]);
 
   const startTimer = async () => {
     if (activeDailyGoal && activeCategory) {
