@@ -68,12 +68,12 @@ async def query_study_blocks(
 
     if query.start_time:
         start_time = datetime.fromisoformat(query.start_time)
-        db_query = db_query.where(StudyBlock.start >= start_time)
+        db_query = db_query.where(StudyBlock.start_time >= start_time)
     if query.end_time:
         end_time = datetime.fromisoformat(query.end_time)
-        db_query = db_query.where(StudyBlock.start <= end_time)
+        db_query = db_query.where(StudyBlock.start_time <= end_time)
 
-    db_query = db_query.order_by(StudyBlock.start.desc())
+    db_query = db_query.order_by(StudyBlock.start_time.desc())
 
     if query.skip is not None:
         db_query = db_query.offset(query.skip)
