@@ -127,15 +127,23 @@ const Timer = () => {
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
     if (!incompleteBlock) return;
 
+    console.log('Incomplete block:', incompleteBlock);
+    console.log('Is countdown:', isCountDown);
+    console.log('Active block size:', activeBlockSize);
+
     const startTime = new Date(incompleteBlock.start_time).getTime();
+    console.log('Start time:', new Date(startTime).toISOString());
 
     const updateTimer = () => {
       const currentTime = Date.now();
+      console.log('Current time:', new Date(currentTime).toISOString());
       const elapsedMilliseconds = currentTime - startTime;
+      console.log('Elapsed milliseconds:', elapsedMilliseconds);
 
       if (isCountDown) {
         const initialBlockTime = activeBlockSize * 1000;
         const remainingTime = Math.max(initialBlockTime - elapsedMilliseconds, 0);
+        console.log('Remaining time (ms):', remainingTime);
         setTime(Math.floor(remainingTime / 1000));
         if (remainingTime <= 0) {
           handleTimerExpiration();
@@ -143,6 +151,7 @@ const Timer = () => {
       } else {
         setTime(Math.floor(elapsedMilliseconds / 1000));
       }
+      console.log('Set time to:', time);
     };
 
     updateTimer(); // Update immediately
@@ -153,14 +162,18 @@ const Timer = () => {
 
   const startTimer = async () => {
     if (activeDailyGoal && activeCategory) {
+      console.log('Starting timer. Is countdown:', isCountDown);
+      console.log('Active block size:', activeBlockSize);
       const newBlock = await createStudyBlockMutation.mutateAsync({
         is_countdown: isCountDown,
         daily_goal_id: activeDailyGoal.id,
         study_category_id: activeCategory.id,
       });
+      console.log('New block created:', newBlock);
       setStudyBlockId(newBlock.id);
       setIsActive(true);
       setTime(isCountDown ? activeBlockSize : 0);
+      console.log('Initial time set to:', isCountDown ? activeBlockSize : 0);
     }
   };
 
