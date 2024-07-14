@@ -79,16 +79,16 @@ async def update_daily_goal(
 
     daily_goal_data = daily_goal.dict(exclude_unset=True)
 
-    if daily_goal_data.get("is_active") == True:
+    if daily_goal_data.get("is_selected") == True:
         await db.execute(
             update(DailyGoal)
             .where(
                 and_(
                     DailyGoal.user_id == user_id,
-                    DailyGoal.is_active == True,
+                    DailyGoal.is_selected == True,
                 )
             )
-            .values(is_active=False)
+            .values(is_selected=False)
         )
 
     for key, value in daily_goal_data.items():

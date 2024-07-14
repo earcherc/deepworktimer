@@ -89,16 +89,16 @@ async def update_study_category(
 
         update_data = study_category.dict(exclude_unset=True)
 
-        if update_data.get("is_active") == True:
+        if update_data.get("is_selected") == True:
             await db.execute(
                 update(StudyCategory)
                 .where(
                     and_(
                         StudyCategory.user_id == user_id,
-                        StudyCategory.is_active == True,
+                        StudyCategory.is_selected == True,
                     )
                 )
-                .values(is_active=False)
+                .values(is_selected=False)
             )
 
         for key, value in update_data.items():
