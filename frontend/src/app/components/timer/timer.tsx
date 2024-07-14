@@ -19,7 +19,7 @@ const Timer = () => {
 
   const [time, setTime] = useState(0);
   const [isActive, setIsActive] = useState(false);
-  const [isCountDown, setIsCountDown] = useState(true);
+  const [isCountDown, setIsCountDown] = useState<boolean | null>(null);
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
 
   const initialCheckPerformed = useRef(false);
@@ -86,7 +86,7 @@ const Timer = () => {
       if (incompleteBlock) {
         setIsActive(true);
         setStudyBlockId(incompleteBlock.id);
-        if (incompleteBlock.is_countdown) setIsCountDown(incompleteBlock.is_countdown);
+        if (incompleteBlock.is_countdown !== undefined) setIsCountDown(!!incompleteBlock.is_countdown);
 
         const startTime = new Date(incompleteBlock.start_time).getTime();
         const elapsedMilliseconds = currentTime - startTime;
@@ -104,6 +104,7 @@ const Timer = () => {
         }
       } else {
         setTime(activeBlockSize);
+        setIsCountDown(true);
       }
 
       initialCheckPerformed.current = true;
@@ -127,23 +128,15 @@ const Timer = () => {
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
     if (!incompleteBlock) return;
 
-    console.log('Incomplete block:', incompleteBlock);
-    console.log('Is countdown:', isCountDown);
-    console.log('Active block size:', activeBlockSize);
-
     const startTime = new Date(incompleteBlock.start_time + 'Z').getTime();
-    console.log('Start time:', new Date(startTime).toISOString());
 
     const updateTimer = () => {
       const currentTime = Date.now();
-      console.log('Current time:', new Date(currentTime).toISOString());
       const elapsedMilliseconds = currentTime - startTime;
-      console.log('Elapsed milliseconds:', elapsedMilliseconds);
 
       if (isCountDown) {
         const initialBlockTime = activeBlockSize * 1000;
         const remainingTime = Math.max(initialBlockTime - elapsedMilliseconds, 0);
-        console.log('Remaining time (ms):', remainingTime);
         setTime(Math.floor(remainingTime / 1000));
         if (remainingTime <= 0) {
           handleTimerExpiration();
@@ -151,7 +144,6 @@ const Timer = () => {
       } else {
         setTime(Math.floor(elapsedMilliseconds / 1000));
       }
-      console.log('Set time to:', time);
     };
 
     updateTimer(); // Update immediately
@@ -161,19 +153,15 @@ const Timer = () => {
   }, [studyBlocksData, isActive, isCountDown, activeBlockSize, handleTimerExpiration]);
 
   const startTimer = async () => {
-    if (activeDailyGoal && activeCategory) {
-      console.log('Starting timer. Is countdown:', isCountDown);
-      console.log('Active block size:', activeBlockSize);
+    if (activeDailyGoal && activeCategory && isCountDown !== null) {
       const newBlock = await createStudyBlockMutation.mutateAsync({
         is_countdown: isCountDown,
         daily_goal_id: activeDailyGoal.id,
         study_category_id: activeCategory.id,
       });
-      console.log('New block created:', newBlock);
       setStudyBlockId(newBlock.id);
       setIsActive(true);
       setTime(isCountDown ? activeBlockSize : 0);
-      console.log('Initial time set to:', isCountDown ? activeBlockSize : 0);
     }
   };
 
