@@ -32,7 +32,7 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     bio: Optional[str] = None
-    date_of_birth: Optional[datetime] = None
+    date_of_birth: Optional[date] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     gender: Optional[Gender] = None

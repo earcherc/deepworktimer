@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from enum import Enum
 from typing import TYPE_CHECKING, List, Optional
 
@@ -29,7 +29,9 @@ class User(SQLModel, table=True):
     gender: Optional[Gender] = None
     profile_photo_key: Optional[str] = None
     is_active: bool = Field(default=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+    )
 
     # Relationships
     study_blocks: List["StudyBlock"] = Relationship(
