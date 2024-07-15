@@ -1,5 +1,6 @@
 'use client';
 
+import { formatToLocalTime } from '@utils/dateUtils';
 import React, { useEffect, useState } from 'react';
 
 const CurrentTimeIndicator: React.FC = () => {
@@ -12,7 +13,7 @@ const CurrentTimeIndicator: React.FC = () => {
       const minutesSinceMidnight = now.getHours() * 60 + now.getMinutes();
       const percentage = (minutesSinceMidnight / 1440) * 100;
       setPosition(percentage);
-      setCurrentTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      setCurrentTime(formatToLocalTime(now, 'HH:mm'));
     };
 
     const interval = setInterval(updatePositionAndTime, 30000);

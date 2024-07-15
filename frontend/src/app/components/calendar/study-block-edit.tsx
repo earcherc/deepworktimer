@@ -10,24 +10,20 @@ import {
   StudyCategory,
 } from '@api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { formatToLocalTime, toLocalTime, toUTC } from '@utils/dateUtils';
 import { useModalContext } from '@context/modal/modal-context';
 import useToast from '@context/toasts/toast-context';
 import React, { useEffect, useState } from 'react';
+import { format, parseISO } from 'date-fns';
 
 interface StudyBlockEditProps {
   block: StudyBlock;
 }
 
-export function toLocalTime(dateString: string): Date {
-  return new Date(dateString + 'Z');
-}
-
-export function getCurrentUTC(): string {
-  return new Date().toISOString().slice(0, -1);
-}
-
 const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
-  const [endTime, setEndTime] = useState(block.end_time ? toLocalTime(block.end_time).toISOString().slice(0, 16) : '');
+  const [endTime, setEndTime] = useState(
+    block.end_time ? format(toLocalTime(block.end_time), "yyyy-MM-dd'T'HH:mm") : '',
+  );
   const [rating, setRating] = useState(block.rating || 0);
   const { hideModal } = useModalContext();
   const { addToast } = useToast();
@@ -47,7 +43,7 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
 
   useEffect(() => {
     setIsFormChanged(
-      endTime !== (block.end_time ? toLocalTime(block.end_time).toISOString().slice(0, 16) : '') ||
+      endTime !== (block.end_time ? format(toLocalTime(block.end_time), "yyyy-MM-dd'T'HH:mm") : '') ||
         rating !== block.rating,
     );
   }, [endTime, rating, block.end_time, block.rating]);
@@ -72,7 +68,7 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const startTimeDate = toLocalTime(block.start_time);
-    const endTimeDate = new Date(endTime);
+    const endTimeDate = parseISO(endTime);
 
     if (endTimeDate <= startTimeDate) {
       addToast({ type: 'error', content: 'End time must be greater than the start time.' });
@@ -81,7 +77,7 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
 
     const updatedBlock = {
       ...block,
-      end_time: endTimeDate.toISOString().slice(0, -1),
+      end_time: toUTC(endTimeDate),
       rating,
     };
 
@@ -109,7 +105,7 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
       <div className="bg-gray-100 p-4 rounded-md mb-4">
         <p className="text-left text-sm text-gray-700 space-y-3">
           <p>
-            <strong>Start:</strong> {toLocalTime(block.start_time).toLocaleString()}
+            <strong>Start:</strong> {formatToLocalTime(toLocalTime(block.start_time), 'PPpp')}
           </p>
           <p>
             <strong>Category:</strong> {category?.title || 'Unknown'}

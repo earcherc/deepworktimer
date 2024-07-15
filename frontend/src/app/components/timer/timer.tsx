@@ -8,8 +8,8 @@ import {
   StudyCategoriesService,
   StudyCategory,
 } from '@api';
+import { getCurrentUTC, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getCurrentUTC, getTodayDateRange } from '@utils/dateUtils';
 import useToast from '@context/toasts/toast-context';
 import { useEffect, useState } from 'react';
 
@@ -100,8 +100,7 @@ const Timer = () => {
     setStudyBlockId(incompleteBlock.id);
     setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.Stopwatch);
 
-    // Add 'Z' to ensure UTC time
-    const startTime = new Date(incompleteBlock.start_time + 'Z').getTime();
+    const startTime = toLocalTime(incompleteBlock.start_time).getTime();
     const elapsedMilliseconds = Date.now() - startTime;
 
     if (incompleteBlock.is_countdown) {

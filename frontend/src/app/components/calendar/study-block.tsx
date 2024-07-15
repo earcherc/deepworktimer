@@ -1,6 +1,7 @@
 'use client';
 
 import { toLocalTime } from '@utils/dateUtils';
+import { format } from 'date-fns';
 import { StudyBlock } from '@api';
 import React from 'react';
 
@@ -12,25 +13,16 @@ interface StudyBlockProps {
 }
 
 const formatTime = (date: Date): string => {
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return format(date, 'HH:mm');
 };
 
 const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, zoomLevel, calculatePosition, onDoubleClick }) => {
   const startTime = toLocalTime(block.start_time);
   const endTime = block.end_time ? toLocalTime(block.end_time) : new Date();
 
-  console.log('StudyBlock - Original start time:', block.start_time);
-  console.log('StudyBlock - Converted start time:', startTime.toLocaleString());
-  console.log('StudyBlock - Original end time:', block.end_time);
-  console.log('StudyBlock - Converted end time:', endTime.toLocaleString());
-
   const startPosition = calculatePosition(startTime, zoomLevel);
   const endPosition = calculatePosition(endTime, zoomLevel);
   const duration = Math.max(endPosition - startPosition, 20);
-
-  console.log('StudyBlock - Start position:', startPosition);
-  console.log('StudyBlock - End position:', endPosition);
-  console.log('StudyBlock - Duration:', duration);
 
   return (
     <li

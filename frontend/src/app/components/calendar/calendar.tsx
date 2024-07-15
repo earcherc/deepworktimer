@@ -1,6 +1,6 @@
 'use client';
 
-import { getTodayDateRange, toLocalTime } from '@utils/dateUtils';
+import { formatToLocalTime, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
 import { MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { useModalContext } from '@context/modal/modal-context';
 import CurrentTimeIndicator from './current-time-indicator';
@@ -38,10 +38,10 @@ const Calendar: React.FC<CalendarProps> = () => {
       console.log('Received study blocks:', studyBlocksData);
       studyBlocksData.forEach((block) => {
         console.log('Block start time (server):', block.start_time);
-        console.log('Block start time (local):', toLocalTime(block.start_time).toLocaleString());
+        console.log('Block start time (local):', formatToLocalTime(toLocalTime(block.start_time)));
         if (block.end_time) {
           console.log('Block end time (server):', block.end_time);
-          console.log('Block end time (local):', toLocalTime(block.end_time).toLocaleString());
+          console.log('Block end time (local):', formatToLocalTime(toLocalTime(block.end_time)));
         }
       });
     }
