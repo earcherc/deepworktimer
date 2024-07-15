@@ -8,7 +8,7 @@ import React from 'react';
 interface StudyBlockProps {
   block: StudyBlock;
   zoomLevel: number;
-  calculatePosition: (date: Date, zoomLevel: number) => number;
+  calculatePosition: (date: Date) => number;
   onDoubleClick: () => void;
 }
 
@@ -20,16 +20,17 @@ const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, zoomLevel, calc
   const startTime = toLocalTime(block.start_time);
   const endTime = block.end_time ? toLocalTime(block.end_time) : new Date();
 
-  const startPosition = calculatePosition(startTime, zoomLevel);
-  const endPosition = calculatePosition(endTime, zoomLevel);
-  const duration = Math.max(endPosition - startPosition, 20);
+  const startPosition = calculatePosition(startTime);
+  const endPosition = calculatePosition(endTime);
+  const duration = Math.max(endPosition - startPosition, 1); // Ensure minimum 1% height
 
   return (
     <li
       className="absolute left-0 right-0 flex flex-col overflow-hidden rounded-lg bg-blue-50 text-xs leading-5 hover:bg-blue-100 cursor-pointer"
       style={{
-        top: `${startPosition}px`,
-        height: `${duration}px`,
+        top: `${startPosition}%`,
+        height: `${duration}%`,
+        minHeight: `${20 / zoomLevel}px`, // Adjust minimum height based on zoom level
       }}
       onDoubleClick={onDoubleClick}
     >
@@ -37,7 +38,7 @@ const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, zoomLevel, calc
         <p className="font-semibold text-blue-700">
           {formatTime(startTime)} - {block.end_time ? formatTime(endTime) : 'In Progress'}
         </p>
-        {duration > 25 && (
+        {duration > 25 / zoomLevel && (
           <p className="text-blue-500">
             {block.is_countdown ? 'Countdown' : 'Session'}
             {!block.end_time && <span className="ml-1 animate-pulse text-red-500">•</span>}

@@ -30,9 +30,6 @@ const Calendar: React.FC<CalendarProps> = () => {
     queryFn: () => StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange),
   });
 
-  console.log('Client time:', new Date().toISOString());
-  console.log('Date range:', dateRange);
-
   useEffect(() => {
     if (studyBlocksData) {
       console.log('Received study blocks:', studyBlocksData);
@@ -102,7 +99,7 @@ const Calendar: React.FC<CalendarProps> = () => {
             <div className="grid flex-auto grid-cols-1 grid-rows-1">
               <div
                 className="col-start-1 col-end-2 row-start-1 grid divide-y divide-gray-100"
-                style={{ gridTemplateRows: `repeat(${HOURS_PER_DAY}, minmax(${3.5 * zoomLevel}rem, auto))` }}
+                style={{ gridTemplateRows: `repeat(${HOURS_PER_DAY}, minmax(${3.5 * zoomLevel}rem, 1fr))` }}
               >
                 {Array.from({ length: HOURS_PER_DAY }).map((_, index) => (
                   <div key={index}>
@@ -112,7 +109,7 @@ const Calendar: React.FC<CalendarProps> = () => {
                   </div>
                 ))}
               </div>
-              <ol className="col-start-1 col-end-2 row-start-1 relative">
+              <ol className="col-start-1 col-end-2 row-start-1 relative h-full">
                 {studyBlocksData?.map((block) => (
                   <StudyBlockComponent
                     key={block.id}
