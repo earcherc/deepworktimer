@@ -30,6 +30,12 @@ const Calendar: React.FC<CalendarProps> = () => {
     queryFn: () => StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange),
   });
 
+  const sortedStudyBlocks = React.useMemo(() => {
+    return [...(studyBlocksData || [])].sort(
+      (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
+    );
+  }, [studyBlocksData]);
+
   const scrollToCurrentTime = () => {
     if (containerRef.current) {
       const now = new Date();
@@ -96,11 +102,10 @@ const Calendar: React.FC<CalendarProps> = () => {
                 ))}
               </div>
               <ol className="col-start-1 col-end-2 row-start-1 relative h-full">
-                {studyBlocksData?.map((block) => (
+                {sortedStudyBlocks?.map((block) => (
                   <StudyBlockComponent
                     key={block.id}
                     block={block}
-                    zoomLevel={zoomLevel}
                     calculatePosition={calculateGridPosition}
                     onDoubleClick={() => openEditStudyBlockModal(block)}
                   />

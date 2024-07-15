@@ -13,7 +13,7 @@ const CurrentTimeIndicator: React.FC = () => {
       const minutesSinceMidnight = now.getHours() * 60 + now.getMinutes();
       const percentage = (minutesSinceMidnight / 1440) * 100;
       setPosition(percentage);
-      setCurrentTime(formatToLocalTime(now, 'HH:mm'));
+      setCurrentTime(formatToLocalTime(now, 'h:mm'));
     };
 
     const interval = setInterval(updatePositionAndTime, 30000);
