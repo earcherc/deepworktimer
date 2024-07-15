@@ -1,20 +1,43 @@
+// calendar.tsx
 'use client';
-import { getTodayDateRange } from '../../../utils/dateUtils';
+import { getCurrentUTC, getTodayDateRange, toLocalTime } from '../../../utils/dateUtils';
 import { StudyBlock, StudyBlocksService } from '@api';
+import { Fragment, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import StudyBlockComponent from './study-block';
-import { Fragment, useRef } from 'react';
 
 export default function Calendar() {
   const container = useRef<HTMLDivElement>(null);
   const containerOffset = useRef<HTMLDivElement>(null);
 
   const dateRange = getTodayDateRange();
+  console.log('Date range:', dateRange);
 
   const { data: studyBlocksData } = useQuery<StudyBlock[]>({
     queryKey: ['studyBlocks', dateRange.start_time, dateRange.end_time],
     queryFn: () => StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange),
   });
+
+  useEffect(() => {
+    console.log('Fetched study blocks:', studyBlocksData);
+  }, [studyBlocksData]);
+
+  const scrollToCurrentHour = () => {
+    if (container.current) {
+      const now = toLocalTime(getCurrentUTC());
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const scrollPosition = (currentHour * 60 + currentMinute) * (3.5 / 60) * 16; // 3.5rem per hour, 16px per rem
+      const containerHeight = container.current.clientHeight;
+      const totalHeight = 24 * 3.5 * 16; // Total height of 24 hours
+      const maxScroll = totalHeight - containerHeight;
+      container.current.scrollTop = Math.min(scrollPosition - containerHeight / 2, maxScroll);
+    }
+  };
+
+  useEffect(() => {
+    scrollToCurrentHour();
+  }, []);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
