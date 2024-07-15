@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Optional
 
+from sqlalchemy import Column, DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -12,9 +13,12 @@ if TYPE_CHECKING:
 class StudyBlock(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     start_time: datetime = Field(
-        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+        sa_column=Column(DateTime(timezone=True)),
+        default_factory=lambda: datetime.now(UTC),
     )
-    end_time: Optional[datetime] = Field(default=None)
+    end_time: Optional[datetime] = Field(
+        sa_column=Column(DateTime(timezone=True)), default=None
+    )
     rating: Optional[float] = Field(default=None, ge=0, le=5)
     is_countdown: bool = Field(default=True)
 

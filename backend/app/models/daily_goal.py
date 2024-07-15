@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import Column, DateTime, UniqueConstraint
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -15,7 +15,8 @@ class DailyGoal(SQLModel, table=True):
     block_size: int
     is_selected: bool = Field(default=False)
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+        sa_column=Column(DateTime(timezone=True)),
+        default_factory=lambda: datetime.now(UTC),
     )
     user_id: int = Field(foreign_key="user.id", index=True)
 

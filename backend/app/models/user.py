@@ -2,6 +2,7 @@ from datetime import UTC, date, datetime
 from enum import Enum
 from typing import TYPE_CHECKING, List, Optional
 
+from sqlalchemy import Column, DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -30,7 +31,8 @@ class User(SQLModel, table=True):
     profile_photo_key: Optional[str] = None
     is_active: bool = Field(default=True)
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(UTC).replace(tzinfo=None)
+        sa_column=Column(DateTime(timezone=True)),
+        default_factory=lambda: datetime.now(UTC),
     )
 
     # Relationships
