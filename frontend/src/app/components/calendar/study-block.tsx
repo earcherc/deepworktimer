@@ -1,6 +1,5 @@
 'use client';
 
-import { calculateGridPosition } from '@utils/timeUtils';
 import { toLocalTime } from '@utils/dateUtils';
 import { StudyBlock } from '@api';
 import React from 'react';
@@ -10,36 +9,35 @@ interface StudyBlockProps {
   zoomLevel: number;
   calculatePosition: (date: Date, zoomLevel: number) => number;
   onDoubleClick: () => void;
-  totalBlocks: number;
-  style?: React.CSSProperties;
 }
 
 const formatTime = (date: Date): string => {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
-const StudyBlockComponent: React.FC<StudyBlockProps> = ({
-  block,
-  zoomLevel,
-  calculatePosition,
-  onDoubleClick,
-  totalBlocks,
-  style,
-}) => {
+const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, zoomLevel, calculatePosition, onDoubleClick }) => {
   const startTime = toLocalTime(block.start_time);
   const endTime = block.end_time ? toLocalTime(block.end_time) : new Date();
 
-  const startPosition = calculateGridPosition(startTime, zoomLevel);
-  const endPosition = calculateGridPosition(endTime, zoomLevel);
-  const duration = Math.max(endPosition - startPosition, 20); // Minimum height of 20px
+  console.log('StudyBlock - Original start time:', block.start_time);
+  console.log('StudyBlock - Converted start time:', startTime.toLocaleString());
+  console.log('StudyBlock - Original end time:', block.end_time);
+  console.log('StudyBlock - Converted end time:', endTime.toLocaleString());
+
+  const startPosition = calculatePosition(startTime, zoomLevel);
+  const endPosition = calculatePosition(endTime, zoomLevel);
+  const duration = Math.max(endPosition - startPosition, 20);
+
+  console.log('StudyBlock - Start position:', startPosition);
+  console.log('StudyBlock - End position:', endPosition);
+  console.log('StudyBlock - Duration:', duration);
 
   return (
-    <div
-      className="absolute flex flex-col overflow-hidden rounded-lg bg-blue-50 text-xs leading-5 hover:bg-blue-100 cursor-pointer"
+    <li
+      className="absolute left-0 right-0 flex flex-col overflow-hidden rounded-lg bg-blue-50 text-xs leading-5 hover:bg-blue-100 cursor-pointer"
       style={{
         top: `${startPosition}px`,
         height: `${duration}px`,
-        ...style,
       }}
       onDoubleClick={onDoubleClick}
     >
@@ -54,7 +52,7 @@ const StudyBlockComponent: React.FC<StudyBlockProps> = ({
           </p>
         )}
       </div>
-    </div>
+    </li>
   );
 };
 
