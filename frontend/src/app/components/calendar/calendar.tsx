@@ -1,8 +1,8 @@
 // calendar.tsx
 import { calculateGridPosition, groupOverlappingBlocks } from '@utils/timeUtils';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useModalContext } from '@app/context/modal/modal-context';
 import { MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
+import { useModalContext } from '@context/modal/modal-context';
 import CurrentTimeIndicator from './current-time-indicator';
 import { StudyBlock, StudyBlocksService } from '@api';
 import { getTodayDateRange } from '@utils/dateUtils';
@@ -11,7 +11,7 @@ import StudyBlockEdit from './study-block-edit';
 import StudyBlockComponent from './study-block';
 
 const MIN_ZOOM = 0.5;
-const MAX_ZOOM = 8;
+const MAX_ZOOM = 4;
 const ZOOM_STEP = 0.5;
 const MINUTES_PER_DAY = 1440;
 const HOURS_PER_DAY = 24;
@@ -88,7 +88,7 @@ const Calendar: React.FC<CalendarProps> = () => {
             <div className="grid flex-auto grid-cols-1 grid-rows-1">
               <div
                 className="col-start-1 col-end-2 row-start-1 grid divide-y divide-gray-100 my-4"
-                style={{ gridTemplateRows: `repeat(${HOURS_PER_DAY * 2}, minmax(${1.75 * zoomLevel}rem, 1fr))` }}
+                style={{ gridTemplateRows: `repeat(${HOURS_PER_DAY * 2}, minmax(${1.75 * zoomLevel}rem))` }}
               >
                 {Array.from({ length: HOURS_PER_DAY }).map((_, index) => (
                   <React.Fragment key={index}>
