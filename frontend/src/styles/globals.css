@@ -15,3 +15,7 @@
   animation-name: countdown;
   animation-timing-function: linear;
 }
+
+.zoom-transition {
+  transition: all 0.3s ease-in-out;
+}

@@ -1,47 +1,59 @@
-'use client';
-import { toLocalTime } from '../../../utils/dateUtils';
-import { StudyBlock as StudyBlockType } from '@api';
-import React, { useEffect, useState } from 'react';
+// study-block.tsx
+import { calculateGridPosition } from '@utils/timeUtils';
+import { toLocalTime } from '@utils/dateUtils';
+import { StudyBlock } from '@api';
+import React from 'react';
 
-const timeToGridRow = (start: string, end: string | undefined): string => {
-  const startDate = toLocalTime(start);
-  const endDate = end ? toLocalTime(end) : new Date();
-  const startTotalMinutes = (startDate.getHours() * 60 + startDate.getMinutes()) % 1440;
-  const endTotalMinutes = (endDate.getHours() * 60 + endDate.getMinutes()) % 1440;
-  return `${startTotalMinutes + 2} / ${endTotalMinutes + 2}`;
+interface StudyBlockProps {
+  block: StudyBlock;
+  zoomLevel: number;
+  calculatePosition: (date: Date, zoomLevel: number) => number;
+  onDoubleClick: () => void;
+  totalBlocks: number;
+  style?: React.CSSProperties;
+}
+
+const formatTime = (date: Date): string => {
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
-const formatTime = (dateString: string) =>
-  toLocalTime(dateString).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+const StudyBlockComponent: React.FC<StudyBlockProps> = ({
+  block,
+  zoomLevel,
+  calculatePosition,
+  onDoubleClick,
+  totalBlocks,
+  style,
+}) => {
+  const startTime = toLocalTime(block.start_time);
+  const endTime = block.end_time ? toLocalTime(block.end_time) : new Date();
 
-const StudyBlockComponent: React.FC<{ block: StudyBlockType }> = ({ block }) => {
-  const { start_time, end_time, is_countdown } = block;
-  const [gridPosition, setGridPosition] = useState(timeToGridRow(start_time, end_time));
-  const [currentEndTime, setCurrentEndTime] = useState(end_time ? formatTime(end_time) : 'In Progress');
-
-  useEffect(() => {
-    if (!end_time) {
-      const timer = setInterval(() => {
-        const now = new Date();
-        setGridPosition(timeToGridRow(start_time, now.toISOString()));
-        setCurrentEndTime(formatTime(now.toISOString()));
-      }, 60000);
-      return () => clearInterval(timer);
-    }
-  }, [start_time, end_time]);
+  const startPosition = calculateGridPosition(startTime, zoomLevel);
+  const endPosition = calculateGridPosition(endTime, zoomLevel);
+  const duration = Math.max(endPosition - startPosition, 20); // Minimum height of 20px
 
   return (
-    <li className="relative mt-px flex" style={{ gridRow: gridPosition }}>
-      <div className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-blue-50 p-2 text-xs leading-5 hover:bg-blue-100">
-        <p className="order-1 font-semibold text-blue-700">{is_countdown ? 'Countdown' : 'Session'}</p>
-        <p className="text-blue-500 group-hover:text-blue-700">
-          <time dateTime={start_time}>{formatTime(start_time)}</time>
-          {' - '}
-          <time>{currentEndTime}</time>
-          {!end_time && <span className="ml-1 animate-pulse text-red-500">•</span>}
+    <div
+      className="absolute flex flex-col overflow-hidden rounded-lg bg-blue-50 text-xs leading-5 hover:bg-blue-100 cursor-pointer"
+      style={{
+        top: `${startPosition}px`,
+        height: `${duration}px`,
+        ...style,
+      }}
+      onDoubleClick={onDoubleClick}
+    >
+      <div className="flex-1 p-1 truncate">
+        <p className="font-semibold text-blue-700">
+          {formatTime(startTime)} - {block.end_time ? formatTime(endTime) : 'In Progress'}
         </p>
+        {duration > 25 && (
+          <p className="text-blue-500">
+            {block.is_countdown ? 'Countdown' : 'Session'}
+            {!block.end_time && <span className="ml-1 animate-pulse text-red-500">•</span>}
+          </p>
+        )}
       </div>
-    </li>
+    </div>
   );
 };
 

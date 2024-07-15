@@ -25,6 +25,7 @@
     "react-query": "^3.39.3",
     "react-timer-hook": "^3.0.7",
     "react-tooltip": "^5.27.1",
+    "react-window": "^1.8.10",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
@@ -33,6 +34,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-window": "^1.8.8",
     "@types/uuid": "^9.0.7",
     "autoprefixer": "^10.0.1",
     "classnames": "^2.3.2",
