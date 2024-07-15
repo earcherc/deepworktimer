@@ -1,12 +1,12 @@
 'use client';
 
-import { formatToLocalTime, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
 import { MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { useModalContext } from '@context/modal/modal-context';
 import CurrentTimeIndicator from './current-time-indicator';
 import React, { useEffect, useRef, useState } from 'react';
 import { calculateGridPosition } from '@utils/timeUtils';
 import { StudyBlock, StudyBlocksService } from '@api';
+import { getTodayDateRange } from '@utils/dateUtils';
 import { useQuery } from '@tanstack/react-query';
 import StudyBlockEdit from './study-block-edit';
 import StudyBlockComponent from './study-block';
@@ -29,20 +29,6 @@ const Calendar: React.FC<CalendarProps> = () => {
     queryKey: ['studyBlocks', dateRange.start_time, dateRange.end_time],
     queryFn: () => StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange),
   });
-
-  useEffect(() => {
-    if (studyBlocksData) {
-      console.log('Received study blocks:', studyBlocksData);
-      studyBlocksData.forEach((block) => {
-        console.log('Block start time (server):', block.start_time);
-        console.log('Block start time (local):', formatToLocalTime(toLocalTime(block.start_time)));
-        if (block.end_time) {
-          console.log('Block end time (server):', block.end_time);
-          console.log('Block end time (local):', formatToLocalTime(toLocalTime(block.end_time)));
-        }
-      });
-    }
-  }, [studyBlocksData]);
 
   const scrollToCurrentTime = () => {
     if (containerRef.current) {
