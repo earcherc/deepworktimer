@@ -8,7 +8,7 @@ import {
   UsersService,
 } from '@api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import useToast from '@app/context/toasts/toast-context';
+import useToast from '@context/toasts/toast-context';
 import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Image from 'next/image';

@@ -1,8 +1,8 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useModalContext } from '@app/context/modal/modal-context';
-import useToast from '@app/context/toasts/toast-context';
+import { useModalContext } from '@context/modal/modal-context';
+import useToast from '@context/toasts/toast-context';
 import { ApiError, UsersService } from '@api';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';

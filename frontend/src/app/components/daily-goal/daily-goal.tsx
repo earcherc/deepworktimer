@@ -2,9 +2,9 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid';
-import { useModalContext } from '@app/context/modal/modal-context';
+import { useModalContext } from '@context/modal/modal-context';
 import { ApiError, DailyGoal, DailyGoalsService } from '@api';
-import useToast from '@app/context/toasts/toast-context';
+import useToast from '@context/toasts/toast-context';
 import { Menu, Transition } from '@headlessui/react';
 import DailyGoalCreate from './daily-goal-create';
 import classNames from 'classnames';

@@ -1,6 +1,6 @@
 'use client';
 
-import { Providers } from '../context/providers';
+import { Providers } from '@context/providers';
 import '../../api/config';
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {

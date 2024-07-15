@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckIcon, ExclamationTriangleIcon, XCircleIcon } from '@heroicons/react/24/outline';
-import { useModalContext } from '@app/context/modal/modal-context';
+import { useModalContext } from '@context/modal/modal-context';
 import { Dialog, Transition } from '@headlessui/react';
 import React, { Fragment } from 'react';
 

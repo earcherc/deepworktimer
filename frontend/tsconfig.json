@@ -37,6 +37,7 @@
       "@types/*": ["./src/types/*"],
       "@lib/*": ["./src/lib/*"],
       "@utils/*": ["./src/utils/*"],
+      "@context/*": ["./src/app/context/*"],
       "@api": ["./src/api"]
     }
   },

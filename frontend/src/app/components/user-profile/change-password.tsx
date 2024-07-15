@@ -1,7 +1,7 @@
 'use client';
 
-import useToast from '@app/context/toasts/toast-context';
 import { ApiError, AuthenticationService } from '@api';
+import useToast from '@context/toasts/toast-context';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 
