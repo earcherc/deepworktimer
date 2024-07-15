@@ -23,7 +23,7 @@ const CurrentTimeIndicator: React.FC = () => {
   }, []);
 
   return (
-    <div className="absolute left-0 right-0 flex items-center pointer-events-none" style={{ top: `${position}%` }}>
+    <div className="absolute left-0 right-0 flex items-center pointer-events-none z-20" style={{ top: `${position}%` }}>
       <div className="absolute left-14 w-2 h-2 rounded-full -ml-1 bg-red-300" />
       <div className="absolute left-14 right-0 h-px bg-red-300" />
       <span className="absolute left-20 text-xs -ml-16 text-red-500 opacity-50 font-medium">{currentTime}</span>
