@@ -1,4 +1,5 @@
-// study-block.tsx
+'use client';
+
 import { calculateGridPosition } from '@utils/timeUtils';
 import { toLocalTime } from '@utils/dateUtils';
 import { StudyBlock } from '@api';

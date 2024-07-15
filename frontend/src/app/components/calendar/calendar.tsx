@@ -1,16 +1,17 @@
-// calendar.tsx
+'use client';
+
 import { calculateGridPosition, groupOverlappingBlocks } from '@utils/timeUtils';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { useModalContext } from '@context/modal/modal-context';
 import CurrentTimeIndicator from './current-time-indicator';
+import React, { useEffect, useRef, useState } from 'react';
 import { StudyBlock, StudyBlocksService } from '@api';
 import { getTodayDateRange } from '@utils/dateUtils';
 import { useQuery } from '@tanstack/react-query';
 import StudyBlockEdit from './study-block-edit';
 import StudyBlockComponent from './study-block';
 
-const MIN_ZOOM = 0.5;
+const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
 const ZOOM_STEP = 0.5;
 const MINUTES_PER_DAY = 1440;
@@ -31,7 +32,7 @@ const Calendar: React.FC<CalendarProps> = () => {
 
   const groupedBlocks = groupOverlappingBlocks(studyBlocksData || []);
 
-  const scrollToCurrentTime = useCallback(() => {
+  const scrollToCurrentTime = () => {
     if (containerRef.current) {
       const now = new Date();
       const minutesSinceMidnight = now.getHours() * 60 + now.getMinutes();
@@ -39,12 +40,10 @@ const Calendar: React.FC<CalendarProps> = () => {
       containerRef.current.scrollTop =
         scrollRatio * containerRef.current.scrollHeight - containerRef.current.clientHeight / 2;
     }
-  }, []);
+  };
 
   useEffect(() => {
     scrollToCurrentTime();
-    const interval = setInterval(scrollToCurrentTime, 60000);
-    return () => clearInterval(interval);
   }, [scrollToCurrentTime]);
 
   const handleZoom = (delta: number) => {
@@ -81,14 +80,14 @@ const Calendar: React.FC<CalendarProps> = () => {
           <PlusIcon className="w-5 h-5" />
         </button>
       </div>
-      <div className="isolate flex flex-auto overflow-auto rounded-lg bg-white">
+      <div className="isolate flex flex-auto overflow-hidden rounded-lg bg-white">
         <div ref={containerRef} className="flex flex-auto flex-col overflow-auto">
-          <div className="flex w-full flex-auto">
+          <div className="flex w-full flex-auto relative">
             <div className="w-14 flex-none bg-white ring-1 ring-gray-100" />
             <div className="grid flex-auto grid-cols-1 grid-rows-1">
               <div
-                className="col-start-1 col-end-2 row-start-1 grid divide-y divide-gray-100 my-4"
-                style={{ gridTemplateRows: `repeat(${HOURS_PER_DAY * 2}, minmax(${1.75 * zoomLevel}rem))` }}
+                className="col-start-1 col-end-2 row-start-1 grid divide-y divide-gray-100"
+                style={{ gridTemplateRows: `repeat(${HOURS_PER_DAY * 2}, minmax(${1.75 * zoomLevel}rem, auto))` }}
               >
                 {Array.from({ length: HOURS_PER_DAY }).map((_, index) => (
                   <React.Fragment key={index}>
@@ -124,7 +123,7 @@ const Calendar: React.FC<CalendarProps> = () => {
                   </li>
                 ))}
               </ol>
-              <CurrentTimeIndicator zoomLevel={zoomLevel} />
+              <CurrentTimeIndicator />
             </div>
           </div>
         </div>
