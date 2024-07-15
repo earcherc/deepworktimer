@@ -11,6 +11,11 @@
     "prettier": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/free-brands-svg-icons": "^6.5.2",
+    "@fortawesome/free-regular-svg-icons": "^6.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.5.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
     "@tanstack/react-query": "^5.51.1",
