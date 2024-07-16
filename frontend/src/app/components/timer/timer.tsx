@@ -10,12 +10,14 @@ import {
 } from '@api';
 import { getCurrentUTC, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+import { Cog6ToothIcon } from '@heroicons/react/20/solid';
 import useToast from '@context/toasts/toast-context';
 import { useEffect, useState } from 'react';
 
 enum TimerMode {
   Countdown = 'Timer',
-  Stopwatch = 'Stopwatch',
+  OpenSession = 'Open Session',
 }
 
 const QUERY_KEYS = {
@@ -98,7 +100,7 @@ const Timer = () => {
 
     setIsActive(true);
     setStudyBlockId(incompleteBlock.id);
-    setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.Stopwatch);
+    setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
 
     const startTime = toLocalTime(incompleteBlock.start_time).getTime();
     const elapsedMilliseconds = Date.now() - startTime;
@@ -169,7 +171,7 @@ const Timer = () => {
   };
 
   const toggleMode = () => {
-    setMode(mode === TimerMode.Countdown ? TimerMode.Stopwatch : TimerMode.Countdown);
+    setMode(mode === TimerMode.Countdown ? TimerMode.OpenSession : TimerMode.Countdown);
     setTime(mode === TimerMode.Countdown ? 0 : activeBlockSize);
   };
 
@@ -187,7 +189,7 @@ const Timer = () => {
   return (
     <div className="rounded-lg bg-white p-4 shadow sm:p-6">
       <div className="flex flex-col items-center">
-        <h2 className="mb-4 text-xl font-semibold text-gray-900">{mode}</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">{mode}</h2>
         <p className="mb-8 text-5xl font-bold text-indigo-600">{formatTime(time)}</p>
         <div className="flex space-x-3">
           {!isActive && (
@@ -196,7 +198,7 @@ const Timer = () => {
               onClick={toggleMode}
               className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              Switch to {mode === TimerMode.Countdown ? 'Stopwatch' : 'Timer'}
+              <Cog6ToothIcon className="w-5 h-5" />
             </button>
           )}
           <button

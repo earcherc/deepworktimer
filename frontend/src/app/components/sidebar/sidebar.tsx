@@ -1,17 +1,17 @@
-import StudyCategory from '../study-category/study-category';
-import DailyGoal from '../daily-goal/daily-goal';
+import StudyCategoryComponent from '../study-category/study-category';
+import DailyGoalComponent from '../daily-goal/daily-goal';
 
 export default function Sidebar() {
   return (
-    <div className="h-100 flex w-96 flex-col ">
+    <div className="h-100 flex w-80 flex-col ">
       <div className="flex grow flex-col overflow-y-auto overflow-x-hidden">
         <nav className="flex flex-1 flex-col">
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
             <li>
-              <DailyGoal></DailyGoal>
+              <DailyGoalComponent />
             </li>
             <li>
-              <StudyCategory></StudyCategory>
+              <StudyCategoryComponent />
             </li>
           </ul>
         </nav>

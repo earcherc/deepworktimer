@@ -60,7 +60,7 @@ const StudyCategoryComponent = () => {
       <div className="mb-1 flex items-center justify-between">
         <div className="relative w-full">
           <Menu.Button className="flex w-full items-center justify-between rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-            <h2 className="text-lg font-semibold text-gray-900">Choose Study Category</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Category</h2>
             <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </Menu.Button>
           <Transition
@@ -108,8 +108,10 @@ const StudyCategoryComponent = () => {
         </button>
       </div>
       {activeCategory && (
-        <div className="mt-4 space-y-2">
-          <div className="text-center text-2xl font-bold text-gray-900">{activeCategory.title}</div>
+        <div className="mt-4 flex justify-center">
+          <div className="w-2/3 text-center">
+            <div className="text-2xl font-bold text-gray-900">{activeCategory.title}</div>
+          </div>
         </div>
       )}
     </Menu>

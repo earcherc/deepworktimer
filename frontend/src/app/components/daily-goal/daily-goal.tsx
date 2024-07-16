@@ -1,7 +1,7 @@
 'use client';
 
+import { ChevronDownIcon, PlusIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { useModalContext } from '@context/modal/modal-context';
 import { ApiError, DailyGoal, DailyGoalsService } from '@api';
 import useToast from '@context/toasts/toast-context';
@@ -62,7 +62,7 @@ const DailyGoalComponent = () => {
       <div className="mb-1 flex items-center justify-between">
         <div className="relative w-full">
           <Menu.Button className="flex w-full items-center justify-between rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-            <h2 className="text-lg font-semibold text-gray-900">Choose Daily Goal</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Daily Goal</h2>
             <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </Menu.Button>
           <Transition
@@ -112,13 +112,13 @@ const DailyGoalComponent = () => {
         </button>
       </div>
       {activeGoal && (
-        <div className="mt-4 space-y-2">
-          <div className="text-center text-sm font-medium text-gray-900">Blocks: {activeGoal.quantity}</div>
-          <div className="text-center text-sm font-medium text-gray-900">
-            Size: {activeGoal.block_size.toFixed(2)} min
-          </div>
-          <div className="text-center text-sm font-medium text-gray-900">
-            Total: {getTotalTime(activeGoal.block_size, activeGoal.quantity)}
+        <div className="mt-4 flex justify-center">
+          <div className="w-2/3 text-center inline-flex items-center justify-center">
+            <span className="text-2xl font-bold text-gray-900">{activeGoal.quantity}</span>
+            <span className="inline-flex items-center mx-2">
+              <XMarkIcon className="h-5 w-5 text-gray-400" />
+            </span>
+            <span className="text-2xl font-bold text-gray-900">{activeGoal.block_size}m</span>
           </div>
         </div>
       )}
