@@ -31,3 +31,19 @@ This 'Deep Work' companion app is designed to help users achieve optimal deep wo
 - **Metrics Tracking**: Insights into productivity patterns and focus sessions.
 - **Friend Connectivity**: Connect with friends, share progress, and stay motivated.
 - **Customizable Routines**: Tailor your deep work routine to fit your personal preferences and schedule.
+
+
+### Nginx Commands
+
+- Start Nginx: sudo systemctl start nginx
+- Stop Nginx: sudo systemctl stop nginx
+- Restart Nginx: sudo systemctl restart nginx
+- Reload Nginx configuration: sudo systemctl reload nginx
+- Test Nginx configuration: sudo nginx -t
+- View Nginx status: sudo systemctl status nginx
+- View Nginx error log: sudo tail -f /var/log/nginx/error.log
+- View Nginx access log: sudo tail -f /var/log/nginx/access.log
+- Edit Nginx main configuration: sudo nano /etc/nginx/nginx.conf
+- List enabled sites: ls -l /etc/nginx/sites-enabled/
+- Enable a site: sudo ln -s /etc/nginx/sites-available/site /etc/nginx/sites-enabled/
+- Disable a site: sudo rm /etc/nginx/sites-enabled/site
