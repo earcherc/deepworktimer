@@ -7,10 +7,10 @@ class Settings(BaseSettings):
     DEBUG: bool = APP_ENV == "development"
 
     # Database settings
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: SecretStr
-    DATABASE_HOST: str
-    DATABASE_NAME: str
+    POSTGRES_USER: str = "docker"
+    POSTGRES_PASSWORD: SecretStr = "docker"
+    DATABASE_HOST: str = "docker"
+    DATABASE_NAME: str = "docker"
     DATABASE_URL: PostgresDsn = None
 
     # AWS settings
@@ -24,11 +24,6 @@ class Settings(BaseSettings):
 
     # CORS settings
     ALLOWED_ORIGINS: list[AnyHttpUrl] = ["http://localhost:3000"]
-
-    # JWT settings
-    JWT_SECRET_KEY: SecretStr
-    JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     class Config:
         env_file = ".env"

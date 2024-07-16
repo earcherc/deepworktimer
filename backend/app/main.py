@@ -26,7 +26,7 @@ async def app_lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="Deep Work",
+        title="TeleoTimer",
         description="Productivity tracker",
         version="1.0.0",
         lifespan=app_lifespan,
