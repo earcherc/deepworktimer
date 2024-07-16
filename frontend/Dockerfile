@@ -14,7 +14,6 @@ RUN npm install --frozen-lockfile
 
 # Copy the rest of the files
 COPY . .
-COPY .env .env.local
 
 # Expose the port the app runs on.
 EXPOSE 3000
