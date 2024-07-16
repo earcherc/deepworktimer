@@ -7,6 +7,7 @@ const nextConfig = {
       'images.unsplash.com',
       'i.imgur.com',
       `${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.amazonaws.com`,
+      new URL(process.env.NEXT_PUBLIC_API_URL).hostname,
     ].filter(Boolean),
   },
   experimental: {},

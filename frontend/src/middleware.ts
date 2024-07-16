@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const sessionValidationEndpoint = 'http://host.docker.internal:8000/auth/validate-session';
+const getSessionValidationEndpoint = () => {
+  return `${process.env.NEXT_PUBLIC_API_URL}/auth/validate-session`;
+};
 
 async function validateSessionToken(request: NextRequest) {
   const sessionCookie = request.cookies.get('session_id');
@@ -10,7 +12,7 @@ async function validateSessionToken(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(sessionValidationEndpoint, {
+    const response = await fetch(getSessionValidationEndpoint(), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

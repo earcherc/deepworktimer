@@ -13,13 +13,13 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    env_file:
+      - .env
     volumes:
       - .:/app:cached # Mount the root folder that contains .git
       - /app/frontend/node_modules
     ports:
       - '3000:3000'
-    environment:
-      - NODE_ENV=development
 
   backend:
     build:

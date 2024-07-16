@@ -14,9 +14,13 @@ RUN npm install --frozen-lockfile
 
 # Copy the rest of the files
 COPY . .
+COPY .env .env.local
 
 # Expose the port the app runs on.
 EXPOSE 3000
 
-# Start the development server using the `dev` script from your package.json.
-CMD ["npm", "run", "dev"]
+CMD if [ "$NODE_ENV" = "production" ]; then \
+  npm run build && npm start; \
+  else \
+  npm run dev; \
+  fi

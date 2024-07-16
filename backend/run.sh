@@ -5,4 +5,8 @@ set -e
 alembic upgrade head
 
 # Start the application
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+if [ "$APP_ENV" = "production" ]; then
+    uvicorn app.main:app --host 0.0.0.0 --port 8000
+else
+    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+fi
