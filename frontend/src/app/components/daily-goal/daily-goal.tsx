@@ -88,9 +88,15 @@ const DailyGoalComponent = () => {
                           )}
                           onClick={() => selectGoal(goal)}
                         >
-                          <span className="font-semibold">Quantity:</span> {goal.quantity},{' '}
-                          <span className="font-semibold">Duration:</span> {goal.block_size}m,{' '}
-                          <span className="font-semibold">Total:</span> {getTotalTime(goal.block_size, goal.quantity)}
+                          <div className="flex justify-center">
+                            <div className="w-2/3 inline-flex items-center justify-center">
+                              <span className="font-bold text-gray-900">{goal.quantity}</span>
+                              <span className="inline-flex items-center mx-2">
+                                <XMarkIcon className="h-5 w-5 text-gray-400" />
+                              </span>
+                              <span className="font-bold text-gray-900">{goal.block_size}m</span>
+                            </div>
+                          </div>
                         </button>
                       )}
                     </Menu.Item>
