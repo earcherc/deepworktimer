@@ -36,13 +36,6 @@ const DailyGoalComponent = () => {
     },
   });
 
-  const getTotalTime = (blockSize: number, quantity: number) => {
-    const totalMinutes = blockSize * quantity;
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return `${hours}hr ${minutes}min`;
-  };
-
   const selectGoal = (activeGoal: DailyGoal) => {
     updateDailyGoalMutation.mutate({ ...activeGoal, is_selected: true });
   };

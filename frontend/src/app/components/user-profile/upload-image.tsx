@@ -71,8 +71,11 @@ export default function ImageUploadForm() {
       setPreview(null);
       setSelectedFile(null);
     },
-    onError: (error: any) => {
-      const errorMessage = error.response?.data?.detail || 'An error occurred while removing the profile photo';
+    onError: (error: unknown) => {
+      let errorMessage = 'An error occurred while removing the profile photo';
+      if (error instanceof ApiError) {
+        errorMessage = error.body?.detail || errorMessage;
+      }
       addToast({ type: 'error', content: errorMessage });
     },
   });

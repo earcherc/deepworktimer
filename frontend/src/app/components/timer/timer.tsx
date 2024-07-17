@@ -114,26 +114,6 @@ const Timer = () => {
   }, [studyBlocksData, dailyGoalsData, activeBlockSize]);
 
   useEffect(() => {
-    if (!isActive) return;
-
-    const interval = setInterval(() => {
-      setTime((prevTime) => {
-        if (mode === TimerMode.Countdown) {
-          const newTime = prevTime - 1;
-          if (newTime <= 0) {
-            handleTimerExpiration();
-            return 0;
-          }
-          return newTime;
-        } else {
-          return prevTime + 1;
-        }
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isActive, mode]);
-
   const handleTimerExpiration = async () => {
     if (studyBlockId) {
       await updateStudyBlockMutation.mutateAsync({
@@ -144,6 +124,28 @@ const Timer = () => {
     setIsActive(false);
     setStudyBlockId(null);
   };
+
+  if (!isActive) return;
+
+  const interval = setInterval(() => {
+    setTime((prevTime) => {
+      if (mode === TimerMode.Countdown) {
+        const newTime = prevTime - 1;
+        if (newTime <= 0) {
+          handleTimerExpiration();
+          return 0;
+        }
+        return newTime;
+      } else {
+        return prevTime + 1;
+      }
+    });
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [isActive, mode, studyBlockId, updateStudyBlockMutation]);
+
+ 
 
   const startTimer = async () => {
     if (activeDailyGoal && activeCategory) {
