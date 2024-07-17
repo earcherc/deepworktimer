@@ -17,11 +17,10 @@ from .auth.auth_routes import router as auth_router
 
 @asynccontextmanager
 async def app_lifespan(app: FastAPI):
-    # Setup
     redis_client = Redis.from_url(settings.REDIS_URL)
     app.state.redis = redis_client
     yield
-    # Teardown
+
     await redis_client.close()
 
 
@@ -33,7 +32,7 @@ def create_app() -> FastAPI:
         lifespan=app_lifespan,
     )
 
-    # CORS middleware
+    # Middleware
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.ALLOWED_ORIGINS,
