@@ -5,7 +5,6 @@ class Settings(BaseSettings):
     # Core settings
     APP_ENV: str = "development"
     DEBUG: bool = APP_ENV == "development"
-    COOKIE_DOMAIN: str = "localhost" if DEBUG else "deepworktimer.io"
 
     # Database settings
     POSTGRES_USER: str = "docker"

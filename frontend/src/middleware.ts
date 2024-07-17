@@ -12,7 +12,9 @@ async function validateSessionToken(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(getSessionValidationEndpoint(), {
+    const endpoint = getSessionValidationEndpoint();
+    console.log('Validating session at:', endpoint);
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

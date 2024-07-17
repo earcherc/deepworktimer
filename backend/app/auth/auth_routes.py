@@ -54,7 +54,7 @@ async def login(
         value=session_id,
         httponly=True,
         secure=True,
-        domain=settings.COOKIE_DOMAIN,
+        samesite="lax",
     )
     user_data = user.__dict__
     user_data.pop("hashed_password", None)
