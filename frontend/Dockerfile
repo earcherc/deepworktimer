@@ -19,7 +19,7 @@ COPY . .
 EXPOSE 3000
 
 CMD if [ "$NODE_ENV" = "production" ]; then \
-  npm run build && npm start; \
+  npm run build && HOSTNAME="0.0.0.0" npm start; \
   else \
   npm run dev; \
   fi
