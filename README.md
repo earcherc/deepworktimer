@@ -1,4 +1,4 @@
-# TeleoTimer
+# Deep Work Timer
 
 [Wiki](https://github.com/earcherc/deep-work/wiki)
 
