@@ -16,8 +16,8 @@ async function validateSessionToken(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Cookie: `session_id=${sessionCookie.value}`,
       },
+      credentials: 'include',
     });
     const data = await response.json();
     return data.isValid;

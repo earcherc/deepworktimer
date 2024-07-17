@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     # Core settings
     APP_ENV: str = "development"
     DEBUG: bool = APP_ENV == "development"
+    COOKIE_DOMAIN: str = "localhost" if DEBUG else "deepworktimer.io"
 
     # Database settings
     POSTGRES_USER: str = "docker"
@@ -23,7 +24,11 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://redis:6379"
 
     # CORS settings
-    ALLOWED_ORIGINS: list[AnyHttpUrl] = ["http://localhost:3000"]
+    ALLOWED_ORIGINS: list[AnyHttpUrl] = [
+        "http://localhost:3000",
+        "https://deepworktimer.io",
+    ]
+    ALLOWED_HOSTS: list[str] = ["deepworktimer.io", "localhost", "127.0.0.1"]
 
     class Config:
         env_file = ".env"

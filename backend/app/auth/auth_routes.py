@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from ..config import settings
 
 from ..database import get_session
 from ..dependencies import get_redis
@@ -48,7 +49,13 @@ async def login(
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    response.set_cookie(key="session_id", value=session_id, httponly=True, secure=True)
+    response.set_cookie(
+        key="session_id",
+        value=session_id,
+        httponly=True,
+        secure=True,
+        domain=settings.COOKIE_DOMAIN,
+    )
     user_data = user.__dict__
     user_data.pop("hashed_password", None)
     # Generate presigned URLs for profile photos if they exist
