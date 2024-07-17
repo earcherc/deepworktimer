@@ -48,7 +48,7 @@ async def login(
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    response.set_cookie(key="session_id", value=session_id, httponly=True, secure=False)
+    response.set_cookie(key="session_id", value=session_id, httponly=True, secure=True)
     user_data = user.__dict__
     user_data.pop("hashed_password", None)
     # Generate presigned URLs for profile photos if they exist
