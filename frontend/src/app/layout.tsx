@@ -10,8 +10,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <link rel="shortcut icon" href="/favicon.ico" />
-        <title>My Journal</title>
-        <meta name="description" content="My Interactive Journal" key="desc" />
+        <title>Deep Work Timer</title>
+        <meta name="description" content="Focus on what matters" key="desc" />
       </head>
       <body className={inter.className}>
         <div className="flex min-h-screen flex-col">

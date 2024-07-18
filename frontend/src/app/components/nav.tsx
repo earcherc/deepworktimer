@@ -70,7 +70,7 @@ export default function Nav() {
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex flex-shrink-0 items-center">
                   <Image width={50} height={50} src="/images/logo.svg" alt="Your Company" />
-                  <h1 className="ms-4 text-white">{displayName}&apos;s Journal</h1>
+                  <h1 className="ms-4 text-white">{displayName}&apos;s Deep Work</h1>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:items-center">
                   <div className="flex space-x-4">
