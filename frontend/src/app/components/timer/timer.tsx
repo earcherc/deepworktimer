@@ -10,6 +10,7 @@ import {
 } from '@api';
 import { getCurrentUTC, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Tooltip } from 'react-tooltip';
 
 import { Cog6ToothIcon } from '@heroicons/react/20/solid';
 import useToast from '@context/toasts/toast-context';
@@ -55,6 +56,7 @@ const Timer = () => {
   const activeCategory = categoriesData?.find((cat) => cat.is_selected);
   const activeDailyGoal = dailyGoalsData?.find((goal) => goal.is_selected);
   const activeBlockSize = (activeDailyGoal && activeDailyGoal.block_size * 60) || 0;
+  const isDisabled = !activeCategory || !activeDailyGoal;
 
   const createStudyBlockMutation = useMutation({
     mutationFn: StudyBlocksService.createStudyBlockStudyBlocksPost,
@@ -114,38 +116,36 @@ const Timer = () => {
   }, [studyBlocksData, dailyGoalsData, activeBlockSize]);
 
   useEffect(() => {
-  const handleTimerExpiration = async () => {
-    if (studyBlockId) {
-      await updateStudyBlockMutation.mutateAsync({
-        id: studyBlockId,
-        block: { end_time: getCurrentUTC() },
-      });
-    }
-    setIsActive(false);
-    setStudyBlockId(null);
-  };
-
-  if (!isActive) return;
-
-  const interval = setInterval(() => {
-    setTime((prevTime) => {
-      if (mode === TimerMode.Countdown) {
-        const newTime = prevTime - 1;
-        if (newTime <= 0) {
-          handleTimerExpiration();
-          return 0;
-        }
-        return newTime;
-      } else {
-        return prevTime + 1;
+    const handleTimerExpiration = async () => {
+      if (studyBlockId) {
+        await updateStudyBlockMutation.mutateAsync({
+          id: studyBlockId,
+          block: { end_time: getCurrentUTC() },
+        });
       }
-    });
-  }, 1000);
+      setIsActive(false);
+      setStudyBlockId(null);
+    };
 
-  return () => clearInterval(interval);
-}, [isActive, mode, studyBlockId, updateStudyBlockMutation]);
+    if (!isActive) return;
 
- 
+    const interval = setInterval(() => {
+      setTime((prevTime) => {
+        if (mode === TimerMode.Countdown) {
+          const newTime = prevTime - 1;
+          if (newTime <= 0) {
+            handleTimerExpiration();
+            return 0;
+          }
+          return newTime;
+        } else {
+          return prevTime + 1;
+        }
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isActive, mode, studyBlockId, updateStudyBlockMutation]);
 
   const startTimer = async () => {
     if (activeDailyGoal && activeCategory) {
@@ -196,26 +196,37 @@ const Timer = () => {
         <div className="flex space-x-3">
           {!isActive && (
             <button
-              disabled={!activeCategory && !activeDailyGoal}
+              disabled={isDisabled}
               onClick={toggleMode}
-              className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className={`rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                isDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500'
+              }`}
+              data-tooltip-id="timer-tooltip"
+              data-tooltip-content={isDisabled ? 'Please assign a daily goal and category' : ''}
+              data-tooltip-delay-show={1000}
             >
               <Cog6ToothIcon className="w-5 h-5" />
             </button>
           )}
           <button
             onClick={isActive ? stopTimer : startTimer}
-            disabled={!activeCategory && !activeDailyGoal}
+            disabled={isDisabled}
             className={`rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-              isActive
-                ? 'bg-red-500 hover:bg-red-600 focus:ring-red-500'
-                : 'bg-indigo-600 hover:bg-indigo-500 focus:ring-indigo-500'
+              isDisabled
+                ? 'bg-gray-400 cursor-not-allowed'
+                : isActive
+                  ? 'bg-red-500 hover:bg-red-600 focus:ring-red-500'
+                  : 'bg-indigo-600 hover:bg-indigo-500 focus:ring-indigo-500'
             }`}
+            data-tooltip-id="timer-tooltip"
+            data-tooltip-content={isDisabled ? 'Please assign a daily goal and category' : ''}
+            data-tooltip-delay-show={1000}
           >
             {isActive ? 'Stop' : 'Start'}
           </button>
         </div>
       </div>
+      <Tooltip id="timer-tooltip" />
     </div>
   );
 };

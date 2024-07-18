@@ -1,3 +1,4 @@
+import 'react-tooltip/dist/react-tooltip.css';
 import '@styles/globals.css';
 
 import { Inter } from 'next/font/google';
