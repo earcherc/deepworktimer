@@ -202,7 +202,7 @@ const Timer = () => {
                 isDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500'
               }`}
               data-tooltip-id="timer-tooltip"
-              data-tooltip-content={isDisabled ? 'Please assign a daily goal and category' : ''}
+              data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
               data-tooltip-delay-show={1000}
             >
               <Cog6ToothIcon className="w-5 h-5" />
@@ -219,7 +219,7 @@ const Timer = () => {
                   : 'bg-indigo-600 hover:bg-indigo-500 focus:ring-indigo-500'
             }`}
             data-tooltip-id="timer-tooltip"
-            data-tooltip-content={isDisabled ? 'Please assign a daily goal and category' : ''}
+            data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
             data-tooltip-delay-show={1000}
           >
             {isActive ? 'Stop' : 'Start'}
