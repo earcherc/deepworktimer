@@ -1,5 +1,4 @@
 'use client';
-
 import { ApiError, StudyCategoriesService, StudyCategoryCreate } from '@api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useModalContext } from '@context/modal/modal-context';
@@ -16,6 +15,7 @@ const StudyCategoryCreateComponent = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<StudyCategoryCreate>({
     defaultValues: {
       title: '',
@@ -24,7 +24,7 @@ const StudyCategoryCreateComponent = () => {
 
   const createStudyCategoryMutation = useMutation({
     mutationFn: (formData: StudyCategoryCreate) =>
-      StudyCategoriesService.createStudyCategoryStudyCategoriesPost({ title: formData.title }),
+      StudyCategoriesService.createStudyCategoryStudyCategoriesPost({ title: formData.title, is_selected: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studyCategories'] });
       reset();
@@ -43,6 +43,10 @@ const StudyCategoryCreateComponent = () => {
     createStudyCategoryMutation.mutate(formData);
   };
 
+  const capitalizeFirstLetter = (value: string) => {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
@@ -51,7 +55,13 @@ const StudyCategoryCreateComponent = () => {
         </label>
         <div className="mt-2">
           <input
-            {...register('title', { required: true })}
+            {...register('title', {
+              required: true,
+              onChange: (e) => {
+                const capitalized = capitalizeFirstLetter(e.target.value);
+                setValue('title', capitalized);
+              },
+            })}
             type="text"
             name="title"
             id="title"

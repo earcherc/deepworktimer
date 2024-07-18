@@ -15,6 +15,6 @@ export type User = {
     profile_photo_urls?: Record<string, string>;
     id: number;
     created_at: string;
-    is_selected: boolean;
+    is_active: boolean;
 };
 

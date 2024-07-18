@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ignore-pattern src/api/**",
-    "generate:types": "openapi --input http://host.docker.internal/api/openapi.json --output src/api",
+    "generate:types": "openapi --input http://host.docker.internal:8080/api/openapi.json --output src/api",
     "prettier": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
   },
   "dependencies": {

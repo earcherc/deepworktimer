@@ -18,6 +18,17 @@ async def create_daily_goal(
     db: AsyncSession = Depends(get_session),
     user_id: int = Depends(get_current_user_id),
 ):
+    await db.execute(
+        update(DailyGoal)
+        .where(
+            and_(
+                DailyGoal.user_id == user_id,
+                DailyGoal.is_selected == True,
+            )
+        )
+        .values(is_selected=False)
+    )
+
     db_daily_goal = DailyGoal(**daily_goal.dict(), user_id=user_id)
     db.add(db_daily_goal)
     try:

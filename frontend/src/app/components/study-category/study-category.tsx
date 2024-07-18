@@ -82,6 +82,7 @@ const StudyCategoryComponent = () => {
                           type="button"
                           className={classNames(
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                            category.is_selected ? 'bg-indigo-50 font-semibold' : '',
                             'block w-full px-4 py-2 text-left text-sm',
                           )}
                           onClick={() => selectCategory(category)}

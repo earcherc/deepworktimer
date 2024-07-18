@@ -77,6 +77,7 @@ const DailyGoalComponent = () => {
                           type="button"
                           className={classNames(
                             active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                            goal.is_selected ? 'bg-indigo-50 font-semibold' : '',
                             'w-full flex-nowrap px-4 py-2 text-left text-sm',
                           )}
                           onClick={() => selectGoal(goal)}
