@@ -47,7 +47,7 @@ const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, calculatePositi
           {isInProgress && <span className=""> - In Progress</span>}
           {isInProgress && <span className="ml-1 animate-pulse text-red-500">•</span>}
         </div>
-        <span className="flex-shrink-0 text-blue-300">{block.is_countdown ? 'countdown' : 'open session'}</span>
+        <span className="flex-shrink-0 text-blue-300">{block.is_countdown ? 'timer' : 'open'}</span>
       </div>
     </li>
   );
