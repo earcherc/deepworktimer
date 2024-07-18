@@ -28,6 +28,7 @@ const DailyGoalCreateComponent = () => {
       DailyGoalsService.createDailyGoalDailyGoalsPost({
         quantity: formData.quantity,
         block_size: formData.block_size,
+        is_selected: true,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dailyGoals'] });

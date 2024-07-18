@@ -23,6 +23,17 @@ async def create_study_category(
     db: AsyncSession = Depends(get_session),
     user_id: int = Depends(get_current_user_id),
 ):
+    await db.execute(
+        update(StudyCategory)
+        .where(
+            and_(
+                StudyCategory.user_id == user_id,
+                StudyCategory.is_selected == True,
+            )
+        )
+        .values(is_selected=False)
+    )
+
     db_study_category = StudyCategory(**study_category.dict(), user_id=user_id)
     db.add(db_study_category)
     try:
