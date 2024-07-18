@@ -107,7 +107,7 @@ const Calendar: React.FC<CalendarProps> = () => {
                     key={block.id}
                     block={block}
                     calculatePosition={calculateGridPosition}
-                    onDoubleClick={() => openEditStudyBlockModal(block)}
+                    onClick={() => openEditStudyBlockModal(block)}
                   />
                 ))}
               </ol>

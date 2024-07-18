@@ -8,14 +8,14 @@ import React from 'react';
 interface StudyBlockProps {
   block: StudyBlock;
   calculatePosition: (date: Date) => number;
-  onDoubleClick: () => void;
+  onClick: () => void;
 }
 
 const formatTime = (date: Date): string => {
   return format(date, 'h:mm aaa');
 };
 
-const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, calculatePosition, onDoubleClick }) => {
+const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, calculatePosition, onClick }) => {
   const startTime = toLocalTime(block.start_time);
   const endTime = block.end_time ? toLocalTime(block.end_time) : new Date();
   const startPosition = calculatePosition(startTime);
@@ -38,7 +38,7 @@ const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, calculatePositi
         height: `${height}%`,
         minHeight: '1.5em', // Ensures one line of text is always visible
       }}
-      onDoubleClick={onDoubleClick}
+      onClick={onClick}
     >
       <div className="flex-1 px-1 truncate text-blue-700 flex justify-between items-center">
         <div className="flex-shrink-0">
