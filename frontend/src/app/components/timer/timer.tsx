@@ -15,10 +15,11 @@ import { Tooltip } from 'react-tooltip';
 import { Cog6ToothIcon } from '@heroicons/react/20/solid';
 import useToast from '@context/toasts/toast-context';
 import { useEffect, useState } from 'react';
+import classNames from 'classnames';
 
 enum TimerMode {
   Countdown = 'Timer',
-  OpenSession = 'Open Session',
+  OpenSession = 'Open',
 }
 
 const QUERY_KEYS = {
@@ -172,11 +173,6 @@ const Timer = () => {
     }
   };
 
-  const toggleMode = () => {
-    setMode(mode === TimerMode.Countdown ? TimerMode.OpenSession : TimerMode.Countdown);
-    setTime(mode === TimerMode.Countdown ? 0 : activeBlockSize);
-  };
-
   const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -191,23 +187,38 @@ const Timer = () => {
   return (
     <div className="rounded-lg bg-white p-4 shadow sm:p-6">
       <div className="flex flex-col items-center">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">{mode}</h2>
-        <p className="mb-4 text-5xl font-bold text-indigo-600">{formatTime(time)}</p>
-        <div className="flex space-x-3">
-          {!isActive && (
+        <div className="mb-4 flex space-x-2">
+          {Object.values(TimerMode).map((timerMode) => (
             <button
-              disabled={isDisabled}
-              onClick={toggleMode}
-              className={`rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                isDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500'
-              }`}
-              data-tooltip-id="timer-tooltip"
-              data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
-              data-tooltip-delay-show={1000}
+              key={timerMode}
+              onClick={() => {
+                setMode(timerMode);
+                setTime(timerMode === TimerMode.Countdown ? activeBlockSize : 0);
+              }}
+              className={classNames(
+                'rounded-md px-3 py-px text-sm font-medium',
+                mode === timerMode
+                  ? 'bg-gray-300 text-gray-700'
+                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
+              )}
             >
-              <Cog6ToothIcon className="w-5 h-5" />
+              {timerMode}
             </button>
-          )}
+          ))}
+        </div>
+        <p className="mb-4 text-5xl font-bold text-indigo-500">{formatTime(time)}</p>
+        <div className="flex space-x-3">
+          <button
+            disabled={isDisabled}
+            className={`rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              isDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500'
+            }`}
+            data-tooltip-id="timer-tooltip"
+            data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
+            data-tooltip-delay-show={1000}
+          >
+            <Cog6ToothIcon className="w-5 h-5" />
+          </button>
           <button
             onClick={isActive ? stopTimer : startTimer}
             disabled={isDisabled}
@@ -215,8 +226,8 @@ const Timer = () => {
               isDisabled
                 ? 'bg-gray-400 cursor-not-allowed'
                 : isActive
-                  ? 'bg-red-500 hover:bg-red-600 focus:ring-red-500'
-                  : 'bg-indigo-500 hover:bg-indigo-600 focus:ring-indigo-500'
+                  ? 'bg-red-400 hover:bg-red-500 focus:ring-red-400'
+                  : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500'
             }`}
             data-tooltip-id="timer-tooltip"
             data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
