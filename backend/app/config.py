@@ -25,9 +25,15 @@ class Settings(BaseSettings):
     # CORS settings
     ALLOWED_ORIGINS: list[AnyHttpUrl] = [
         "http://localhost:3000",
+        "http://host.docker.internal",
         "https://deepworktimer.io",
     ]
-    ALLOWED_HOSTS: list[str] = ["deepworktimer.io", "localhost", "127.0.0.1"]
+    ALLOWED_HOSTS: list[str] = [
+        "deepworktimer.io",
+        "localhost",
+        "127.0.0.1",
+        "host.docker.internal",
+    ]
 
     class Config:
         env_file = ".env"
