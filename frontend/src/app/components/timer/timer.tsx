@@ -192,7 +192,7 @@ const Timer = () => {
     <div className="rounded-lg bg-white p-4 shadow sm:p-6">
       <div className="flex flex-col items-center">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">{mode}</h2>
-        <p className="mb-8 text-5xl font-bold text-indigo-600">{formatTime(time)}</p>
+        <p className="mb-4 text-5xl font-bold text-indigo-600">{formatTime(time)}</p>
         <div className="flex space-x-3">
           {!isActive && (
             <button
@@ -216,7 +216,7 @@ const Timer = () => {
                 ? 'bg-gray-400 cursor-not-allowed'
                 : isActive
                   ? 'bg-red-500 hover:bg-red-600 focus:ring-red-500'
-                  : 'bg-indigo-600 hover:bg-indigo-500 focus:ring-indigo-500'
+                  : 'bg-indigo-500 hover:bg-indigo-600 focus:ring-indigo-500'
             }`}
             data-tooltip-id="timer-tooltip"
             data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}

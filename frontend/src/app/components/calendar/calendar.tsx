@@ -20,7 +20,7 @@ const HOURS_PER_DAY = 24;
 interface CalendarProps {}
 
 const Calendar: React.FC<CalendarProps> = () => {
-  const [zoomLevel, setZoomLevel] = useState(2);
+  const [zoomLevel, setZoomLevel] = useState(3);
   const containerRef = useRef<HTMLDivElement>(null);
   const { showModal } = useModalContext();
 
