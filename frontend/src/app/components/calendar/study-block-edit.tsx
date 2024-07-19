@@ -9,12 +9,12 @@ import {
   StudyCategoriesService,
   StudyCategory,
 } from '@api';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { formatToLocalTime, toLocalTime, toUTC } from '@utils/dateUtils';
 import { useModalContext } from '@context/modal/modal-context';
 import useToast from '@context/toasts/toast-context';
-import React, { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { formatToLocalTime, toLocalTime, toUTC } from '@utils/dateUtils';
 import { format, parseISO } from 'date-fns';
+import React, { useEffect, useState } from 'react';
 
 interface StudyBlockEditProps {
   block: StudyBlock;

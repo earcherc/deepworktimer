@@ -8,15 +8,15 @@ import {
   StudyCategoriesService,
   StudyCategory,
 } from '@api';
-import { getCurrentUTC, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { useCallback, useEffect, useState } from 'react';
-import { TimerMode, timerModeAtom } from '../../store/atoms';
-import { Cog6ToothIcon } from '@heroicons/react/20/solid';
 import useToast from '@context/toasts/toast-context';
-import { Tooltip } from 'react-tooltip';
+import { Cog6ToothIcon } from '@heroicons/react/20/solid';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getCurrentUTC, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
 import classNames from 'classnames';
 import { useAtom } from 'jotai';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Tooltip } from 'react-tooltip';
+import { TimerMode, timerModeAtom } from '../../store/atoms';
 
 const QUERY_KEYS = {
   studyCategories: 'studyCategories',
