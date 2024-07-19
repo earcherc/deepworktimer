@@ -14,7 +14,7 @@ export default function Header() {
 
   return (
     <header className="absolute inset-x-0 top-0 z-50">
-      <nav className="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
+      <nav className="relative flex items-center justify-between p-6 lg:px-8" aria-label="Global">
         <div className="flex lg:hidden">
           <button
             type="button"
@@ -25,7 +25,7 @@ export default function Header() {
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
-        <div className="hidden lg:flex lg:flex-1 lg:justify-center">
+        <div className="hidden lg:flex lg:absolute lg:inset-0 lg:justify-center lg:items-center">
           <div className="flex space-x-8">
             {navigation.map((item) => (
               <Link
@@ -40,7 +40,7 @@ export default function Header() {
             ))}
           </div>
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-end items-center flex-1">
           <Link
             href="/register"
             className="text-sm font-semibold leading-6 text-gray-900 mr-4 hover:text-black transition-colors"
