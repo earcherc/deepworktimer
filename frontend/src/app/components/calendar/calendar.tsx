@@ -129,7 +129,7 @@ const Calendar: React.FC<CalendarProps> = () => {
       </div>
 
       <div className="flex flex-auto overflow-hidden mt-8">
-        <div ref={containerRef} className="flex flex-auto flex-col overflow-auto">
+        <div ref={containerRef} className="flex flex-auto flex-col overflow-auto hide-scrollbar">
           <div className="flex w-full flex-auto relative">
             <div className="w-14 flex-none bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" />
             <div className="flex-1">
