@@ -11,8 +11,8 @@ import CurrentTimeIndicator from './current-time-indicator';
 import StudyBlockComponent from './study-block';
 import StudyBlockEdit from './study-block-edit';
 
-const MIN_ZOOM = 1;
-const MAX_ZOOM = 4;
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 3;
 const ZOOM_STEP = 0.5;
 const MINUTES_PER_DAY = 1440;
 const HOURS_PER_DAY = 24;
@@ -20,7 +20,7 @@ const HOURS_PER_DAY = 24;
 interface CalendarProps {}
 
 const Calendar: React.FC<CalendarProps> = () => {
-  const [zoomLevel, setZoomLevel] = useState(3);
+  const [zoomLevel, setZoomLevel] = useState(1);
   const [currentTime, setCurrentTime] = useState(new Date());
   const containerRef = useRef<HTMLDivElement>(null);
   const { showModal } = useModalContext();
@@ -125,7 +125,7 @@ const Calendar: React.FC<CalendarProps> = () => {
             <div className="grid flex-auto grid-cols-1 grid-rows-1">
               <div
                 className="col-start-1 col-end-2 row-start-1 grid divide-y divide-gray-100"
-                style={{ gridTemplateRows: `repeat(${HOURS_PER_DAY}, minmax(${3.5 * zoomLevel}rem, 1fr))` }}
+                style={{ gridTemplateRows: `repeat(${HOURS_PER_DAY}, minmax(${10.5 * zoomLevel}rem, 1fr))` }}
               >
                 {Array.from({ length: HOURS_PER_DAY }).map((_, index) => (
                   <div key={index}>
