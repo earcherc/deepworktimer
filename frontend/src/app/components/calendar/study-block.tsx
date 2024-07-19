@@ -35,7 +35,7 @@ const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, calculatePositi
   return (
     <li
       className={classNames(
-        'absolute left-0 right-0 flex items-center overflow-hidden rounded-lg text-xs leading-5 cursor-pointer',
+        'absolute left-0 right-0 flex items-center overflow-hidden rounded-lg text-xs leading-5 cursor-pointer mx-2',
         {
           'bg-blue-50 hover:bg-blue-100 opacity-90': !isInProgress,
           'bg-blue-100 hover:bg-blue-200': isInProgress,

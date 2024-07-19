@@ -5,7 +5,7 @@ import { useModalContext } from '@context/modal/modal-context';
 import { ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { useQuery } from '@tanstack/react-query';
 import { calculateGridPosition } from '@utils/timeUtils';
-import { addDays, endOfDay, format, formatISO, isToday, startOfDay, subDays } from 'date-fns';
+import { addDays, endOfDay, format, formatISO, isAfter, isToday, startOfDay, subDays } from 'date-fns';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import CurrentTimeIndicator from './current-time-indicator';
 import StudyBlockComponent from './study-block';
@@ -120,9 +120,9 @@ const Calendar: React.FC<CalendarProps> = () => {
 
   const goToNextDay = () => {
     setCurrentDate((prevDate) => {
-      if (!prevDate) return null;
+      if (!prevDate) return new Date();
       const nextDay = addDays(prevDate, 1);
-      return isToday(nextDay) ? prevDate : nextDay;
+      return isAfter(nextDay, new Date()) ? new Date() : nextDay;
     });
   };
 
@@ -140,7 +140,7 @@ const Calendar: React.FC<CalendarProps> = () => {
         </span>
         <button
           onClick={goToNextDay}
-          disabled={currentDate ? isToday(currentDate) : true}
+          disabled={currentDate ? isAfter(currentDate, new Date()) || isToday(currentDate) : false}
           className="p-1 rounded text-gray-500 hover:bg-gray-100 disabled:opacity-50"
         >
           <ChevronRightIcon className="w-5 h-5" />
