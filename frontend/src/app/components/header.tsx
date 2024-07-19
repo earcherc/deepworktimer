@@ -25,7 +25,7 @@ export default function Header() {
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
-        <div className="hidden lg:flex lg:absolute lg:inset-0 lg:justify-center lg:items-center">
+        <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:items-center">
           <div className="flex space-x-8">
             {navigation.map((item) => (
               <Link
@@ -40,19 +40,21 @@ export default function Header() {
             ))}
           </div>
         </div>
-        <div className="flex justify-end items-center flex-1">
-          <Link
-            href="/register"
-            className="text-sm font-semibold leading-6 text-gray-900 mr-4 hover:text-black transition-colors"
-          >
-            Register
-          </Link>
-          <Link
-            href="/login"
-            className="text-sm font-semibold leading-6 text-gray-900 hover:text-black transition-colors"
-          >
-            Log in
-          </Link>
+        <div className="hidden lg:flex lg:items-center">
+          <div className="absolute right-0 mr-6 flex items-center space-x-4">
+            <Link
+              href="/register"
+              className="text-sm font-semibold leading-6 text-gray-900 hover:text-black transition-colors"
+            >
+              Register
+            </Link>
+            <Link
+              href="/login"
+              className="text-sm font-semibold leading-6 text-gray-900 hover:text-black transition-colors"
+            >
+              Log in
+            </Link>
+          </div>
         </div>
       </nav>
       {/* Mobile menu, show/hide based on menu open state. */}
