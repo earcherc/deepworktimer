@@ -1,15 +1,15 @@
 'use client';
 
-import { MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
-import { useModalContext } from '@context/modal/modal-context';
-import CurrentTimeIndicator from './current-time-indicator';
-import React, { useEffect, useRef, useState } from 'react';
-import { calculateGridPosition } from '@utils/timeUtils';
 import { StudyBlock, StudyBlocksService } from '@api';
-import { getTodayDateRange } from '@utils/dateUtils';
+import { useModalContext } from '@context/modal/modal-context';
+import { MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { useQuery } from '@tanstack/react-query';
-import StudyBlockEdit from './study-block-edit';
+import { getTodayDateRange } from '@utils/dateUtils';
+import { calculateGridPosition } from '@utils/timeUtils';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import CurrentTimeIndicator from './current-time-indicator';
 import StudyBlockComponent from './study-block';
+import StudyBlockEdit from './study-block-edit';
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
@@ -21,6 +21,7 @@ interface CalendarProps {}
 
 const Calendar: React.FC<CalendarProps> = () => {
   const [zoomLevel, setZoomLevel] = useState(3);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const containerRef = useRef<HTMLDivElement>(null);
   const { showModal } = useModalContext();
 
@@ -49,6 +50,39 @@ const Calendar: React.FC<CalendarProps> = () => {
   useEffect(() => {
     scrollToCurrentTime();
   }, []);
+
+  const updateCurrentTime = useCallback(() => {
+    setCurrentTime(new Date());
+  }, []);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const scheduleUpdate = () => {
+      const now = new Date();
+      const delay = 60000 - (now.getSeconds() * 1000 + now.getMilliseconds());
+
+      timeoutId = setTimeout(() => {
+        updateCurrentTime();
+        scheduleUpdate();
+      }, delay);
+    };
+
+    updateCurrentTime();
+    scheduleUpdate();
+
+    const intervalId = setInterval(() => {
+      const now = new Date();
+      if (now.getSeconds() === 0) {
+        updateCurrentTime();
+      }
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
+  }, [updateCurrentTime]);
 
   const handleZoom = (delta: number) => {
     setZoomLevel((prevZoom) => {
@@ -108,10 +142,11 @@ const Calendar: React.FC<CalendarProps> = () => {
                     block={block}
                     calculatePosition={calculateGridPosition}
                     onClick={() => openEditStudyBlockModal(block)}
+                    currentTime={currentTime}
                   />
                 ))}
               </ol>
-              <CurrentTimeIndicator />
+              <CurrentTimeIndicator currentTime={currentTime} />
             </div>
           </div>
         </div>

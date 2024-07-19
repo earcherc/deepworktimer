@@ -1,27 +1,36 @@
 'use client';
+
+import { StudyBlock } from '@api';
 import { toLocalTime } from '@utils/dateUtils';
 import classNames from 'classnames';
 import { format } from 'date-fns';
-import { StudyBlock } from '@api';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface StudyBlockProps {
   block: StudyBlock;
   calculatePosition: (date: Date) => number;
   onClick: () => void;
+  currentTime: Date;
 }
 
 const formatTime = (date: Date): string => {
   return format(date, 'h:mm aaa');
 };
 
-const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, calculatePosition, onClick }) => {
+const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, calculatePosition, onClick, currentTime }) => {
   const startTime = toLocalTime(block.start_time);
-  const endTime = block.end_time ? toLocalTime(block.end_time) : new Date();
+  const [endTime, setEndTime] = useState(block.end_time ? toLocalTime(block.end_time) : currentTime);
+  const isInProgress = !block.end_time;
+
+  useEffect(() => {
+    if (isInProgress) {
+      setEndTime(currentTime);
+    }
+  }, [isInProgress, currentTime]);
+
   const startPosition = calculatePosition(startTime);
   const endPosition = calculatePosition(endTime);
   const height = Math.max(endPosition - startPosition, 0.1);
-  const isInProgress = !block.end_time;
 
   return (
     <li
@@ -35,8 +44,7 @@ const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, calculatePositi
       )}
       style={{
         top: `${startPosition}%`,
-        height: `${height}%`,
-        minHeight: '1.5em', // Ensures one line of text is always visible
+        height: `max(${height}%, 1.5em)`,
       }}
       onClick={onClick}
     >
