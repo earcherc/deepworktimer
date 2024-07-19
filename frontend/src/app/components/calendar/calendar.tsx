@@ -107,13 +107,15 @@ const Calendar: React.FC<CalendarProps> = () => {
           <ChevronLeftIcon className="w-5 h-5" />
         </button>
         <div className="flex items-center space-x-4">
-          <button
-            onClick={resetDate}
-            className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-            title="Reset to today"
-          >
-            <ArrowPathIcon className="w-5 h-5" />
-          </button>
+          {(!currentDate || !isToday(currentDate)) && (
+            <button
+              onClick={resetDate}
+              className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+              title="Reset to today"
+            >
+              <ArrowPathIcon className="w-5 h-5" />
+            </button>
+          )}
           <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             {currentDate ? format(currentDate, 'MMMM d, yyyy') : ''}
           </span>
