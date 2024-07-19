@@ -172,54 +172,53 @@ const Timer: React.FC = () => {
   };
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow sm:p-6">
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-lg">
       <div className="flex flex-col items-center">
-        <div className="mb-4 flex space-x-2">
+        <div className="mb-4 flex space-x-4">
           {Object.values(TimerMode).map((timerMode) => (
             <button
               key={timerMode}
               onClick={toggleMode}
               disabled={isButtonDisabled(timerMode)}
               className={classNames(
-                'text-gray-700 rounded-md px-3 py-px text-sm font-medium',
+                'text-sm font-medium transition-colors',
                 mode === timerMode
-                  ? 'bg-gray-300 text-gray-700 '
-                  : isButtonDisabled(timerMode)
-                    ? ''
-                    : 'hover:bg-gray-100 hover:text-gray-900',
+                  ? 'text-indigo-500 font-semibold'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+                isButtonDisabled(timerMode) && 'opacity-50 cursor-not-allowed'
               )}
             >
               {timerMode}
             </button>
           ))}
         </div>
-        <p className="mb-4 text-5xl font-bold text-indigo-500">{formatTime(time)}</p>
+        <p className="mb-6 text-6xl font-bold text-gray-900 dark:text-white">{formatTime(time)}</p>
         <div className="flex space-x-3">
-          {!isActive && 
-           <button
+          {!isActive && (
+            <button
               disabled={isDisabled}
-              className={`rounded-md bg-gray-300 px-4 py-2 text-sm font-semibold shadow-sm${
-                isDisabled
-                  ? 'bg-white text-gray-400'
-                  : 'bg-white text-gray-900 hover:bg-gray-200'
-              }`}
+              className={classNames(
+                'rounded-full p-2 transition-colors',
+                isDisabled ? 'bg-gray-200 dark:bg-gray-700 text-gray-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              )}
               data-tooltip-id="timer-tooltip"
               data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
               data-tooltip-delay-show={1000}
             >
-              <Cog6ToothIcon className="w-5 h-5 text-gray-700" />
+              <Cog6ToothIcon className="h-5 w-5" />
             </button>
-            }
+          )}
           <button
             onClick={isActive ? stopTimer : startTimer}
             disabled={isDisabled}
-            className={`rounded-md px-4 py-2 text-white focus:outline-none ${
+            className={classNames(
+              'rounded-full px-6 py-2 text-sm font-semibold text-white transition-colors',
               isDisabled
-                ? 'bg-gray-400 cursor-not-allowed'
+                ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
                 : isActive
-                  ? 'bg-red-400 hover:bg-red-500'
-                  : 'bg-blue-500 hover:bg-blue-600'
-            }`}
+                  ? 'bg-red-500 hover:bg-red-600'
+                  : 'bg-indigo-500 hover:bg-indigo-600'
+            )}
             data-tooltip-id="timer-tooltip"
             data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
             data-tooltip-delay-show={1000}
