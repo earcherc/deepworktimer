@@ -2,7 +2,7 @@
 
 import { StudyBlock, StudyBlocksService } from '@api';
 import { useModalContext } from '@context/modal/modal-context';
-import { ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
+import { ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { useQuery } from '@tanstack/react-query';
 import { calculateGridPosition } from '@utils/timeUtils';
 import { addDays, endOfDay, format, formatISO, isAfter, isToday, startOfDay, subDays } from 'date-fns';
@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CurrentTimeIndicator from './current-time-indicator';
 import StudyBlockComponent from './study-block';
 import StudyBlockEdit from './study-block-edit';
+import TimeReset from './time-reset';
 
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 3;
@@ -51,6 +52,10 @@ const Calendar: React.FC<CalendarProps> = () => {
       (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
     );
   }, [studyBlocksData]);
+
+  const resetDate = () => {
+    setCurrentDate(new Date());
+  };
 
   const scrollToCurrentTime = () => {
     if (containerRef.current) {
@@ -135,9 +140,19 @@ const Calendar: React.FC<CalendarProps> = () => {
         >
           <ChevronLeftIcon className="w-5 h-5" />
         </button>
-        <span className="text-sm text-gray-500 font-semibold">
-          {currentDate ? format(currentDate, 'MMMM d, yyyy') : ''}
-        </span>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={resetDate}
+            className="p-px rounded text-gray-500 hover:bg-gray-100"
+            title="Reset to today"
+          >
+            <ArrowPathIcon className="w-5 h-5" />
+          </button>
+          <span className="text-sm text-gray-500 font-semibold">
+            {currentDate ? format(currentDate, 'MMMM d, yyyy') : ''}
+          </span>
+          <TimeReset currentDate={currentDate} onClick={scrollToCurrentTime} />
+        </div>
         <button
           onClick={goToNextDay}
           disabled={currentDate ? isAfter(currentDate, new Date()) || isToday(currentDate) : false}
