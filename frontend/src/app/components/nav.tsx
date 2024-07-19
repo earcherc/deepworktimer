@@ -99,7 +99,7 @@ export default function Nav() {
                     href={`https://github.com/earcherc/deepworktimer/commit/${commitHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mr-4 rounded bg-gray-700 px-2 py-1 text-xs text-gray-300 hover:bg-gray-600"
+                    className="mr-3 rounded bg-gray-700 px-2 py-1 text-xs text-gray-300 hover:bg-gray-600"
                   >
                     {commitHash.substring(0, 7)}
                   </a>

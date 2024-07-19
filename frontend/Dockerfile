@@ -15,6 +15,8 @@ RUN npm install --frozen-lockfile
 # Copy the rest of the files
 COPY . .
 
+ENV NEXT_PUBLIC_COMMIT_HASH=$(git rev-parse HEAD)
+
 # Expose the port the app runs on.
 EXPOSE 3000
 
