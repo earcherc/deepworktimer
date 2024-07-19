@@ -10,6 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Fragment } from 'react';
+import { ThemeToggle } from '../components/theme-toggle';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -106,17 +107,17 @@ export default function Nav() {
                 )}
                 <button
                   type="button"
-                  className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+                  className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white mr-2"
                 >
                   <span className="sr-only">View notifications</span>
                   <BellIcon className="h-6 w-6" aria-hidden="true" />
                 </button>
-
+                <ThemeToggle />
                 <Menu as="div" className="relative ml-3">
                   <div>
                     <Menu.Button
                       id={'usermenu'}
-                      className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+                      className="flex rounded-full bg-gray-800 text-sm"
                     >
                       <span className="sr-only">Open user menu</span>
                       <span className="text-white">{displayName}</span>
