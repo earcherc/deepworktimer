@@ -147,12 +147,11 @@ const Timer: React.FC = () => {
         study_category_id: activeCategory.id,
       });
       setStudyBlockId(newBlock.id);
-      setIsActive(true);
-      setTime(mode === TimerMode.Countdown ? activeBlockSize : 0);
     }
   };
 
   const toggleMode = () => {
+    if (isActive) return;
     setMode((prevMode) => (prevMode === TimerMode.Countdown ? TimerMode.OpenSession : TimerMode.Countdown));
     setTime(() => (mode === TimerMode.Countdown ? 0 : activeBlockSize));
   };
@@ -168,6 +167,10 @@ const Timer: React.FC = () => {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const isButtonDisabled = (timerMode: TimerMode) => {
+    return isActive && mode !== timerMode;
+  };
+
   return (
     <div className="rounded-lg bg-white p-4 shadow sm:p-6">
       <div className="flex flex-col items-center">
@@ -176,11 +179,14 @@ const Timer: React.FC = () => {
             <button
               key={timerMode}
               onClick={toggleMode}
+              disabled={isButtonDisabled(timerMode)}
               className={classNames(
-                'rounded-md px-3 py-px text-sm font-medium',
+                'text-gray-700 rounded-md px-3 py-px text-sm font-medium',
                 mode === timerMode
                   ? 'bg-gray-300 text-gray-700'
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
+                  : isButtonDisabled(timerMode)
+                    ? 'cursor-not-allowed'
+                    : 'hover:bg-gray-100 hover:text-gray-900',
               )}
             >
               {timerMode}
