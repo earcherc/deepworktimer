@@ -10,17 +10,13 @@ import {
 } from '@api';
 import { getCurrentUTC, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Tooltip } from 'react-tooltip';
-
+import React, { useCallback, useEffect, useState } from 'react';
+import { TimerMode, timerModeAtom } from '../../store/atoms';
 import { Cog6ToothIcon } from '@heroicons/react/20/solid';
 import useToast from '@context/toasts/toast-context';
-import { useEffect, useState } from 'react';
+import { Tooltip } from 'react-tooltip';
 import classNames from 'classnames';
-
-enum TimerMode {
-  Countdown = 'Timer',
-  OpenSession = 'Open',
-}
+import { useAtom } from 'jotai';
 
 const QUERY_KEYS = {
   studyCategories: 'studyCategories',
@@ -28,16 +24,15 @@ const QUERY_KEYS = {
   studyBlocks: 'studyBlocks',
 };
 
-const Timer = () => {
+const Timer: React.FC = () => {
   const { addToast } = useToast();
   const queryClient = useQueryClient();
-
-  const [time, setTime] = useState(0);
-  const [isActive, setIsActive] = useState(false);
-  const [mode, setMode] = useState<TimerMode>(TimerMode.Countdown);
-  const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
-
   const dateRange = getTodayDateRange();
+
+  const [time, setTime] = useState<number>(0);
+  const [isActive, setIsActive] = useState<boolean>(false);
+  const [mode, setMode] = useAtom(timerModeAtom);
+  const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
 
   const { data: categoriesData } = useQuery<StudyCategory[]>({
     queryKey: [QUERY_KEYS.studyCategories],
@@ -56,7 +51,7 @@ const Timer = () => {
 
   const activeCategory = categoriesData?.find((cat) => cat.is_selected);
   const activeDailyGoal = dailyGoalsData?.find((goal) => goal.is_selected);
-  const activeBlockSize = (activeDailyGoal && activeDailyGoal.block_size * 60) || 0;
+  const activeBlockSize = activeDailyGoal ? activeDailyGoal.block_size * 60 : 0;
   const isDisabled = !activeCategory || !activeDailyGoal;
 
   const createStudyBlockMutation = useMutation({
@@ -92,51 +87,47 @@ const Timer = () => {
   });
 
   useEffect(() => {
-    if (!studyBlocksData || studyBlocksData.length === 0 || !dailyGoalsData) return;
+    if (!studyBlocksData || !activeDailyGoal) return;
 
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
-    if (!incompleteBlock) {
-      setTime(activeBlockSize);
-      setMode(TimerMode.Countdown);
-      return;
-    }
+    if (incompleteBlock) {
+      const startTime = toLocalTime(incompleteBlock.start_time).getTime();
+      const elapsedMilliseconds = Date.now() - startTime;
+      const newTime = incompleteBlock.is_countdown
+        ? Math.max(activeBlockSize * 1000 - elapsedMilliseconds, 0)
+        : elapsedMilliseconds;
 
-    setIsActive(true);
-    setStudyBlockId(incompleteBlock.id);
-    setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
-
-    const startTime = toLocalTime(incompleteBlock.start_time).getTime();
-    const elapsedMilliseconds = Date.now() - startTime;
-
-    if (incompleteBlock.is_countdown) {
-      const remainingTime = Math.max(activeBlockSize * 1000 - elapsedMilliseconds, 0);
-      setTime(Math.floor(remainingTime / 1000));
+      setTime(Math.floor(newTime / 1000));
+      setIsActive(true);
+      setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
+      setStudyBlockId(incompleteBlock.id);
     } else {
-      setTime(Math.floor(elapsedMilliseconds / 1000));
-    }
-  }, [studyBlocksData, dailyGoalsData, activeBlockSize]);
-
-  useEffect(() => {
-    const handleTimerExpiration = async () => {
-      if (studyBlockId) {
-        await updateStudyBlockMutation.mutateAsync({
-          id: studyBlockId,
-          block: { end_time: getCurrentUTC() },
-        });
-      }
+      setTime(mode === TimerMode.Countdown ? activeBlockSize : 0);
       setIsActive(false);
       setStudyBlockId(null);
-    };
+    }
+  }, [studyBlocksData, activeDailyGoal, activeBlockSize, mode, setMode]);
 
+  const stopTimer = useCallback(async () => {
+    if (studyBlockId) {
+      await updateStudyBlockMutation.mutateAsync({
+        id: studyBlockId,
+        block: { end_time: getCurrentUTC() },
+      });
+      setIsActive(false);
+      setStudyBlockId(null);
+    }
+  }, [studyBlockId, updateStudyBlockMutation]);
+
+  useEffect(() => {
     if (!isActive) return;
 
     const interval = setInterval(() => {
       setTime((prevTime) => {
         if (mode === TimerMode.Countdown) {
-          const newTime = prevTime - 1;
-          if (newTime <= 0) {
-            handleTimerExpiration();
-            return 0;
+          const newTime = Math.max(prevTime - 1, 0);
+          if (newTime === 0) {
+            stopTimer();
           }
           return newTime;
         } else {
@@ -146,7 +137,7 @@ const Timer = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isActive, mode, studyBlockId, updateStudyBlockMutation]);
+  }, [isActive, mode, stopTimer]);
 
   const startTimer = async () => {
     if (activeDailyGoal && activeCategory) {
@@ -161,16 +152,9 @@ const Timer = () => {
     }
   };
 
-  const stopTimer = async () => {
-    if (studyBlockId) {
-      await updateStudyBlockMutation.mutateAsync({
-        id: studyBlockId,
-        block: { end_time: getCurrentUTC() },
-      });
-      setIsActive(false);
-      setStudyBlockId(null);
-      setTime(mode === TimerMode.Countdown ? activeBlockSize : 0);
-    }
+  const toggleMode = () => {
+    setMode((prevMode) => (prevMode === TimerMode.Countdown ? TimerMode.OpenSession : TimerMode.Countdown));
+    setTime(() => (mode === TimerMode.Countdown ? 0 : activeBlockSize));
   };
 
   const formatTime = (totalSeconds: number) => {
@@ -191,10 +175,7 @@ const Timer = () => {
           {Object.values(TimerMode).map((timerMode) => (
             <button
               key={timerMode}
-              onClick={() => {
-                setMode(timerMode);
-                setTime(timerMode === TimerMode.Countdown ? activeBlockSize : 0);
-              }}
+              onClick={toggleMode}
               className={classNames(
                 'rounded-md px-3 py-px text-sm font-medium',
                 mode === timerMode
@@ -210,8 +191,8 @@ const Timer = () => {
         <div className="flex space-x-3">
           <button
             disabled={isDisabled}
-            className={`rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-              isDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500'
+            className={`rounded-md px-4 py-2 text-white focus:outline-none ${
+              isDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
             }`}
             data-tooltip-id="timer-tooltip"
             data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
@@ -222,12 +203,12 @@ const Timer = () => {
           <button
             onClick={isActive ? stopTimer : startTimer}
             disabled={isDisabled}
-            className={`rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+            className={`rounded-md px-4 py-2 text-white focus:outline-none ${
               isDisabled
                 ? 'bg-gray-400 cursor-not-allowed'
                 : isActive
-                  ? 'bg-red-400 hover:bg-red-500 focus:ring-red-400'
-                  : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500'
+                  ? 'bg-red-400 hover:bg-red-500'
+                  : 'bg-blue-500 hover:bg-blue-600'
             }`}
             data-tooltip-id="timer-tooltip"
             data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}

@@ -97,9 +97,7 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
   };
 
   const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this study block?')) {
-      deleteStudyBlockMutation.mutate();
-    }
+    deleteStudyBlockMutation.mutate();
   };
 
   const category = categories.find((c) => c.id === block.study_category_id);
