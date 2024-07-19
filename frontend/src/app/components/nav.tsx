@@ -21,7 +21,7 @@ export default function Nav() {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const commitHash = process.env.NEXT_PUBLIC_COMMIT_HASH || '';
+  const commitHash = process.env.NEXT_PUBLIC_COMMIT_HASH || 'devmode';
 
   const { data: user } = useQuery<User>({
     queryKey: ['currentUser'],
@@ -70,7 +70,7 @@ export default function Nav() {
               </div>
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex flex-shrink-0 items-center">
-                  <Image width={50} height={50} src="/images/logo.svg" alt="Your Company" />
+                  <Image width={40} height={40} src="/images/logo.svg" alt="Deep Work Timer" />
                   <h1 className="ms-4 text-white">{displayName}&apos;s Deep Work</h1>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:items-center">
