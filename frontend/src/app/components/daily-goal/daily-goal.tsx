@@ -1,14 +1,14 @@
 'use client';
 
-import { ChevronDownIcon, PlusIcon, XMarkIcon } from '@heroicons/react/20/solid';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useModalContext } from '@context/modal/modal-context';
 import { ApiError, DailyGoal, DailyGoalsService } from '@api';
+import { useModalContext } from '@context/modal/modal-context';
 import useToast from '@context/toasts/toast-context';
 import { Menu, Transition } from '@headlessui/react';
-import DailyGoalCreate from './daily-goal-create';
+import { ChevronDownIcon, PlusIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import classNames from 'classnames';
 import React from 'react';
+import DailyGoalCreate from './daily-goal-create';
 
 const DailyGoalComponent = () => {
   const { addToast } = useToast();
@@ -51,11 +51,11 @@ const DailyGoalComponent = () => {
   const activeGoal = goals.find((goal) => goal.is_selected);
 
   return (
-    <Menu as="div" className="relative rounded-lg bg-white p-4 shadow sm:p-6">
-      <div className="mb-1 flex items-center justify-between">
-        <div className="relative w-full">
-          <Menu.Button className="flex w-full items-center justify-between rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-            <h2 className="text-lg font-semibold text-gray-900">Daily Goal</h2>
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-4 shadow-lg sm:p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <Menu as="div" className="relative w-full">
+          <Menu.Button className="flex w-full items-center justify-between rounded-md bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Daily Goal</h2>
             <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </Menu.Button>
           <Transition
@@ -67,7 +67,7 @@ const DailyGoalComponent = () => {
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <Menu.Items className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg">
+            <Menu.Items className="absolute z-10 mt-1 w-full rounded-md bg-white dark:bg-gray-700 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
               <div className="py-1">
                 {goals.length > 0 ? (
                   goals.map((goal) => (
@@ -76,19 +76,19 @@ const DailyGoalComponent = () => {
                         <button
                           type="button"
                           className={classNames(
-                            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                            goal.is_selected ? 'bg-indigo-50 font-semibold' : '',
+                            active ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300',
+                            goal.is_selected ? 'bg-indigo-50 dark:bg-indigo-900 font-semibold' : '',
                             'w-full flex-nowrap px-4 py-2 text-left text-sm',
                           )}
                           onClick={() => selectGoal(goal)}
                         >
                           <div className="flex justify-center">
                             <div className="w-2/3 inline-flex items-center justify-center">
-                              <span className="font-bold text-gray-900">{goal.quantity}</span>
+                              <span className="font-bold">{goal.quantity}</span>
                               <span className="inline-flex items-center mx-2">
-                                <XMarkIcon className="h-5 w-5 text-gray-400" />
+                                <XMarkIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                               </span>
-                              <span className="font-bold text-gray-900">{goal.block_size}m</span>
+                              <span className="font-bold">{goal.block_size}m</span>
                             </div>
                           </div>
                         </button>
@@ -97,16 +97,16 @@ const DailyGoalComponent = () => {
                   ))
                 ) : (
                   <Menu.Item>
-                    <div className="block w-full px-4 py-2 text-left text-sm text-gray-500">No Goals</div>
+                    <div className="block w-full px-4 py-2 text-left text-sm text-gray-500 dark:text-gray-400">No Goals</div>
                   </Menu.Item>
                 )}
               </div>
             </Menu.Items>
           </Transition>
-        </div>
+        </Menu>
         <button
           onClick={openCreateGoalModal}
-          className="ml-3 rounded-md bg-blue-500 p-3 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="ml-3 rounded-full p-2 bg-indigo-500 text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
         >
           <PlusIcon className="h-5 w-5" />
         </button>
@@ -114,15 +114,15 @@ const DailyGoalComponent = () => {
       {activeGoal && (
         <div className="mt-4 flex justify-center">
           <div className="w-2/3 text-center inline-flex items-center justify-center">
-            <span className="text-2xl font-bold text-gray-900">{activeGoal.quantity}</span>
+            <span className="text-3xl font-bold text-gray-900 dark:text-white">{activeGoal.quantity}</span>
             <span className="inline-flex items-center mx-2">
-              <XMarkIcon className="h-5 w-5 text-gray-400" />
+              <XMarkIcon className="h-6 w-6 text-gray-400 dark:text-gray-500" />
             </span>
-            <span className="text-2xl font-bold text-gray-900">{activeGoal.block_size}m</span>
+            <span className="text-3xl font-bold text-gray-900 dark:text-white">{activeGoal.block_size}m</span>
           </div>
         </div>
       )}
-    </Menu>
+    </div>
   );
 };
 
