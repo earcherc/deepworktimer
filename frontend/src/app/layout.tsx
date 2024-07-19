@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="description" content="Focus on what matters" key="desc" />
       </head>
       <body className={inter.className}>
-        <div className="flex min-h-screen flex-col">
+        <div className="flex min-h-screen flex-col bg-gray-900 text-white">
           <main className="flex-grow">{children}</main>
         </div>
       </body>
