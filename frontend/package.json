@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "NEXT_PUBLIC_COMMIT_HASH=$(git rev-parse HEAD) next build",
     "start": "next start",
     "lint": "eslint . --ignore-pattern src/api/**",
     "generate:types": "openapi --input http://host.docker.internal:8080/api/openapi.json --output src/api",

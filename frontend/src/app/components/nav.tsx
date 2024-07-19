@@ -1,15 +1,15 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { ApiError, AuthenticationService, User, UsersService } from '@api';
-import { Disclosure, Menu, Transition } from '@headlessui/react';
-import { usePathname, useRouter } from 'next/navigation';
 import useToast from '@context/toasts/toast-context';
+import { Disclosure, Menu, Transition } from '@headlessui/react';
+import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import classNames from 'classnames';
-import { Fragment } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { Fragment } from 'react';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -21,6 +21,7 @@ export default function Nav() {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const commitHash = process.env.NEXT_PUBLIC_COMMIT_HASH || '';
 
   const { data: user } = useQuery<User>({
     queryKey: ['currentUser'],
@@ -93,6 +94,16 @@ export default function Nav() {
                 </div>
               </div>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                {commitHash && (
+                  <a
+                    href={`https://github.com/earcherc/deepworktimer/commit/${commitHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mr-4 rounded bg-gray-700 px-2 py-1 text-xs text-gray-300 hover:bg-gray-600"
+                  >
+                    {commitHash.substring(0, 7)}
+                  </a>
+                )}
                 <button
                   type="button"
                   className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
