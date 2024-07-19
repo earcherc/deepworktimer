@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client';
+
 import {
   ArrowPathIcon,
   ChevronRightIcon,
@@ -9,12 +10,11 @@ import {
 import classNames from 'classnames';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const navigation = [
-  { name: 'Product', href: '#' },
-  { name: 'Features', href: '#' },
-  { name: 'Marketplace', href: '#' },
-  { name: 'Company', href: '#' },
+  { name: 'Product', href: '/' },
+  { name: 'Blog', href: '/blog' },
 ];
 const primaryFeatures = [
   {
@@ -211,21 +211,40 @@ const footerNavigation = {
 };
 
 export default function Home() {
+  const pathname = usePathname();
+
   return (
     <div className="bg-white">
       {/* Header */}
       <header className="absolute inset-x-0 top-0 z-50">
-        <nav className="flex mx-auto p-6 lg:px-8" aria-label="Global">
-          <div className="flex flex-1 justify-center gap-x-12">
+        <nav className="flex items-center mx-auto p-6 lg:px-8 relative" aria-label="Global">
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex space-x-6">
             {navigation.map((item) => (
-              <a key={item.name} href={item.href} className="text-sm font-semibold leading-6 text-gray-900">
+              <Link 
+                key={item.name} 
+                href={item.href}
+                className={`text-sm font-semibold leading-6 transition-colors ${
+                  pathname === item.href
+                    ? 'text-black font-bold'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
                 {item.name}
-              </a>
+              </Link>
             ))}
           </div>
-          <div className="flex justify-end">
-            <Link href="/login" className="text-sm font-semibold leading-6 text-gray-900">
-              Log in <span aria-hidden="true">&rarr;</span>
+          <div className="ml-auto">
+            <Link 
+              href="/register" 
+              className="text-sm font-semibold leading-6 text-gray-900 mr-4 hover:text-black transition-colors"
+            >
+              Register
+            </Link>
+            <Link 
+              href="/login" 
+              className="text-sm font-semibold leading-6 text-gray-900 hover:text-black transition-colors"
+            >
+              Log in
             </Link>
           </div>
         </nav>
