@@ -16,7 +16,7 @@ services:
     env_file:
       - .env
     environment:
-      - NEXT_PUBLIC_COMMIT_HASH=${NEXT_PUBLIC_COMMIT_HASH}
+      - NEXT_PUBLIC_COMMIT_HASH=$(git rev-parse HEAD)
     volumes:
       - .:/app:cached # Mount the root folder that contains .git
       - /app/frontend/node_modules
