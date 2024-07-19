@@ -1,16 +1,16 @@
 'use client';
 
-import { ApiError, AuthenticationService, User, UsersService } from '@api';
-import useToast from '@context/toasts/toast-context';
-import { Disclosure, Menu, Transition } from '@headlessui/react';
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { ApiError, AuthenticationService, User, UsersService } from '@api';
+import { Disclosure, Menu, Transition } from '@headlessui/react';
+import { ThemeToggle } from '../components/theme-toggle';
+import { usePathname, useRouter } from 'next/navigation';
+import useToast from '@context/toasts/toast-context';
 import classNames from 'classnames';
+import { Fragment } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { Fragment } from 'react';
-import { ThemeToggle } from '../components/theme-toggle';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard' },
@@ -105,20 +105,14 @@ export default function Nav() {
                     {commitHash.substring(0, 7)}
                   </a>
                 )}
-                <button
-                  type="button"
-                  className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white mr-2"
-                >
+                <button type="button" className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white mr-2">
                   <span className="sr-only">View notifications</span>
                   <BellIcon className="h-6 w-6" aria-hidden="true" />
                 </button>
                 <ThemeToggle />
                 <Menu as="div" className="relative ml-3">
                   <div>
-                    <Menu.Button
-                      id={'usermenu'}
-                      className="flex rounded-full bg-gray-800 text-sm"
-                    >
+                    <Menu.Button id={'usermenu'} className="flex rounded-full bg-gray-800 text-sm">
                       <span className="sr-only">Open user menu</span>
                       <span className="text-white">{displayName}</span>
                     </Menu.Button>

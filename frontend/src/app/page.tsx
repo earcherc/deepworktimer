@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { ArrowPathIcon, CloudArrowUpIcon, LockClosedIcon, ServerIcon } from '@heroicons/react/20/solid';
+import {
+  ArrowPathIcon,
+  ChartBarIcon,
+  ClockIcon,
+  CloudArrowUpIcon,
+  LockClosedIcon,
+  UsersIcon,
+} from '@heroicons/react/20/solid';
 import { usePathname } from 'next/navigation';
 import classNames from 'classnames';
 import Image from 'next/image';
@@ -13,21 +20,25 @@ const navigation = [
 ];
 const primaryFeatures = [
   {
-    name: 'Push to deploy.',
-    description: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit aute id magna.',
-    icon: CloudArrowUpIcon,
+    name: 'Pomodoro Timer & Streaks',
+    description:
+      'Use our Pomodoro timer and calendar tracking to maintain and improve your study streaks, keeping you motivated and consistent.',
+    icon: ClockIcon,
   },
   {
-    name: 'SSL certificates.',
-    description: 'Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo.',
-    icon: LockClosedIcon,
+    name: 'Social Connectivity',
+    description:
+      'Add friends and see results from people worldwide who are working on similar tasks, fostering a sense of community and shared purpose.',
+    icon: UsersIcon,
   },
   {
-    name: 'Database backups.',
-    description: 'Ac tincidunt sapien vehicula erat auctor pellentesque rhoncus.',
-    icon: ServerIcon,
+    name: 'In-depth Analytics',
+    description:
+      'Push yourself to new heights with comprehensive analytics. Track your performance over time and unlock your full potential.',
+    icon: ChartBarIcon,
   },
 ];
+
 const secondaryFeatures = [
   {
     name: 'Push to deploy',
@@ -294,18 +305,19 @@ export default function Home() {
             <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-center lg:gap-y-0">
               <div className="lg:row-start-2 lg:max-w-md">
                 <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                  Boost your productivity.
+                  Focus deeper.
                   <br />
-                  Start using our app today.
+                  Achieve more together.
                 </h2>
                 <p className="mt-6 text-lg leading-8 text-gray-300">
-                  Ac euismod vel sit maecenas id pellentesque eu sed consectetur. Malesuada adipiscing sagittis vel
-                  nulla. Ac euismod vel sit maecenas.
+                  Our app combines the power of focused work sessions, social motivation, and data-driven insights.
+                  Elevate your productivity, connect with like-minded individuals, and understand your working patterns
+                  like never before.
                 </p>
               </div>
               <Image
-                src="https://tailwindui.com/img/component-images/dark-project-app-screenshot.png"
-                alt="Product screenshot"
+                src="/images/deepworktimer.png"
+                alt="Deep Work Timer App screenshot"
                 className="relative -z-20 min-w-full max-w-xl rounded-xl shadow-xl ring-1 ring-white/10 lg:row-span-4 lg:w-[64rem] lg:max-w-none"
                 width={2432}
                 height={1442}
