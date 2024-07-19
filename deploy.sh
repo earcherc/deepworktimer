@@ -8,4 +8,5 @@ docker compose down
 docker compose build
 docker compose up -d
 
-docker image prune -f
+docker image prune -af
+docker builder prune -af
