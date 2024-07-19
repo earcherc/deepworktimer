@@ -183,9 +183,9 @@ const Timer: React.FC = () => {
               className={classNames(
                 'text-gray-700 rounded-md px-3 py-px text-sm font-medium',
                 mode === timerMode
-                  ? 'bg-gray-300 text-gray-700'
+                  ? 'bg-gray-300 text-gray-700 '
                   : isButtonDisabled(timerMode)
-                    ? 'cursor-not-allowed'
+                    ? ''
                     : 'hover:bg-gray-100 hover:text-gray-900',
               )}
             >
@@ -195,17 +195,21 @@ const Timer: React.FC = () => {
         </div>
         <p className="mb-4 text-5xl font-bold text-indigo-500">{formatTime(time)}</p>
         <div className="flex space-x-3">
-          <button
-            disabled={isDisabled}
-            className={`rounded-md px-4 py-2 text-white focus:outline-none ${
-              isDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
-            }`}
-            data-tooltip-id="timer-tooltip"
-            data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
-            data-tooltip-delay-show={1000}
-          >
-            <Cog6ToothIcon className="w-5 h-5" />
-          </button>
+          {!isActive && 
+           <button
+              disabled={isDisabled}
+              className={`rounded-md bg-gray-300 px-4 py-2 text-sm font-semibold shadow-sm${
+                isDisabled
+                  ? 'bg-white text-gray-400'
+                  : 'bg-white text-gray-900 hover:bg-gray-200'
+              }`}
+              data-tooltip-id="timer-tooltip"
+              data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
+              data-tooltip-delay-show={1000}
+            >
+              <Cog6ToothIcon className="w-5 h-5 text-gray-700" />
+            </button>
+            }
           <button
             onClick={isActive ? stopTimer : startTimer}
             disabled={isDisabled}
