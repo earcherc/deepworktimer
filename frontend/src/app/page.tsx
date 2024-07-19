@@ -1,15 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import {
-  ArrowPathIcon,
-  CloudArrowUpIcon,
-  LockClosedIcon,
-  ServerIcon
-} from '@heroicons/react/20/solid';
+import { ArrowPathIcon, CloudArrowUpIcon, LockClosedIcon, ServerIcon } from '@heroicons/react/20/solid';
+import { usePathname } from 'next/navigation';
 import classNames from 'classnames';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 
 const navigation = [
   { name: 'Product', href: '/' },
@@ -219,13 +215,11 @@ export default function Home() {
         <nav className="flex items-center mx-auto p-6 lg:px-8 relative" aria-label="Global">
           <div className="absolute left-1/2 transform -translate-x-1/2 flex space-x-6">
             {navigation.map((item) => (
-              <Link 
-                key={item.name} 
+              <Link
+                key={item.name}
                 href={item.href}
                 className={`text-sm font-semibold leading-6 transition-colors ${
-                  pathname === item.href
-                    ? 'text-black font-bold'
-                    : 'text-gray-600 hover:text-gray-900'
+                  pathname === item.href ? 'text-black font-bold' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 {item.name}
@@ -233,14 +227,14 @@ export default function Home() {
             ))}
           </div>
           <div className="ml-auto">
-            <Link 
-              href="/register" 
+            <Link
+              href="/register"
               className="text-sm font-semibold leading-6 text-gray-900 mr-4 hover:text-black transition-colors"
             >
               Register
             </Link>
-            <Link 
-              href="/login" 
+            <Link
+              href="/login"
               className="text-sm font-semibold leading-6 text-gray-900 hover:text-black transition-colors"
             >
               Log in
@@ -276,7 +270,8 @@ export default function Home() {
                 Focus. Create. Achieve.
               </h1>
               <p className="mt-6 text-lg leading-8 text-gray-600">
-                Great work requires deep concentration. Our timer creates the structure you need to dive into your most challenging tasks. Minimize interruptions, maximize output, and unlock your full creative potential.
+                Great work requires deep concentration. Our timer creates the structure you need to dive into your most
+                challenging tasks. Minimize interruptions, maximize output, and unlock your full creative potential.
               </p>
               <div className="mt-10 flex items-center gap-x-6">
                 <a
