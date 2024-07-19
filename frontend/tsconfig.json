@@ -38,6 +38,7 @@
       "@lib/*": ["./src/lib/*"],
       "@utils/*": ["./src/utils/*"],
       "@context/*": ["./src/app/context/*"],
+      "@hooks/*": ["./src/hooks/*"],
       "@api": ["./src/api"]
     }
   },

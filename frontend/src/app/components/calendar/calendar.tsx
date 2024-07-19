@@ -6,7 +6,7 @@ import { ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon }
 import { useQuery } from '@tanstack/react-query';
 import { calculateGridPosition } from '@utils/timeUtils';
 import { addDays, endOfDay, format, formatISO, isAfter, isToday, startOfDay, subDays } from 'date-fns';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import CurrentTimeIndicator from './current-time-indicator';
 import StudyBlockComponent from './study-block';
 import StudyBlockEdit from './study-block-edit';
@@ -22,7 +22,6 @@ interface CalendarProps {}
 
 const Calendar: React.FC<CalendarProps> = () => {
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { showModal } = useModalContext();
@@ -70,39 +69,6 @@ const Calendar: React.FC<CalendarProps> = () => {
   useEffect(() => {
     scrollToCurrentTime();
   }, []);
-
-  const updateCurrentTime = useCallback(() => {
-    setCurrentTime(new Date());
-  }, []);
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
-    const scheduleUpdate = () => {
-      const now = new Date();
-      const delay = 60000 - (now.getSeconds() * 1000 + now.getMilliseconds());
-
-      timeoutId = setTimeout(() => {
-        updateCurrentTime();
-        scheduleUpdate();
-      }, delay);
-    };
-
-    updateCurrentTime();
-    scheduleUpdate();
-
-    const intervalId = setInterval(() => {
-      const now = new Date();
-      if (now.getSeconds() === 0) {
-        updateCurrentTime();
-      }
-    }, 1000);
-
-    return () => {
-      clearTimeout(timeoutId);
-      clearInterval(intervalId);
-    };
-  }, [updateCurrentTime]);
 
   const handleZoom = (delta: number) => {
     setZoomLevel((prevZoom) => {
@@ -187,11 +153,10 @@ const Calendar: React.FC<CalendarProps> = () => {
                       block={block}
                       calculatePosition={calculateGridPosition}
                       onClick={() => openEditStudyBlockModal(block)}
-                      currentTime={currentTime}
                     />
                   ))}
                 </ol>
-                <CurrentTimeIndicator currentTime={currentTime} />
+                <CurrentTimeIndicator />
               </div>
             </div>
           </div>

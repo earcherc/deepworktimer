@@ -1,6 +1,7 @@
 'use client';
 
 import { StudyBlock } from '@api';
+import { useTimeManagement } from '@hooks/useTimeManagement';
 import { toLocalTime } from '@utils/dateUtils';
 import classNames from 'classnames';
 import { format } from 'date-fns';
@@ -10,20 +11,20 @@ interface StudyBlockProps {
   block: StudyBlock;
   calculatePosition: (date: Date) => number;
   onClick: () => void;
-  currentTime: Date;
 }
 
 const formatTime = (date: Date): string => {
   return format(date, 'h:mm aaa');
 };
 
-const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, calculatePosition, onClick, currentTime }) => {
+const StudyBlockComponent: React.FC<StudyBlockProps> = ({ block, calculatePosition, onClick }) => {
   const startTime = toLocalTime(block.start_time);
-  const [endTime, setEndTime] = useState(block.end_time ? toLocalTime(block.end_time) : currentTime);
+  const { currentTime } = useTimeManagement();
+  const [endTime, setEndTime] = useState(block.end_time ? toLocalTime(block.end_time) : new Date());
   const isInProgress = !block.end_time;
 
   useEffect(() => {
-    if (isInProgress) {
+    if (isInProgress && currentTime) {
       setEndTime(currentTime);
     }
   }, [isInProgress, currentTime]);

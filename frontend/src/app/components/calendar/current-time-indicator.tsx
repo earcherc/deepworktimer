@@ -1,21 +1,23 @@
 'use client';
+import { useTimeManagement } from '@hooks/useTimeManagement';
 import { formatToLocalTime } from '@utils/dateUtils';
 import React, { useEffect, useState } from 'react';
 
-interface CurrentTimeIndicatorProps {
-  currentTime: Date;
-}
-
-const CurrentTimeIndicator: React.FC<CurrentTimeIndicatorProps> = ({ currentTime }) => {
+const CurrentTimeIndicator: React.FC = () => {
+  const { currentTime } = useTimeManagement();
   const [position, setPosition] = useState(0);
   const [displayTime, setDisplayTime] = useState('');
 
   useEffect(() => {
-    const minutesSinceMidnight = currentTime.getHours() * 60 + currentTime.getMinutes();
-    const percentage = (minutesSinceMidnight / 1440) * 100;
-    setPosition(percentage);
-    setDisplayTime(formatToLocalTime(currentTime, 'h:mm'));
+    if (currentTime) {
+      const minutesSinceMidnight = currentTime.getHours() * 60 + currentTime.getMinutes();
+      const percentage = (minutesSinceMidnight / 1440) * 100;
+      setPosition(percentage);
+      setDisplayTime(formatToLocalTime(currentTime, 'h:mm'));
+    }
   }, [currentTime]);
+
+  if (!currentTime) return null;
 
   return (
     <div className="absolute left-0 right-0 flex items-center pointer-events-none z-20" style={{ top: `${position}%` }}>
