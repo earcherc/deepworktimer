@@ -13,7 +13,7 @@ async function validateSessionToken(sessionId: string): Promise<boolean> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Cookie': `session_id=${sessionId}`,
+        Cookie: `session_id=${sessionId}`,
       },
       credentials: 'include',
     });
@@ -34,14 +34,14 @@ async function validateSessionToken(sessionId: string): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   try {
     const sessionCookie = request.cookies.get('session_id');
-    
+
     if (!sessionCookie) {
       console.log('No session cookie found, redirecting to login');
       return redirectToLogin(request);
     }
 
     const isValidSession = await validateSessionToken(sessionCookie.value);
-    
+
     if (!isValidSession) {
       console.log('Invalid session, redirecting to login');
       return redirectToLogin(request);
