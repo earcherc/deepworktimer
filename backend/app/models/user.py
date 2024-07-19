@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from .daily_goal import DailyGoal
     from .study_block import StudyBlock
     from .study_category import StudyCategory
+    from .time_settings import TimeSettings
 
 
 class Gender(str, Enum):
@@ -43,6 +44,9 @@ class User(SQLModel, table=True):
         back_populates="user", sa_relationship_kwargs={"cascade": "delete"}
     )
     study_categories: List["StudyCategory"] = Relationship(
+        back_populates="user", sa_relationship_kwargs={"cascade": "delete"}
+    )
+    time_settings: List["TimeSettings"] = Relationship(
         back_populates="user", sa_relationship_kwargs={"cascade": "delete"}
     )
 
