@@ -98,23 +98,23 @@ const Calendar: React.FC<CalendarProps> = () => {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden relative">
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between py-2 px-8">
+    <div className="flex h-full rounded-lg flex-col overflow-hidden relative bg-white dark:bg-gray-900">
+      <div className="absolute top-0 left-0 rounded-t-lg right-0 z-10 flex items-center justify-between py-1 px-4 bg-white dark:bg-gray-800">
         <button
           onClick={goToPreviousDay}
-          className="p-1 ml-10 rounded text-gray-500 hover:bg-gray-100"
+          className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           <ChevronLeftIcon className="w-5 h-5" />
         </button>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-4">
           <button
             onClick={resetDate}
-            className="p-px rounded text-gray-500 hover:bg-gray-100"
+            className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             title="Reset to today"
           >
             <ArrowPathIcon className="w-5 h-5" />
           </button>
-          <span className="text-sm text-gray-500 font-semibold">
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             {currentDate ? format(currentDate, 'MMMM d, yyyy') : ''}
           </span>
           <TimeReset currentDate={currentDate} onClick={scrollToCurrentTime} />
@@ -122,25 +122,25 @@ const Calendar: React.FC<CalendarProps> = () => {
         <button
           onClick={goToNextDay}
           disabled={currentDate ? isAfter(currentDate, new Date()) || isToday(currentDate) : false}
-          className="p-1 rounded text-gray-500 hover:bg-gray-100 disabled:opacity-50"
+          className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
         >
           <ChevronRightIcon className="w-5 h-5" />
         </button>
       </div>
 
-      <div className="isolate flex flex-auto overflow-hidden rounded-lg bg-white">
+      <div className="flex flex-auto overflow-hidden mt-8">
         <div ref={containerRef} className="flex flex-auto flex-col overflow-auto">
           <div className="flex w-full flex-auto relative">
-            <div className="w-14 flex-none bg-white ring-1 ring-gray-100" />
+            <div className="w-14 flex-none bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" />
             <div className="flex-1">
               <div className="grid flex-auto grid-cols-1 grid-rows-1">
                 <div
-                  className="col-start-1 col-end-2 row-start-1 grid divide-y divide-gray-100"
+                  className="col-start-1 col-end-2 row-start-1 grid divide-y divide-gray-200 dark:divide-gray-700"
                   style={{ gridTemplateRows: `repeat(${HOURS_PER_DAY}, minmax(${10.5 * zoomLevel}rem, 1fr))` }}
                 >
                   {Array.from({ length: HOURS_PER_DAY }).map((_, index) => (
                     <div key={index}>
-                      <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs leading-5 text-gray-400">
+                      <div className="sticky left-0 -ml-14 -mt-2.5 w-14 pr-2 text-right text-xs leading-5 text-gray-400 dark:text-gray-500">
                         {index === 0 ? '12 AM' : `${index % 12 === 0 ? 12 : index % 12} ${index < 12 ? 'AM' : 'PM'}`}
                       </div>
                     </div>
@@ -163,19 +163,19 @@ const Calendar: React.FC<CalendarProps> = () => {
         </div>
       </div>
       
-      <div className="absolute bottom-4 right-4 z-10 flex items-center space-x-2 mr-4">
-        <span className="text-gray-500 font-semibold">{(zoomLevel * 100).toFixed(0)}%</span>
+      <div className="absolute bottom-4 right-4 z-10 flex items-center space-x-2 bg-white dark:bg-gray-800 rounded-full shadow-md p-1">
+        <span className="text-gray-600 dark:text-gray-300 font-semibold px-2">{(zoomLevel * 100).toFixed(0)}%</span>
         <button
           onClick={() => handleZoom(-ZOOM_STEP)}
           disabled={zoomLevel <= MIN_ZOOM}
-          className="p-2 rounded text-gray-500 hover:bg-gray-100 disabled:opacity-50"
+          className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
         >
           <MinusIcon className="w-5 h-5" />
         </button>
         <button
           onClick={() => handleZoom(ZOOM_STEP)}
           disabled={zoomLevel >= MAX_ZOOM}
-          className="p-2 rounded text-gray-500 hover:bg-gray-100 disabled:opacity-50"
+          className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
         >
           <PlusIcon className="w-5 h-5" />
         </button>
