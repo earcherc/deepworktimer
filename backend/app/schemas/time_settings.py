@@ -10,7 +10,7 @@ class TimeSettingsBase(BaseModel):
     short_break_duration: int = Field(default=5)
     long_break_duration: int = Field(default=30)
     long_break_interval: int = Field(default=6)
-    is_sound: bool = Field(default=False)
+    is_sound: bool = Field(default=True)
     sound_interval: int = Field(default=20)
 
 

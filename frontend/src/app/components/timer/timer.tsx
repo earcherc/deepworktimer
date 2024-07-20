@@ -7,16 +7,20 @@ import {
   StudyBlockUpdate,
   StudyCategoriesService,
   StudyCategory,
+  TimeSettings,
+  TimeSettingsService,
 } from '@api';
-import useToast from '@context/toasts/toast-context';
-import { Cog6ToothIcon } from '@heroicons/react/20/solid';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getCurrentUTC, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import TimeSettingsModal from '../time-settings/time-settings-view';
+import { useModalContext } from '@app/context/modal/modal-context';
+import React, { useCallback, useEffect, useState } from 'react';
+import { TimerMode, timerModeAtom } from '../../store/atoms';
+import { Cog6ToothIcon } from '@heroicons/react/20/solid';
+import useToast from '@context/toasts/toast-context';
+import { Tooltip } from 'react-tooltip';
 import classNames from 'classnames';
 import { useAtom } from 'jotai';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Tooltip } from 'react-tooltip';
-import { TimerMode, timerModeAtom } from '../../store/atoms';
 
 const QUERY_KEYS = {
   studyCategories: 'studyCategories',
@@ -26,6 +30,7 @@ const QUERY_KEYS = {
 
 const Timer: React.FC = () => {
   const { addToast } = useToast();
+  const { showModal } = useModalContext();
   const queryClient = useQueryClient();
   const dateRange = getTodayDateRange();
 
@@ -48,6 +53,19 @@ const Timer: React.FC = () => {
     queryKey: [QUERY_KEYS.studyBlocks, dateRange.start_time, dateRange.end_time],
     queryFn: () => StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange),
   });
+
+  const { data: timeSettings = [] } = useQuery<TimeSettings[]>({
+    queryKey: ['timeSettings'],
+    queryFn: () => TimeSettingsService.readTimeSettingsListTimeSetttingsGet(),
+  });
+
+  const openSettingsModal = () => {
+    showModal({
+      type: 'default',
+      title: 'Time Settings',
+      content: <TimeSettingsModal />,
+    });
+  };
 
   const activeCategory = categoriesData?.find((cat) => cat.is_selected);
   const activeDailyGoal = dailyGoalsData?.find((goal) => goal.is_selected);
@@ -185,7 +203,7 @@ const Timer: React.FC = () => {
                 mode === timerMode
                   ? 'text-indigo-500 font-semibold'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
-                isButtonDisabled(timerMode) && 'opacity-50 cursor-not-allowed'
+                isButtonDisabled(timerMode) && 'opacity-50 cursor-not-allowed',
               )}
             >
               {timerMode}
@@ -196,10 +214,13 @@ const Timer: React.FC = () => {
         <div className="flex space-x-3">
           {!isActive && (
             <button
+              onClick={openSettingsModal}
               disabled={isDisabled}
               className={classNames(
                 'rounded-full p-2 transition-colors',
-                isDisabled ? 'bg-gray-200 dark:bg-gray-700 text-gray-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                isDisabled
+                  ? 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
               )}
               data-tooltip-id="timer-tooltip"
               data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
@@ -217,7 +238,7 @@ const Timer: React.FC = () => {
                 ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
                 : isActive
                   ? 'bg-red-500 hover:bg-red-600'
-                  : 'bg-indigo-500 hover:bg-indigo-600'
+                  : 'bg-indigo-500 hover:bg-indigo-600',
             )}
             data-tooltip-id="timer-tooltip"
             data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
