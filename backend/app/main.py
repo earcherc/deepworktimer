@@ -13,6 +13,7 @@ from .routers.user import router as user_router
 from .routers.study_block import router as study_block_router
 from .uploads.upload_routes import router as upload_router
 from .auth.auth_routes import router as auth_router
+from .routers.time_settings import router as time_settings_router
 
 
 @asynccontextmanager
@@ -69,6 +70,9 @@ def create_app() -> FastAPI:
         study_category_router, prefix="/study-categories", tags=["Study Categories"]
     )
     app.include_router(upload_router, prefix="/upload", tags=["Uploads"])
+    app.include_router(
+        time_settings_router, prefix="/time-setttings", tags=["Time Settings"]
+    )
 
     return app
 
