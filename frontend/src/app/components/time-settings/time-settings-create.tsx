@@ -42,7 +42,11 @@ const TimeSettingsCreate: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value === '' ? undefined : parseInt(value, 10) }));
+    const numValue = parseInt(value, 10);
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value === '' ? undefined : Math.max(1, numValue), // Ensure minimum value is 1
+    }));
   };
 
   const handleModeChange = (isCountdown: boolean) => {
@@ -53,12 +57,15 @@ const TimeSettingsCreate: React.FC = () => {
       short_break_duration: isCountdown ? 5 : undefined,
       long_break_duration: isCountdown ? 30 : undefined,
       long_break_interval: isCountdown ? 6 : undefined,
-      is_sound: isCountdown,
+      is_sound: true,
+      sound_interval: isCountdown ? undefined : 20,
     }));
   };
 
   const handleEndBellChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, is_sound: checked }));
+    if (formData.is_countdown) {
+      setFormData((prev) => ({ ...prev, is_sound: checked }));
+    }
   };
 
   const handleReminderSoundChange = (checked: boolean) => {
@@ -70,11 +77,13 @@ const TimeSettingsCreate: React.FC = () => {
     name,
     icon,
     value,
+    disabled = false,
   }: {
     label: string;
     name: string;
     icon: React.ReactNode;
     value: number | undefined;
+    disabled?: boolean;
   }) => (
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center">
@@ -86,7 +95,11 @@ const TimeSettingsCreate: React.FC = () => {
         name={name}
         value={value ?? ''}
         onChange={handleInputChange}
-        className="w-20 text-right rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        disabled={disabled}
+        min={1}
+        className={`w-20 text-right rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
+          disabled ? 'bg-gray-100 cursor-not-allowed' : ''
+        }`}
       />
     </div>
   );
@@ -102,7 +115,7 @@ const TimeSettingsCreate: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <ClockIcon className="h-5 w-5 text-gray-400" />
-          <label className="ml-2 font-bold">Mode:</label>
+          <label className="ml-2 font-bold">Mode</label>
         </div>
         <div className="flex space-x-2">
           <button
@@ -176,10 +189,17 @@ const TimeSettingsCreate: React.FC = () => {
           <Switch
             checked={formData.sound_interval !== undefined}
             onChange={handleReminderSoundChange}
-            className={`${formData.sound_interval !== undefined ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full`}
+            disabled={!formData.is_countdown}
+            className={`${
+              formData.sound_interval !== undefined ? 'bg-blue-600' : 'bg-gray-200'
+            } relative inline-flex h-6 w-11 items-center rounded-full ${
+              !formData.is_countdown ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             <span
-              className={`${formData.sound_interval !== undefined ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white`}
+              className={`${
+                formData.sound_interval !== undefined ? 'translate-x-6' : 'translate-x-1'
+              } inline-block h-4 w-4 transform rounded-full bg-white`}
             />
           </Switch>
           {formData.sound_interval !== undefined && (
@@ -188,6 +208,7 @@ const TimeSettingsCreate: React.FC = () => {
               name="sound_interval"
               value={formData.sound_interval}
               onChange={handleInputChange}
+              min={1}
               className="w-16 text-right rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             />
           )}

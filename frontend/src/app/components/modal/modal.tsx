@@ -68,7 +68,7 @@ const Modal = ({ children }: { children: React.ReactNode }) => {
                   </div>
                 )}
                 <div className="mt-3 text-center sm:mt-5">
-                  <Dialog.Title as="h3" className="mb-3 text-lg font-medium leading-6 text-gray-900">
+                  <Dialog.Title as="h2" className="mb-8 text-xl font-semibold leading-6 text-gray-900">
                     {modalConfig?.title}
                   </Dialog.Title>
                   {modalConfig?.message && (
