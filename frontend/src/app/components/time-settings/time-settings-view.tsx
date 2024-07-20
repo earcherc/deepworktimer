@@ -1,22 +1,37 @@
 'use client';
 
-import { CheckIcon, ClockIcon, SpeakerWaveIcon, TrashIcon } from '@heroicons/react/20/solid';
+import {
+  ArrowPathIcon,
+  ArrowUpCircleIcon,
+  BellIcon,
+  BoltIcon,
+  ClockIcon,
+  CogIcon,
+  MoonIcon,
+  PauseIcon,
+  PlayIcon,
+  TrashIcon,
+} from '@heroicons/react/20/solid';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, TimeSettings, TimeSettingsService } from '@api';
 import { useModalContext } from '@context/modal/modal-context';
 import TimeSettingsCreate from './time-settings-create';
 import useToast from '@context/toasts/toast-context';
-import React from 'react';
+import { Tooltip } from 'react-tooltip';
+import React, { useState } from 'react';
 
 const TimeSettingsModal: React.FC = () => {
   const { showModal } = useModalContext();
   const { addToast } = useToast();
   const queryClient = useQueryClient();
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   const { data: timeSettings = [] } = useQuery<TimeSettings[]>({
     queryKey: ['timeSettings'],
     queryFn: () => TimeSettingsService.readTimeSettingsListTimeSetttingsGet(),
   });
+
+  const sortedTimeSettings = [...timeSettings].sort((a, b) => a.id - b.id);
 
   const updateTimeSettingsMutation = useMutation({
     mutationFn: (settings: TimeSettings) =>
@@ -63,38 +78,70 @@ const TimeSettingsModal: React.FC = () => {
     });
   };
 
+  const handleEdit = (settings: TimeSettings) => {
+    // This is a placeholder for the edit functionality
+    console.log('Edit settings:', settings);
+  };
+
   return (
-    <div className=" bg-white rounded-lg shadow-xl p-6 w-full">
-      <div className="flex flex-nowrap mb-4 text-sm text-gray-500">
-        <p>Type | Duration | S-Break | L-Break | Sessions till L-Break | Sound | Sound Interval</p>
+    <div className="bg-white rounded-lg w-full p-4">
+      <div className="flex items-center justify-between mb-4 text-sm text-gray-500 mx-px px-3">
+        <ClockIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Type" />
+        <PlayIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Duration" />
+        <PauseIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Short Break" />
+        <MoonIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Long Break" />
+        <ArrowPathIcon
+          className="h-5 w-5"
+          data-tooltip-id="icon-tooltip"
+          data-tooltip-content="Sessions till Long Break"
+        />
+        <BellIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Sound" />
+        <BoltIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Sound Interval" />
       </div>
 
       <div className="max-h-80 overflow-y-auto mb-4">
-        {timeSettings.length > 0 ? (
-          timeSettings.map((settings) => (
+        {sortedTimeSettings.length > 0 ? (
+          sortedTimeSettings.map((settings) => (
             <div
               key={settings.id}
-              className={`flex items-center justify-between p-3 mb-2 rounded-lg cursor-pointer hover:bg-gray-100 ${settings.is_selected ? 'bg-blue-100' : ''}`}
+              className={`relative flex items-center justify-between p-3 mb-2 rounded-lg cursor-pointer hover:bg-gray-100 ${settings.is_selected ? 'bg-blue-100' : ''}`}
               onClick={() => handleSelect(settings)}
+              onMouseEnter={() => setHoveredId(settings.id)}
+              onMouseLeave={() => setHoveredId(null)}
             >
-              <div className="flex items-center space-x-2">
-                <ClockIcon className="h-5 w-5 text-gray-400" />
-                <span className="font-semibold">{settings.is_countdown ? 'Timer' : 'Open'}</span>
-                <span>{settings.duration}</span>
-                <span>{settings.short_break_duration}</span>
-                <span>{settings.long_break_duration}</span>
-                <span>{settings.long_break_interval}</span>
-                {settings.is_sound && <SpeakerWaveIcon className="h-5 w-5 text-gray-400" />}
-                <span>{settings.sound_interval}</span>
-                {settings.is_selected && <CheckIcon className="h-5 w-5 text-green-500" />}
+              <div className="flex items-center justify-between w-full">
+                <span className="w-6 flex justify-center">
+                  {settings.is_countdown ? (
+                    <ClockIcon className="h-5 w-5 text-blue-500" aria-label="Timer" />
+                  ) : (
+                    <ArrowUpCircleIcon className="h-5 w-5 text-green-500" aria-label="Open" />
+                  )}
+                </span>
+                <span className="w-8 text-center">{settings.duration}</span>
+                <span className="w-8 text-center">{settings.short_break_duration}</span>
+                <span className="w-8 text-center">{settings.long_break_duration}</span>
+                <span className="w-8 text-center">{settings.long_break_interval}</span>
+                <BellIcon className={`h-6 w-6 ${settings.is_sound ? 'text-yellow-500' : 'text-gray-300'}`} />
+                <span className="w-8 text-center">{settings.sound_interval}</span>
               </div>
-              <TrashIcon
-                className="h-5 w-5 text-red-500 hover:text-red-700"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(settings.id);
-                }}
-              />
+              {hoveredId === settings.id && (
+                <div className="absolute right-2 flex space-x-2 bg-gray-800 bg-opacity-90 rounded p-1">
+                  <CogIcon
+                    className="h-5 w-5 text-white hover:text-gray-200"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(settings);
+                    }}
+                  />
+                  <TrashIcon
+                    className="h-5 w-5 text-red-500 hover:text-red-400"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(settings.id);
+                    }}
+                  />
+                </div>
+              )}
             </div>
           ))
         ) : (
@@ -105,6 +152,8 @@ const TimeSettingsModal: React.FC = () => {
       <button className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600" onClick={handleCreate}>
         Create New Setting
       </button>
+
+      <Tooltip id="icon-tooltip" />
     </div>
   );
 };

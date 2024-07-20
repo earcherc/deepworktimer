@@ -1,17 +1,15 @@
-# schemas/time_settings.py
-
 from typing import Optional
 from pydantic import BaseModel, Field
 
 
 class TimeSettingsBase(BaseModel):
-    is_countdown: bool = Field(default=True)
-    duration: int = Field(default=55)
-    short_break_duration: int = Field(default=5)
-    long_break_duration: int = Field(default=30)
-    long_break_interval: int = Field(default=6)
-    is_sound: bool = Field(default=True)
-    sound_interval: int = Field(default=20)
+    is_countdown: bool = Field(...)
+    duration: Optional[int] = Field(default=None)
+    short_break_duration: Optional[int] = Field(default=None)
+    long_break_duration: Optional[int] = Field(default=None)
+    long_break_interval: Optional[int] = Field(default=None)
+    is_sound: Optional[bool] = Field(default=None)
+    sound_interval: Optional[int] = Field(default=None)
 
 
 class TimeSettingsCreate(TimeSettingsBase):

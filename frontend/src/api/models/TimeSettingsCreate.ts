@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type TimeSettingsCreate = {
-    is_countdown?: boolean;
+    is_countdown: boolean;
     duration?: number;
     short_break_duration?: number;
     long_break_duration?: number;
