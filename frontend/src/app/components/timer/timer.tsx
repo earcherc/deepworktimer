@@ -34,7 +34,8 @@ const QUERY_KEYS = {
   timeSettings: 'timeSettings',
 };
 
-const DEFAULT_DURATION = 60 * 60; // 60 minutes in seconds
+const minutesToSeconds = (minutes: number) => minutes * 60;
+const DEFAULT_DURATION = minutesToSeconds(60);
 
 const Timer: React.FC = () => {
   const { addToast } = useToast();
@@ -151,7 +152,7 @@ const Timer: React.FC = () => {
       const startTime = toLocalTime(incompleteBlock.start_time).getTime();
       const elapsedMilliseconds = Date.now() - startTime;
       const newTime = incompleteBlock.is_countdown
-        ? Math.max((activeTimeSettings.duration || DEFAULT_DURATION) * 1000 - elapsedMilliseconds, 0)
+        ? Math.max(minutesToSeconds(activeTimeSettings.duration || 60) * 1000 - elapsedMilliseconds, 0)
         : elapsedMilliseconds;
 
       setTime(Math.floor(newTime / 1000));
@@ -159,7 +160,7 @@ const Timer: React.FC = () => {
       setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
       setStudyBlockId(incompleteBlock.id);
     } else {
-      setTime(activeTimeSettings.duration || DEFAULT_DURATION);
+      setTime(minutesToSeconds(activeTimeSettings.duration || 60));
       setIsActive(false);
       setStudyBlockId(null);
       setDummyActive(false);
@@ -186,16 +187,16 @@ const Timer: React.FC = () => {
         // Start break timer
         setIsBreak(true);
         if (newCompleted % (activeTimeSettings.long_break_interval || 4) === 0) {
-          setTime(activeTimeSettings.long_break_duration || 15 * 60);
+          setTime(minutesToSeconds(activeTimeSettings.long_break_duration || 15));
         } else {
-          setTime(activeTimeSettings.short_break_duration || 5 * 60);
+          setTime(minutesToSeconds(activeTimeSettings.short_break_duration || 5));
         }
         setIsActive(true);
       } else if (time === 0 && !activeSessionCounter) {
         createSessionCounterMutation.mutate({ target: 5, completed: 1 });
         // Start short break
         setIsBreak(true);
-        setTime(activeTimeSettings?.short_break_duration || 5 * 60);
+        setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
         setIsActive(true);
       } else {
         setDummyActive(false);
@@ -204,7 +205,7 @@ const Timer: React.FC = () => {
       // Break timer finished
       setIsBreak(false);
       setIsActive(false);
-      setTime(activeTimeSettings?.duration || DEFAULT_DURATION);
+      setTime(minutesToSeconds(activeTimeSettings?.duration || 60));
     }
   }, [
     studyBlockId,
@@ -255,7 +256,7 @@ const Timer: React.FC = () => {
   const toggleMode = () => {
     if (isActive) return;
     setMode((prevMode) => (prevMode === TimerMode.Countdown ? TimerMode.OpenSession : TimerMode.Countdown));
-    setTime(activeTimeSettings?.duration || DEFAULT_DURATION);
+    setTime(minutesToSeconds(activeTimeSettings?.duration || 60));
   };
 
   const formatTime = (totalSeconds: number) => {
