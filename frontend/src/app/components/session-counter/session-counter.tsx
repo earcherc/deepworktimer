@@ -1,4 +1,4 @@
-// session-counter.tsx
+import { ArrowPathIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import React from 'react';
 
@@ -23,9 +23,8 @@ const SessionCounter: React.FC<SessionCounterProps> = ({
     const dots = [];
     for (let i = 0; i < target; i++) {
       const dotClass = classNames('w-4 h-4 rounded-full transition-all duration-300', {
-        'bg-gray-300': i > completed,
+        'bg-gray-300': i >= completed || (i === completed && !isActive),
         'bg-indigo-500': i < completed,
-        'bg-indigo-500': i === completed && !isActive,
         'relative overflow-hidden': i === completed && isActive,
       });
       dots.push(
@@ -40,17 +39,17 @@ const SessionCounter: React.FC<SessionCounterProps> = ({
   };
 
   return (
-    <div className="flex space-x-2 mt-4 mb-6 cursor-pointer relative group" onClick={onClick}>
-      {renderDots()}
-      {!isDummy && (
+    <div className="flex space-x-3 mt-2 mb-4 cursor-pointer relative group" onClick={onClick}>
+      <div className="flex space-x-4 transition-colors">{renderDots()}</div>
+      {!isDummy && completed > 0 && (
         <button
-          className="absolute -right-6 top-1/2 transform -translate-y-1/2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute -right-6 top-1/2 transform -translate-y-1/2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-50 rounded-full p-1"
           onClick={(e) => {
             e.stopPropagation();
             onReset?.();
           }}
         >
-          ↺
+          <ArrowPathIcon className="h-5 w-5" />
         </button>
       )}
     </div>

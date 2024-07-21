@@ -9,8 +9,6 @@ import {
   StudyBlockUpdate,
   StudyCategoriesService,
   StudyCategory,
-  TimeSettings,
-  TimeSettingsService,
 } from '@api';
 import { getCurrentUTC, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -43,7 +41,7 @@ const Timer: React.FC = () => {
   const [isActive, setIsActive] = useState<boolean>(false);
   const [mode, setMode] = useAtom(timerModeAtom);
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
-  const [dummyCompleted, setDummyCompleted] = useState(0);
+  const [dummyActive, setDummyActive] = useState(false);
 
   const { data: categoriesData } = useQuery<StudyCategory[]>({
     queryKey: [QUERY_KEYS.studyCategories],
@@ -60,10 +58,10 @@ const Timer: React.FC = () => {
     queryFn: () => StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange),
   });
 
-  const { data: timeSettingsData = [] } = useQuery<TimeSettings[]>({
-    queryKey: ['timeSettings'],
-    queryFn: () => TimeSettingsService.readTimeSettingsListTimeSetttingsGet(),
-  });
+  // const { data: timeSettingsData = [] } = useQuery<TimeSettings[]>({
+  //   queryKey: ['timeSettings'],
+  //   queryFn: () => TimeSettingsService.readTimeSettingsListTimeSetttingsGet(),
+  // });
 
   const { data: sessionCountersData = [] } = useQuery<SessionCounterType[]>({
     queryKey: [QUERY_KEYS.sessionCounters],
@@ -159,6 +157,7 @@ const Timer: React.FC = () => {
       setTime(mode === TimerMode.Countdown ? activeBlockSize : 0);
       setIsActive(false);
       setStudyBlockId(null);
+      setDummyActive(false);
     }
   }, [studyBlocksData, activeDailyGoal, activeBlockSize, mode, setMode]);
 
@@ -182,7 +181,7 @@ const Timer: React.FC = () => {
           createSessionCounterMutation.mutate({ target: 5, completed: 1 });
         }
       }
-      setDummyCompleted(0);
+      setDummyActive(false);
     }
   }, [
     studyBlockId,
@@ -222,7 +221,7 @@ const Timer: React.FC = () => {
       });
       setStudyBlockId(newBlock.id);
       if (!activeSessionCounter) {
-        setDummyCompleted(1);
+        setDummyActive(true);
       }
     }
   };
@@ -294,9 +293,9 @@ const Timer: React.FC = () => {
         <p className="mb-6 text-6xl font-bold text-gray-900 dark:text-white">{formatTime(time)}</p>
         {mode === TimerMode.Countdown && (
           <SessionCounter
-            target={5}
-            completed={activeSessionCounter ? activeSessionCounter.completed : dummyCompleted}
-            isActive={isActive}
+            target={activeSessionCounter ? activeSessionCounter.target : 5}
+            completed={activeSessionCounter ? activeSessionCounter.completed : 0}
+            isActive={activeSessionCounter ? isActive : dummyActive}
             isDummy={!activeSessionCounter}
             onReset={resetSessionCounter}
             onClick={openSessionsModal}

@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING, Optional
+from sqlalchemy import Column, DateTime
 from sqlmodel import Field, SQLModel, Relationship
 from datetime import datetime, UTC
 
@@ -13,6 +14,7 @@ class SessionCounter(SQLModel, table=True):
     target: int
     completed: int = Field(default=0)
     created_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True)),
         default_factory=lambda: datetime.now(UTC),
     )
 

@@ -17,7 +17,7 @@ const SessionCounterModal: React.FC = () => {
   });
 
   const createSessionCounterMutation = useMutation({
-    mutationFn: (newCounter: { target: number }) =>
+    mutationFn: (newCounter: { target: number; is_selected: boolean }) =>
       SessionCountersService.createSessionCounterSessionCountersPost(newCounter),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessionCounters'] });
@@ -34,7 +34,7 @@ const SessionCounterModal: React.FC = () => {
   });
 
   const handleCreate = () => {
-    createSessionCounterMutation.mutate({ target });
+    createSessionCounterMutation.mutate({ target, is_selected: true });
   };
 
   const renderDots = () => {
@@ -47,12 +47,18 @@ const SessionCounterModal: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-center space-x-4">
-        <button onClick={() => setTarget(Math.max(1, target - 1))} className="text-2xl font-bold text-indigo-500">
+      <div className="flex items-center justify-between space-x-4">
+        <button
+          onClick={() => setTarget(Math.max(1, target - 1))}
+          className="text-2xl font-bold text-indigo-500 bg-gray-100 rounded-full w-10 h-10 flex items-center justify-center"
+        >
           -
         </button>
-        <div className="flex space-x-1">{renderDots()}</div>
-        <button onClick={() => setTarget(target + 1)} className="text-2xl font-bold text-indigo-500">
+        <div className="flex-grow flex justify-center space-x-2">{renderDots()}</div>
+        <button
+          onClick={() => setTarget(target + 1)}
+          className="text-2xl font-bold text-indigo-500 bg-gray-100 rounded-full w-10 h-10 flex items-center justify-center"
+        >
           +
         </button>
       </div>
