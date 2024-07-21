@@ -2,6 +2,8 @@ import {
   ApiError,
   DailyGoal,
   DailyGoalsService,
+  SessionCountersService,
+  SessionCounter as SessionCounterType,
   StudyBlock,
   StudyBlocksService,
   StudyBlockUpdate,
@@ -12,8 +14,10 @@ import {
 } from '@api';
 import { getCurrentUTC, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import SessionCounterModal from '../session-counter/session-counter-modal';
 import TimeSettingsModal from '../time-settings/time-settings-view';
 import { useModalContext } from '@app/context/modal/modal-context';
+import SessionCounter from '../session-counter/session-counter';
 import React, { useCallback, useEffect, useState } from 'react';
 import { TimerMode, timerModeAtom } from '../../store/atoms';
 import { Cog6ToothIcon } from '@heroicons/react/20/solid';
@@ -26,6 +30,7 @@ const QUERY_KEYS = {
   studyCategories: 'studyCategories',
   dailyGoals: 'dailyGoals',
   studyBlocks: 'studyBlocks',
+  sessionCounters: 'sessionCounters',
 };
 
 const Timer: React.FC = () => {
@@ -38,6 +43,7 @@ const Timer: React.FC = () => {
   const [isActive, setIsActive] = useState<boolean>(false);
   const [mode, setMode] = useAtom(timerModeAtom);
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
+  const [dummyCompleted, setDummyCompleted] = useState(0);
 
   const { data: categoriesData } = useQuery<StudyCategory[]>({
     queryKey: [QUERY_KEYS.studyCategories],
@@ -54,23 +60,21 @@ const Timer: React.FC = () => {
     queryFn: () => StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange),
   });
 
-  const { data: timeSettings = [] } = useQuery<TimeSettings[]>({
+  const { data: timeSettingsData = [] } = useQuery<TimeSettings[]>({
     queryKey: ['timeSettings'],
     queryFn: () => TimeSettingsService.readTimeSettingsListTimeSetttingsGet(),
   });
 
-  const openSettingsModal = () => {
-    showModal({
-      type: 'default',
-      title: 'Time Settings',
-      content: <TimeSettingsModal />,
-    });
-  };
+  const { data: sessionCountersData = [] } = useQuery<SessionCounterType[]>({
+    queryKey: [QUERY_KEYS.sessionCounters],
+    queryFn: () => SessionCountersService.readSessionCountersSessionCountersGet(),
+  });
 
   const activeCategory = categoriesData?.find((cat) => cat.is_selected);
   const activeDailyGoal = dailyGoalsData?.find((goal) => goal.is_selected);
   const activeBlockSize = activeDailyGoal ? activeDailyGoal.block_size * 60 : 0;
   const isDisabled = !activeCategory || !activeDailyGoal;
+  const activeSessionCounter = sessionCountersData.find((counter) => counter.is_selected);
 
   const createStudyBlockMutation = useMutation({
     mutationFn: StudyBlocksService.createStudyBlockStudyBlocksPost,
@@ -104,6 +108,38 @@ const Timer: React.FC = () => {
     },
   });
 
+  const createSessionCounterMutation = useMutation({
+    mutationFn: (counter: { target: number; completed: number }) =>
+      SessionCountersService.createSessionCounterSessionCountersPost(counter),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.sessionCounters] });
+    },
+    onError: (error: unknown) => {
+      const errorMessage =
+        error instanceof ApiError
+          ? error.body?.detail || 'Failed to create session counter'
+          : 'Failed to create session counter';
+      addToast({ type: 'error', content: errorMessage });
+    },
+  });
+
+  const updateSessionCounterMutation = useMutation({
+    mutationFn: (counter: { id: number; completed: number }) =>
+      SessionCountersService.updateSessionCounterSessionCountersSessionCounterIdPatch(counter.id, {
+        completed: counter.completed,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.sessionCounters] });
+    },
+    onError: (error: unknown) => {
+      const errorMessage =
+        error instanceof ApiError
+          ? error.body?.detail || 'Failed to update session counter'
+          : 'Failed to update session counter';
+      addToast({ type: 'error', content: errorMessage });
+    },
+  });
+
   useEffect(() => {
     if (!studyBlocksData || !activeDailyGoal) return;
 
@@ -134,8 +170,28 @@ const Timer: React.FC = () => {
       });
       setIsActive(false);
       setStudyBlockId(null);
+
+      if (time === 0) {
+        // Only create/update session counter if timer reached 0
+        if (activeSessionCounter) {
+          updateSessionCounterMutation.mutate({
+            id: activeSessionCounter.id,
+            completed: activeSessionCounter.completed + 1,
+          });
+        } else {
+          createSessionCounterMutation.mutate({ target: 5, completed: 1 });
+        }
+      }
+      setDummyCompleted(0);
     }
-  }, [studyBlockId, updateStudyBlockMutation]);
+  }, [
+    studyBlockId,
+    updateStudyBlockMutation,
+    activeSessionCounter,
+    updateSessionCounterMutation,
+    createSessionCounterMutation,
+    time,
+  ]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -165,6 +221,9 @@ const Timer: React.FC = () => {
         study_category_id: activeCategory.id,
       });
       setStudyBlockId(newBlock.id);
+      if (!activeSessionCounter) {
+        setDummyCompleted(1);
+      }
     }
   };
 
@@ -189,6 +248,28 @@ const Timer: React.FC = () => {
     return isActive && mode !== timerMode;
   };
 
+  const openSettingsModal = () => {
+    showModal({
+      type: 'default',
+      title: 'Time Settings',
+      content: <TimeSettingsModal />,
+    });
+  };
+
+  const openSessionsModal = () => {
+    showModal({
+      type: 'default',
+      title: 'Session Counter',
+      content: <SessionCounterModal />,
+    });
+  };
+
+  const resetSessionCounter = () => {
+    if (activeSessionCounter) {
+      createSessionCounterMutation.mutate({ target: activeSessionCounter.target, completed: 0 });
+    }
+  };
+
   return (
     <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-lg">
       <div className="flex flex-col items-center">
@@ -211,6 +292,16 @@ const Timer: React.FC = () => {
           ))}
         </div>
         <p className="mb-6 text-6xl font-bold text-gray-900 dark:text-white">{formatTime(time)}</p>
+        {mode === TimerMode.Countdown && (
+          <SessionCounter
+            target={5}
+            completed={activeSessionCounter ? activeSessionCounter.completed : dummyCompleted}
+            isActive={isActive}
+            isDummy={!activeSessionCounter}
+            onReset={resetSessionCounter}
+            onClick={openSessionsModal}
+          />
+        )}
         <div className="flex space-x-3">
           {!isActive && (
             <button
