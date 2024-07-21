@@ -16,6 +16,9 @@ export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { LoginRequest } from './models/LoginRequest';
 export type { PasswordChangeRequest } from './models/PasswordChangeRequest';
 export type { RegistrationRequest } from './models/RegistrationRequest';
+export type { SessionCounter } from './models/SessionCounter';
+export type { SessionCounterCreate } from './models/SessionCounterCreate';
+export type { SessionCounterUpdate } from './models/SessionCounterUpdate';
 export type { StudyBlock } from './models/StudyBlock';
 export type { StudyBlockCreate } from './models/StudyBlockCreate';
 export type { StudyBlockQuery } from './models/StudyBlockQuery';
@@ -33,6 +36,7 @@ export type { ValidationError } from './models/ValidationError';
 
 export { AuthenticationService } from './services/AuthenticationService';
 export { DailyGoalsService } from './services/DailyGoalsService';
+export { SessionCountersService } from './services/SessionCountersService';
 export { StudyBlocksService } from './services/StudyBlocksService';
 export { StudyCategoriesService } from './services/StudyCategoriesService';
 export { TimeSettingsService } from './services/TimeSettingsService';
