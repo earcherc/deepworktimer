@@ -290,7 +290,7 @@ const Timer: React.FC = () => {
             </button>
           ))}
         </div>
-        <p className="mb-6 text-6xl font-bold text-gray-900 dark:text-white">{formatTime(time)}</p>
+        <p className="mb-2 text-6xl font-bold text-gray-900 dark:text-white">{formatTime(time)}</p>
         {mode === TimerMode.Countdown && (
           <SessionCounter
             target={activeSessionCounter ? activeSessionCounter.target : 5}
