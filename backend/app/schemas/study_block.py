@@ -9,8 +9,8 @@ class StudyBlockBase(BaseModel):
 
 
 class StudyBlockCreate(StudyBlockBase):
-    daily_goal_id: int
-    study_category_id: int
+    daily_goal_id: Optional[int] = None
+    study_category_id: Optional[int] = None
 
 
 class StudyBlockUpdate(BaseModel):
@@ -24,8 +24,8 @@ class StudyBlock(StudyBlockBase):
     end_time: Optional[datetime] = None
     rating: Optional[float] = None
     user_id: int
-    daily_goal_id: int
-    study_category_id: int
+    daily_goal_id: Optional[int] = None
+    study_category_id: Optional[int] = None
 
     class Config:
         orm_mode = True

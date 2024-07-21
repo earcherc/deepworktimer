@@ -9,7 +9,7 @@ export type StudyBlock = {
     end_time?: string;
     rating?: number;
     user_id: number;
-    daily_goal_id: number;
-    study_category_id: number;
+    daily_goal_id?: number;
+    study_category_id?: number;
 };
 

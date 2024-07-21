@@ -14,6 +14,7 @@ class TimeSettings(SQLModel, table=True):
     short_break_duration: Optional[int] = Field(default=None)
     long_break_duration: Optional[int] = Field(default=None)
     long_break_interval: Optional[int] = Field(default=None)
+    # is_autostart: Optional[bool] = Field(default=None)
     is_sound: Optional[bool] = Field(default=None)
     sound_interval: Optional[int] = Field(default=None)
     user_id: int = Field(foreign_key="user.id")

@@ -9,6 +9,8 @@ import {
   StudyBlockUpdate,
   StudyCategoriesService,
   StudyCategory,
+  TimeSettings,
+  TimeSettingsService,
 } from '@api';
 import { getCurrentUTC, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -29,7 +31,10 @@ const QUERY_KEYS = {
   dailyGoals: 'dailyGoals',
   studyBlocks: 'studyBlocks',
   sessionCounters: 'sessionCounters',
+  timeSettings: 'timeSettings',
 };
+
+const DEFAULT_DURATION = 60 * 60; // 60 minutes in seconds
 
 const Timer: React.FC = () => {
   const { addToast } = useToast();
@@ -37,11 +42,12 @@ const Timer: React.FC = () => {
   const queryClient = useQueryClient();
   const dateRange = getTodayDateRange();
 
-  const [time, setTime] = useState<number>(0);
+  const [time, setTime] = useState<number>(DEFAULT_DURATION);
   const [isActive, setIsActive] = useState<boolean>(false);
   const [mode, setMode] = useAtom(timerModeAtom);
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
   const [dummyActive, setDummyActive] = useState(false);
+  const [isBreak, setIsBreak] = useState(false);
 
   const { data: categoriesData } = useQuery<StudyCategory[]>({
     queryKey: [QUERY_KEYS.studyCategories],
@@ -58,21 +64,20 @@ const Timer: React.FC = () => {
     queryFn: () => StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange),
   });
 
-  // const { data: timeSettingsData = [] } = useQuery<TimeSettings[]>({
-  //   queryKey: ['timeSettings'],
-  //   queryFn: () => TimeSettingsService.readTimeSettingsListTimeSetttingsGet(),
-  // });
-
   const { data: sessionCountersData = [] } = useQuery<SessionCounterType[]>({
     queryKey: [QUERY_KEYS.sessionCounters],
     queryFn: () => SessionCountersService.readSessionCountersSessionCountersGet(),
   });
 
+  const { data: timeSettingsData } = useQuery<TimeSettings[]>({
+    queryKey: [QUERY_KEYS.timeSettings],
+    queryFn: () => TimeSettingsService.readTimeSettingsListTimeSetttingsGet(),
+  });
+
   const activeCategory = categoriesData?.find((cat) => cat.is_selected);
   const activeDailyGoal = dailyGoalsData?.find((goal) => goal.is_selected);
-  const activeBlockSize = activeDailyGoal ? activeDailyGoal.block_size * 60 : 0;
-  const isDisabled = !activeCategory || !activeDailyGoal;
   const activeSessionCounter = sessionCountersData.find((counter) => counter.is_selected);
+  const activeTimeSettings = timeSettingsData?.find((settings) => settings.is_selected);
 
   const createStudyBlockMutation = useMutation({
     mutationFn: StudyBlocksService.createStudyBlockStudyBlocksPost,
@@ -139,14 +144,14 @@ const Timer: React.FC = () => {
   });
 
   useEffect(() => {
-    if (!studyBlocksData || !activeDailyGoal) return;
+    if (!studyBlocksData || !activeTimeSettings) return;
 
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
     if (incompleteBlock) {
       const startTime = toLocalTime(incompleteBlock.start_time).getTime();
       const elapsedMilliseconds = Date.now() - startTime;
       const newTime = incompleteBlock.is_countdown
-        ? Math.max(activeBlockSize * 1000 - elapsedMilliseconds, 0)
+        ? Math.max((activeTimeSettings.duration || DEFAULT_DURATION) * 1000 - elapsedMilliseconds, 0)
         : elapsedMilliseconds;
 
       setTime(Math.floor(newTime / 1000));
@@ -154,12 +159,13 @@ const Timer: React.FC = () => {
       setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
       setStudyBlockId(incompleteBlock.id);
     } else {
-      setTime(mode === TimerMode.Countdown ? activeBlockSize : 0);
+      setTime(activeTimeSettings.duration || DEFAULT_DURATION);
       setIsActive(false);
       setStudyBlockId(null);
       setDummyActive(false);
+      setIsBreak(false);
     }
-  }, [studyBlocksData, activeDailyGoal, activeBlockSize, mode, setMode]);
+  }, [studyBlocksData, activeTimeSettings, setMode]);
 
   const stopTimer = useCallback(async () => {
     if (studyBlockId) {
@@ -170,26 +176,45 @@ const Timer: React.FC = () => {
       setIsActive(false);
       setStudyBlockId(null);
 
-      if (time === 0) {
-        // Only create/update session counter if timer reached 0
-        if (activeSessionCounter) {
-          updateSessionCounterMutation.mutate({
-            id: activeSessionCounter.id,
-            completed: activeSessionCounter.completed + 1,
-          });
+      if (time === 0 && activeSessionCounter && activeTimeSettings) {
+        const newCompleted = activeSessionCounter.completed + 1;
+        updateSessionCounterMutation.mutate({
+          id: activeSessionCounter.id,
+          completed: newCompleted,
+        });
+
+        // Start break timer
+        setIsBreak(true);
+        if (newCompleted % (activeTimeSettings.long_break_interval || 4) === 0) {
+          setTime(activeTimeSettings.long_break_duration || 15 * 60);
         } else {
-          createSessionCounterMutation.mutate({ target: 5, completed: 1 });
+          setTime(activeTimeSettings.short_break_duration || 5 * 60);
         }
+        setIsActive(true);
+      } else if (time === 0 && !activeSessionCounter) {
+        createSessionCounterMutation.mutate({ target: 5, completed: 1 });
+        // Start short break
+        setIsBreak(true);
+        setTime(activeTimeSettings?.short_break_duration || 5 * 60);
+        setIsActive(true);
+      } else {
+        setDummyActive(false);
       }
-      setDummyActive(false);
+    } else if (isBreak) {
+      // Break timer finished
+      setIsBreak(false);
+      setIsActive(false);
+      setTime(activeTimeSettings?.duration || DEFAULT_DURATION);
     }
   }, [
     studyBlockId,
     updateStudyBlockMutation,
     activeSessionCounter,
+    activeTimeSettings,
     updateSessionCounterMutation,
     createSessionCounterMutation,
     time,
+    isBreak,
   ]);
 
   useEffect(() => {
@@ -197,7 +222,7 @@ const Timer: React.FC = () => {
 
     const interval = setInterval(() => {
       setTime((prevTime) => {
-        if (mode === TimerMode.Countdown) {
+        if (mode === TimerMode.Countdown || isBreak) {
           const newTime = Math.max(prevTime - 1, 0);
           if (newTime === 0) {
             stopTimer();
@@ -210,26 +235,27 @@ const Timer: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isActive, mode, stopTimer]);
+  }, [isActive, mode, stopTimer, isBreak]);
 
   const startTimer = async () => {
-    if (activeDailyGoal && activeCategory) {
+    if (!isBreak) {
       const newBlock = await createStudyBlockMutation.mutateAsync({
         is_countdown: mode === TimerMode.Countdown,
-        daily_goal_id: activeDailyGoal.id,
-        study_category_id: activeCategory.id,
+        daily_goal_id: activeDailyGoal?.id,
+        study_category_id: activeCategory?.id,
       });
       setStudyBlockId(newBlock.id);
       if (!activeSessionCounter) {
         setDummyActive(true);
       }
     }
+    setIsActive(true);
   };
 
   const toggleMode = () => {
     if (isActive) return;
     setMode((prevMode) => (prevMode === TimerMode.Countdown ? TimerMode.OpenSession : TimerMode.Countdown));
-    setTime(() => (mode === TimerMode.Countdown ? 0 : activeBlockSize));
+    setTime(activeTimeSettings?.duration || DEFAULT_DURATION);
   };
 
   const formatTime = (totalSeconds: number) => {
@@ -277,13 +303,13 @@ const Timer: React.FC = () => {
             <button
               key={timerMode}
               onClick={toggleMode}
-              disabled={isButtonDisabled(timerMode)}
+              disabled={isButtonDisabled(timerMode) || isBreak}
               className={classNames(
                 'text-sm font-medium transition-colors',
                 mode === timerMode
                   ? 'text-indigo-500 font-semibold'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
-                isButtonDisabled(timerMode) && 'opacity-50 cursor-not-allowed',
+                (isButtonDisabled(timerMode) || isBreak) && 'opacity-50 cursor-not-allowed',
               )}
             >
               {timerMode}
@@ -291,7 +317,7 @@ const Timer: React.FC = () => {
           ))}
         </div>
         <p className="mb-2 text-6xl font-bold text-gray-900 dark:text-white">{formatTime(time)}</p>
-        {mode === TimerMode.Countdown && (
+        {mode === TimerMode.Countdown && !isBreak && (
           <SessionCounter
             target={activeSessionCounter ? activeSessionCounter.target : 5}
             completed={activeSessionCounter ? activeSessionCounter.completed : 0}
@@ -301,19 +327,14 @@ const Timer: React.FC = () => {
             onClick={openSessionsModal}
           />
         )}
+        {isBreak && <p className="mb-4 text-lg font-medium text-indigo-500">Break Time</p>}
         <div className="flex space-x-3">
-          {!isActive && (
+          {!isActive && !isBreak && (
             <button
               onClick={openSettingsModal}
-              disabled={isDisabled}
-              className={classNames(
-                'rounded-full p-2 transition-colors',
-                isDisabled
-                  ? 'bg-gray-200 dark:bg-gray-700 text-gray-400'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
-              )}
+              className="rounded-full p-2 transition-colors bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               data-tooltip-id="timer-tooltip"
-              data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
+              data-tooltip-content="Time Settings"
               data-tooltip-delay-show={1000}
             >
               <Cog6ToothIcon className="h-5 w-5" />
@@ -321,18 +342,10 @@ const Timer: React.FC = () => {
           )}
           <button
             onClick={isActive ? stopTimer : startTimer}
-            disabled={isDisabled}
             className={classNames(
               'rounded-full px-6 py-2 text-sm font-semibold text-white transition-colors',
-              isDisabled
-                ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
-                : isActive
-                  ? 'bg-red-500 hover:bg-red-600'
-                  : 'bg-indigo-500 hover:bg-indigo-600',
+              isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-indigo-500 hover:bg-indigo-600',
             )}
-            data-tooltip-id="timer-tooltip"
-            data-tooltip-content={isDisabled ? 'Assign goal and category' : ''}
-            data-tooltip-delay-show={1000}
           >
             {isActive ? 'Stop' : 'Start'}
           </button>

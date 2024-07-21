@@ -24,13 +24,19 @@ class StudyBlock(SQLModel, table=True):
 
     # Foreign keys
     user_id: int = Field(foreign_key="user.id", index=True)
-    daily_goal_id: int = Field(foreign_key="dailygoal.id", index=True)
-    study_category_id: int = Field(foreign_key="studycategory.id", index=True)
+    daily_goal_id: Optional[int] = Field(
+        foreign_key="dailygoal.id", index=True, default=None
+    )
+    study_category_id: Optional[int] = Field(
+        foreign_key="studycategory.id", index=True, default=None
+    )
 
     # Relationships
     user: "User" = Relationship(back_populates="study_blocks")
-    daily_goal: "DailyGoal" = Relationship(back_populates="study_blocks")
-    study_category: "StudyCategory" = Relationship(back_populates="study_blocks")
+    daily_goal: Optional["DailyGoal"] = Relationship(back_populates="study_blocks")
+    study_category: Optional["StudyCategory"] = Relationship(
+        back_populates="study_blocks"
+    )
 
 
 StudyBlock.update_forward_refs()
