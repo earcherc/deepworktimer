@@ -15,10 +15,10 @@ import {
 import { getCurrentUTC, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import SessionCounterModal from '../session-counter/session-counter-modal';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import TimeSettingsModal from '../time-settings/time-settings-view';
 import { useModalContext } from '@app/context/modal/modal-context';
 import SessionCounter from '../session-counter/session-counter';
-import React, { useCallback, useEffect, useState } from 'react';
 import { TimerMode, timerModeAtom } from '../../store/atoms';
 import { Cog6ToothIcon } from '@heroicons/react/20/solid';
 import useToast from '@context/toasts/toast-context';
@@ -49,6 +49,7 @@ const Timer: React.FC = () => {
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
   const [dummyActive, setDummyActive] = useState(false);
   const [isBreak, setIsBreak] = useState(false);
+  const workerRef = useRef<Worker | null>(null);
 
   const { data: categoriesData } = useQuery<StudyCategory[]>({
     queryKey: [QUERY_KEYS.studyCategories],
@@ -145,6 +146,33 @@ const Timer: React.FC = () => {
   });
 
   useEffect(() => {
+    const workerCode = `
+      let interval = null;
+      self.onmessage = (e) => {
+        if (e.data === 'start') {
+          interval = self.setInterval(() => {
+            self.postMessage('tick');
+          }, 1000);
+        } else if (e.data === 'stop') {
+          if (interval !== null) {
+            self.clearInterval(interval);
+            interval = null;
+          }
+        }
+      };
+    `;
+
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    const workerUrl = URL.createObjectURL(blob);
+    workerRef.current = new Worker(workerUrl);
+
+    return () => {
+      workerRef.current?.terminate();
+      URL.revokeObjectURL(workerUrl);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!studyBlocksData || !activeTimeSettings) return;
 
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
@@ -174,32 +202,29 @@ const Timer: React.FC = () => {
         id: studyBlockId,
         block: { end_time: getCurrentUTC() },
       });
-      setIsActive(false);
       setStudyBlockId(null);
 
-      if (time === 0 && activeSessionCounter && activeTimeSettings) {
+      if (activeSessionCounter && activeTimeSettings) {
         const newCompleted = activeSessionCounter.completed + 1;
-        updateSessionCounterMutation.mutate({
+        await updateSessionCounterMutation.mutateAsync({
           id: activeSessionCounter.id,
           completed: newCompleted,
         });
 
-        // Start break timer
+        // Start break timer immediately
         setIsBreak(true);
         if (newCompleted % (activeTimeSettings.long_break_interval || 4) === 0) {
           setTime(minutesToSeconds(activeTimeSettings.long_break_duration || 15));
         } else {
           setTime(minutesToSeconds(activeTimeSettings.short_break_duration || 5));
         }
-        setIsActive(true);
-      } else if (time === 0 && !activeSessionCounter) {
-        createSessionCounterMutation.mutate({ target: 5, completed: 1 });
+        setIsActive(true); // Keep the timer active for the break
+      } else if (!activeSessionCounter) {
+        await createSessionCounterMutation.mutateAsync({ target: 5, completed: 1 });
         // Start short break
         setIsBreak(true);
         setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
-        setIsActive(true);
-      } else {
-        setDummyActive(false);
+        setIsActive(true); // Keep the timer active for the break
       }
     } else if (isBreak) {
       // Break timer finished
@@ -214,29 +239,44 @@ const Timer: React.FC = () => {
     activeTimeSettings,
     updateSessionCounterMutation,
     createSessionCounterMutation,
-    time,
     isBreak,
   ]);
 
   useEffect(() => {
-    if (!isActive) return;
+    if (!workerRef.current) return;
 
-    const interval = setInterval(() => {
+    const handleTick = () => {
       setTime((prevTime) => {
         if (mode === TimerMode.Countdown || isBreak) {
           const newTime = Math.max(prevTime - 1, 0);
           if (newTime === 0) {
             stopTimer();
+            if (isBreak) {
+              // Timer completely stops after break
+              setIsActive(false);
+              setIsBreak(false);
+              return minutesToSeconds(activeTimeSettings?.duration || 60);
+            }
           }
           return newTime;
         } else {
           return prevTime + 1;
         }
       });
-    }, 1000);
+    };
 
-    return () => clearInterval(interval);
-  }, [isActive, mode, stopTimer, isBreak]);
+    workerRef.current.onmessage = handleTick;
+
+    if (isActive) {
+      workerRef.current.postMessage('start');
+    } else {
+      workerRef.current.postMessage('stop');
+    }
+
+    return () => {
+      workerRef.current?.postMessage('stop');
+    };
+  }, [isActive, mode, stopTimer, isBreak, activeTimeSettings]);
 
   const startTimer = async () => {
     if (!isBreak) {
