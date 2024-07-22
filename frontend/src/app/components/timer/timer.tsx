@@ -114,7 +114,7 @@ const Timer: React.FC = () => {
   });
 
   const createSessionCounterMutation = useMutation({
-    mutationFn: (counter: { target: number; completed: number }) =>
+    mutationFn: (counter: { target: number; completed: number; is_selected: boolean }) =>
       SessionCountersService.createSessionCounterSessionCountersPost(counter),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.sessionCounters] });
@@ -220,7 +220,7 @@ const Timer: React.FC = () => {
         }
         setIsActive(true); // Keep the timer active for the break
       } else if (!activeSessionCounter) {
-        await createSessionCounterMutation.mutateAsync({ target: 5, completed: 1 });
+        await createSessionCounterMutation.mutateAsync({ target: 5, completed: 1, is_selected: true });
         // Start short break
         setIsBreak(true);
         setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
@@ -332,7 +332,7 @@ const Timer: React.FC = () => {
 
   const resetSessionCounter = () => {
     if (activeSessionCounter) {
-      createSessionCounterMutation.mutate({ target: activeSessionCounter.target, completed: 0 });
+      createSessionCounterMutation.mutate({ target: activeSessionCounter.target, completed: 0, is_selected: true });
     }
   };
 
