@@ -16,7 +16,6 @@ const SessionCounterModal: React.FC = () => {
       SessionCountersService.createSessionCounterSessionCountersPost(newCounter),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessionCounters'] });
-      addToast({ type: 'success', content: 'Session counter created successfully' });
       hideModal();
     },
     onError: (error: unknown) => {

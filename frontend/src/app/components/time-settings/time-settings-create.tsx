@@ -28,7 +28,6 @@ const TimeSettingsCreate: React.FC = () => {
       TimeSettingsService.createTimeSettingsTimeSetttingsPost(newSettings),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['timeSettings'] });
-      addToast({ type: 'success', content: 'Time settings created successfully' });
       hideModal();
     },
     onError: (error: unknown) => {
