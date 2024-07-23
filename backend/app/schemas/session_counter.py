@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -9,7 +10,7 @@ class SessionCounterBase(BaseModel):
 
 
 class SessionCounterCreate(SessionCounterBase):
-    pass
+    completed: Optional[int] = None
 
 
 class SessionCounterUpdate(BaseModel):
