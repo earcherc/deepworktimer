@@ -283,6 +283,15 @@ const Timer: React.FC = () => {
     };
   }, [isActive, mode, stopTimer, isBreak]);
 
+  useEffect(() => {
+    const formattedTime = formatTime(time);
+    document.title = isActive ? formattedTime : 'Timer';
+
+    return () => {
+      document.title = 'Timer';
+    };
+  }, [time, isActive]);
+
   const startTimer = async () => {
     if (!isBreak) {
       const newBlock = await createStudyBlockMutation.mutateAsync({
