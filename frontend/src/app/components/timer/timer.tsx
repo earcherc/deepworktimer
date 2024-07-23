@@ -172,6 +172,14 @@ const Timer: React.FC = () => {
     };
   }, []);
 
+  const resetTimer = useCallback(() => {
+    setTime(mode === TimerMode.Countdown ? minutesToSeconds(activeTimeSettings?.duration || 60) : 0);
+    setIsActive(false);
+    setStudyBlockId(null);
+    setDummyActive(false);
+    setIsBreak(false);
+  }, [mode, activeTimeSettings]);
+
   useEffect(() => {
     if (!studyBlocksData || !activeTimeSettings) return;
 
@@ -190,15 +198,7 @@ const Timer: React.FC = () => {
     } else {
       resetTimer();
     }
-  }, [studyBlocksData, activeTimeSettings, setMode]);
-
-  const resetTimer = useCallback(() => {
-    setTime(mode === TimerMode.Countdown ? minutesToSeconds(activeTimeSettings?.duration || 60) : 0);
-    setIsActive(false);
-    setStudyBlockId(null);
-    setDummyActive(false);
-    setIsBreak(false);
-  }, [mode, activeTimeSettings]);
+  }, [studyBlocksData, activeTimeSettings, setMode, resetTimer]);
 
   const stopTimer = useCallback(
     async (timerFinished: boolean = false) => {
@@ -209,27 +209,29 @@ const Timer: React.FC = () => {
         });
         setStudyBlockId(null);
 
-        if (timerFinished && mode === TimerMode.Countdown && activeSessionCounter && activeTimeSettings) {
-          const newCompleted = activeSessionCounter.completed + 1;
-          await updateSessionCounterMutation.mutateAsync({
-            id: activeSessionCounter.id,
-            completed: newCompleted,
-          });
+        if (timerFinished && mode === TimerMode.Countdown) {
+          if (activeSessionCounter && activeTimeSettings) {
+            const newCompleted = activeSessionCounter.completed + 1;
+            await updateSessionCounterMutation.mutateAsync({
+              id: activeSessionCounter.id,
+              completed: newCompleted,
+            });
 
-          // Start break timer
-          setIsBreak(true);
-          if (newCompleted % (activeTimeSettings.long_break_interval || 4) === 0) {
-            setTime(minutesToSeconds(activeTimeSettings.long_break_duration || 15));
-          } else {
-            setTime(minutesToSeconds(activeTimeSettings.short_break_duration || 5));
+            // Start break timer
+            setIsBreak(true);
+            if (newCompleted % (activeTimeSettings.long_break_interval || 4) === 0) {
+              setTime(minutesToSeconds(activeTimeSettings.long_break_duration || 15));
+            } else {
+              setTime(minutesToSeconds(activeTimeSettings.short_break_duration || 5));
+            }
+            setIsActive(true);
+          } else if (!activeSessionCounter) {
+            await createSessionCounterMutation.mutateAsync({ target: 5, completed: 1, is_selected: true });
+            // Start short break
+            setIsBreak(true);
+            setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
+            setIsActive(true);
           }
-          setIsActive(true);
-        } else if (timerFinished && !activeSessionCounter) {
-          await createSessionCounterMutation.mutateAsync({ target: 5, completed: 1, is_selected: true });
-          // Start short break
-          setIsBreak(true);
-          setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
-          setIsActive(true);
         } else {
           resetTimer();
         }
@@ -388,7 +390,7 @@ const Timer: React.FC = () => {
             </button>
           )}
           <button
-            onClick={isActive ? stopTimer : startTimer}
+            onClick={isActive ? () => stopTimer(false) : startTimer}
             className={classNames(
               'rounded-full px-6 py-2 text-sm font-semibold text-white transition-colors',
               isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-indigo-500 hover:bg-indigo-600',

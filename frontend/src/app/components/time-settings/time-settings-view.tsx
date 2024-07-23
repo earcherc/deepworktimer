@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  ArrowDownCircleIcon,
   ArrowPathIcon,
   ArrowUpCircleIcon,
   BellIcon,
@@ -112,7 +113,7 @@ const TimeSettingsModal: React.FC = () => {
               <div className="flex items-center justify-between w-full">
                 <span className="w-6 flex justify-center">
                   {settings.is_countdown ? (
-                    <ClockIcon className="h-5 w-5 text-blue-500" aria-label="Timer" />
+                    <ArrowDownCircleIcon className="h-5 w-5 text-blue-500" aria-label="Timer" />
                   ) : (
                     <ArrowUpCircleIcon className="h-5 w-5 text-green-500" aria-label="Open" />
                   )}
