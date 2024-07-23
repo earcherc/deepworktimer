@@ -44,7 +44,7 @@ const SessionCounter: React.FC<SessionCounterProps> = ({
       <div className="flex space-x-4 transition-colors flex-wrap">{renderDots()}</div>
       {!isDummy && completed > 0 && (
         <button
-          className="absolute -right-8 top-1/2 transform -translate-y-1/2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-50 rounded-full p-1"
+          className="absolute -mt-px -right-10 top-1/2 transform -translate-y-1/2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-50 rounded-full p-1"
           onClick={(e) => {
             e.stopPropagation();
             onReset?.();
