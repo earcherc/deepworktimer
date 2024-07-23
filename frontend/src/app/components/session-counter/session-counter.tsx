@@ -23,7 +23,7 @@ const SessionCounter: React.FC<SessionCounterProps> = ({
     const totalDots = Math.max(target, completed + (isActive ? 1 : 0));
     const dots = [];
     for (let i = 0; i < totalDots; i++) {
-      const dotClass = classNames('w-4 h-4 rounded-full transition-all duration-300', {
+      const dotClass = classNames('w-4 h-4 rounded-full transition-all duration-300 mb-1', {
         'bg-gray-300': i >= completed,
         'bg-indigo-500': i < completed,
         'relative overflow-hidden': i === completed && isActive,
@@ -40,11 +40,11 @@ const SessionCounter: React.FC<SessionCounterProps> = ({
   };
 
   return (
-    <div className="flex space-x-3 mt-2 mb-4 cursor-pointer relative group" onClick={onClick}>
+    <div className="flex mt-2 mb-3 cursor-pointer relative group max-w-48" onClick={onClick}>
       <div className="flex space-x-4 transition-colors flex-wrap">{renderDots()}</div>
       {!isDummy && completed > 0 && (
         <button
-          className="absolute -right-10 top-1/2 transform -translate-y-1/2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-50 rounded-full p-1"
+          className="absolute -right-8 top-1/2 transform -translate-y-1/2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-50 rounded-full p-1"
           onClick={(e) => {
             e.stopPropagation();
             onReset?.();
