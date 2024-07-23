@@ -1,19 +1,19 @@
 'use client';
 
-import { StudyBlock, StudyBlocksService } from '@api';
-import { useModalContext } from '@context/modal/modal-context';
 import { ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
-import { useQuery } from '@tanstack/react-query';
-import { calculateGridPosition } from '@utils/timeUtils';
 import { addDays, endOfDay, format, formatISO, isAfter, isToday, startOfDay, subDays } from 'date-fns';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useModalContext } from '@context/modal/modal-context';
 import CurrentTimeIndicator from './current-time-indicator';
-import StudyBlockComponent from './study-block';
+import { calculateGridPosition } from '@utils/timeUtils';
+import { StudyBlock, StudyBlocksService } from '@api';
+import { useQuery } from '@tanstack/react-query';
 import StudyBlockEdit from './study-block-edit';
+import StudyBlockComponent from './study-block';
 import TimeReset from './time-reset';
 
 const MIN_ZOOM = 0.5;
-const MAX_ZOOM = 3;
+const MAX_ZOOM = 4;
 const ZOOM_STEP = 0.5;
 const MINUTES_PER_DAY = 1440;
 const HOURS_PER_DAY = 24;
@@ -42,7 +42,8 @@ const Calendar: React.FC<CalendarProps> = () => {
 
   const { data: studyBlocksData } = useQuery<StudyBlock[]>({
     queryKey: ['studyBlocks', dateRange?.start_time, dateRange?.end_time],
-    queryFn: () => dateRange ? StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange) : Promise.resolve([]),
+    queryFn: () =>
+      dateRange ? StudyBlocksService.queryStudyBlocksStudyBlocksQueryPost(dateRange) : Promise.resolve([]),
     enabled: !!dateRange,
   });
 
@@ -86,7 +87,7 @@ const Calendar: React.FC<CalendarProps> = () => {
   };
 
   const goToPreviousDay = () => {
-    setCurrentDate((prevDate) => prevDate ? subDays(prevDate, 1) : null);
+    setCurrentDate((prevDate) => (prevDate ? subDays(prevDate, 1) : null));
   };
 
   const goToNextDay = () => {
@@ -138,7 +139,7 @@ const Calendar: React.FC<CalendarProps> = () => {
               <div className="grid flex-auto grid-cols-1 grid-rows-1">
                 <div
                   className="col-start-1 col-end-2 row-start-1 grid divide-y divide-gray-200 dark:divide-gray-700"
-                  style={{ gridTemplateRows: `repeat(${HOURS_PER_DAY}, minmax(${10.5 * zoomLevel}rem, 1fr))` }}
+                  style={{ gridTemplateRows: `repeat(${HOURS_PER_DAY}, minmax(${6 * zoomLevel}rem, 1fr))` }}
                 >
                   {Array.from({ length: HOURS_PER_DAY }).map((_, index) => (
                     <div key={index}>
@@ -164,7 +165,7 @@ const Calendar: React.FC<CalendarProps> = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="absolute bottom-4 right-4 z-10 flex items-center space-x-2 bg-white dark:bg-gray-800 rounded-full shadow-md p-1">
         <span className="text-gray-600 dark:text-gray-300 font-semibold px-2">{(zoomLevel * 100).toFixed(0)}%</span>
         <button
