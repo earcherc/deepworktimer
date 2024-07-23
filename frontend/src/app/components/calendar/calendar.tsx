@@ -71,11 +71,29 @@ const Calendar: React.FC<CalendarProps> = () => {
     scrollToCurrentTime();
   }, []);
 
+  const calculateCenter = () => {
+    if (containerRef.current) {
+      const { scrollTop, clientHeight, scrollHeight } = containerRef.current;
+      return (scrollTop + clientHeight / 2) / scrollHeight;
+    }
+    return 0;
+  };
+
   const handleZoom = (delta: number) => {
-    setZoomLevel((prevZoom) => {
-      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prevZoom + delta));
-      return Number(newZoom.toFixed(1));
-    });
+    if (containerRef.current) {
+      const centerBefore = calculateCenter();
+
+      setZoomLevel((prevZoom) => {
+        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prevZoom + delta));
+        return Number(newZoom.toFixed(1));
+      });
+
+      setTimeout(() => {
+        const { scrollHeight, clientHeight } = containerRef.current!;
+        const newScrollTop = centerBefore * scrollHeight - clientHeight / 2;
+        containerRef.current!.scrollTop = newScrollTop;
+      }, 0);
+    }
   };
 
   const openEditStudyBlockModal = (block: StudyBlock) => {
