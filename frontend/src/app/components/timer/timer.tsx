@@ -188,59 +188,67 @@ const Timer: React.FC = () => {
       setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
       setStudyBlockId(incompleteBlock.id);
     } else {
-      setTime(minutesToSeconds(activeTimeSettings.duration || 60));
-      setIsActive(false);
-      setStudyBlockId(null);
-      setDummyActive(false);
-      setIsBreak(false);
+      resetTimer();
     }
   }, [studyBlocksData, activeTimeSettings, setMode]);
 
-  const stopTimer = useCallback(async () => {
-    if (studyBlockId) {
-      await updateStudyBlockMutation.mutateAsync({
-        id: studyBlockId,
-        block: { end_time: getCurrentUTC() },
-      });
-      setStudyBlockId(null);
+  const resetTimer = useCallback(() => {
+    setTime(mode === TimerMode.Countdown ? minutesToSeconds(activeTimeSettings?.duration || 60) : 0);
+    setIsActive(false);
+    setStudyBlockId(null);
+    setDummyActive(false);
+    setIsBreak(false);
+  }, [mode, activeTimeSettings]);
 
-      if (activeSessionCounter && activeTimeSettings) {
-        const newCompleted = activeSessionCounter.completed + 1;
-        await updateSessionCounterMutation.mutateAsync({
-          id: activeSessionCounter.id,
-          completed: newCompleted,
+  const stopTimer = useCallback(
+    async (timerFinished: boolean = false) => {
+      if (studyBlockId) {
+        await updateStudyBlockMutation.mutateAsync({
+          id: studyBlockId,
+          block: { end_time: getCurrentUTC() },
         });
+        setStudyBlockId(null);
 
-        // Start break timer immediately
-        setIsBreak(true);
-        if (newCompleted % (activeTimeSettings.long_break_interval || 4) === 0) {
-          setTime(minutesToSeconds(activeTimeSettings.long_break_duration || 15));
+        if (timerFinished && mode === TimerMode.Countdown && activeSessionCounter && activeTimeSettings) {
+          const newCompleted = activeSessionCounter.completed + 1;
+          await updateSessionCounterMutation.mutateAsync({
+            id: activeSessionCounter.id,
+            completed: newCompleted,
+          });
+
+          // Start break timer
+          setIsBreak(true);
+          if (newCompleted % (activeTimeSettings.long_break_interval || 4) === 0) {
+            setTime(minutesToSeconds(activeTimeSettings.long_break_duration || 15));
+          } else {
+            setTime(minutesToSeconds(activeTimeSettings.short_break_duration || 5));
+          }
+          setIsActive(true);
+        } else if (timerFinished && !activeSessionCounter) {
+          await createSessionCounterMutation.mutateAsync({ target: 5, completed: 1, is_selected: true });
+          // Start short break
+          setIsBreak(true);
+          setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
+          setIsActive(true);
         } else {
-          setTime(minutesToSeconds(activeTimeSettings.short_break_duration || 5));
+          resetTimer();
         }
-        setIsActive(true); // Keep the timer active for the break
-      } else if (!activeSessionCounter) {
-        await createSessionCounterMutation.mutateAsync({ target: 5, completed: 1, is_selected: true });
-        // Start short break
-        setIsBreak(true);
-        setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
-        setIsActive(true); // Keep the timer active for the break
+      } else if (isBreak) {
+        resetTimer();
       }
-    } else if (isBreak) {
-      // Break timer finished
-      setIsBreak(false);
-      setIsActive(false);
-      setTime(minutesToSeconds(activeTimeSettings?.duration || 60));
-    }
-  }, [
-    studyBlockId,
-    updateStudyBlockMutation,
-    activeSessionCounter,
-    activeTimeSettings,
-    updateSessionCounterMutation,
-    createSessionCounterMutation,
-    isBreak,
-  ]);
+    },
+    [
+      studyBlockId,
+      updateStudyBlockMutation,
+      mode,
+      activeSessionCounter,
+      activeTimeSettings,
+      updateSessionCounterMutation,
+      createSessionCounterMutation,
+      isBreak,
+      resetTimer,
+    ],
+  );
 
   useEffect(() => {
     if (!workerRef.current) return;
@@ -250,13 +258,8 @@ const Timer: React.FC = () => {
         if (mode === TimerMode.Countdown || isBreak) {
           const newTime = Math.max(prevTime - 1, 0);
           if (newTime === 0) {
-            stopTimer();
-            if (isBreak) {
-              // Timer completely stops after break
-              setIsActive(false);
-              setIsBreak(false);
-              return minutesToSeconds(activeTimeSettings?.duration || 60);
-            }
+            stopTimer(true);
+            return newTime;
           }
           return newTime;
         } else {
@@ -276,7 +279,7 @@ const Timer: React.FC = () => {
     return () => {
       workerRef.current?.postMessage('stop');
     };
-  }, [isActive, mode, stopTimer, isBreak, activeTimeSettings]);
+  }, [isActive, mode, stopTimer, isBreak]);
 
   const startTimer = async () => {
     if (!isBreak) {
@@ -295,8 +298,11 @@ const Timer: React.FC = () => {
 
   const toggleMode = () => {
     if (isActive) return;
-    setMode((prevMode) => (prevMode === TimerMode.Countdown ? TimerMode.OpenSession : TimerMode.Countdown));
-    setTime(minutesToSeconds(activeTimeSettings?.duration || 60));
+    setMode((prevMode) => {
+      const newMode = prevMode === TimerMode.Countdown ? TimerMode.OpenSession : TimerMode.Countdown;
+      setTime(newMode === TimerMode.Countdown ? minutesToSeconds(activeTimeSettings?.duration || 60) : 0);
+      return newMode;
+    });
   };
 
   const formatTime = (totalSeconds: number) => {
