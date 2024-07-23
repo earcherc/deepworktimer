@@ -1,6 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ApiError, SessionCounter, SessionCountersService } from '@api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useModalContext } from '@app/context/modal/modal-context';
+import { ApiError, SessionCountersService } from '@api';
 import useToast from '@context/toasts/toast-context';
 import React, { useState } from 'react';
 
@@ -10,11 +10,6 @@ const SessionCounterModal: React.FC = () => {
   const queryClient = useQueryClient();
 
   const [target, setTarget] = useState(5);
-
-  const { data: sessionCounters = [] } = useQuery<SessionCounter[]>({
-    queryKey: ['sessionCounters'],
-    queryFn: () => SessionCountersService.readSessionCountersSessionCountersGet(),
-  });
 
   const createSessionCounterMutation = useMutation({
     mutationFn: (newCounter: { target: number; is_selected: boolean }) =>
