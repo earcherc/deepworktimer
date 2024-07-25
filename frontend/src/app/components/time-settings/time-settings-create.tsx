@@ -18,7 +18,7 @@ const TimeSettingsCreate: React.FC = () => {
     duration: 55,
     short_break_duration: 5,
     long_break_duration: 30,
-    long_break_interval: 6,
+    long_break_interval: 3,
     is_sound: true,
     sound_interval: undefined,
   });
@@ -44,7 +44,7 @@ const TimeSettingsCreate: React.FC = () => {
     const numValue = parseInt(value, 10);
     setFormData((prev) => ({
       ...prev,
-      [name]: value === '' ? undefined : Math.max(1, numValue), // Ensure minimum value is 1
+      [name]: value === '' ? undefined : name === 'long_break_interval' ? Math.max(2, numValue) : Math.max(1, numValue),
     }));
   };
 
@@ -77,12 +77,14 @@ const TimeSettingsCreate: React.FC = () => {
     icon,
     value,
     disabled = false,
+    min = 1,
   }: {
     label: string;
     name: string;
     icon: React.ReactNode;
     value: number | undefined;
     disabled?: boolean;
+    min?: number;
   }) => (
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center">
@@ -95,7 +97,7 @@ const TimeSettingsCreate: React.FC = () => {
         value={value ?? ''}
         onChange={handleInputChange}
         disabled={disabled}
-        min={1}
+        min={min}
         className={`w-20 text-right rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
           disabled ? 'bg-gray-100 cursor-not-allowed' : ''
         }`}
@@ -159,6 +161,7 @@ const TimeSettingsCreate: React.FC = () => {
             name="long_break_interval"
             icon={<ArrowPathIcon className="h-5 w-5 text-gray-400" />}
             value={formData.long_break_interval}
+            min={2}
           />
 
           <div className="flex items-center justify-between mb-4">
