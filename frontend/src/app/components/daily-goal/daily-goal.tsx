@@ -51,7 +51,7 @@ const DailyGoalComponent = () => {
   const activeGoal = goals.find((goal) => goal.is_selected);
 
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-4 shadow-lg sm:p-6">
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-4 shadow sm:p-6">
       <div className="mb-4 flex items-center justify-between">
         <Menu as="div" className="relative w-full">
           <Menu.Button className="flex w-full items-center justify-between rounded-md bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 ">

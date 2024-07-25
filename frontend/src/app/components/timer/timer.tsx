@@ -424,7 +424,7 @@ const Timer: React.FC = () => {
   };
 
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-lg">
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
       <div className="flex flex-col items-center">
         <div className="mb-4 flex space-x-4">
           {!isBreakMode &&
