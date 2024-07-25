@@ -1,21 +1,24 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createMutationErrorHandler } from '@utils/httpUtils';
+import { User, UserUpdate, UsersService } from '@api';
 import useToast from '@context/toasts/toast-context';
-import { ApiError, User, UsersService } from '@api';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { useEffect } from 'react';
+import debounce from 'lodash/debounce';
 
 export default function UserForm() {
   const { addToast } = useToast();
   const queryClient = useQueryClient();
+  const handleMutationError = createMutationErrorHandler(addToast);
 
   const { data: user } = useQuery<User>({
     queryKey: ['currentUser'],
     queryFn: () => UsersService.readCurrentUserUsersMeGet(),
   });
 
-  const { register, handleSubmit, reset } = useForm<Partial<User>>();
+  const { register, reset, watch } = useForm<UserUpdate>();
 
   useEffect(() => {
     if (user) {
@@ -24,27 +27,32 @@ export default function UserForm() {
   }, [user, reset]);
 
   const updateUserMutation = useMutation({
-    mutationFn: (data: Partial<User>) => UsersService.updateCurrentUserUsersPatch(data),
+    mutationFn: (data: UserUpdate) => UsersService.updateCurrentUserUsersPatch(data),
     onSuccess: (updatedUser) => {
       queryClient.setQueryData(['currentUser'], updatedUser);
       addToast({ type: 'success', content: 'User profile updated successfully.' });
     },
-    onError: (error: unknown) => {
-      let errorMessage = 'An error occurred while updating the profile';
-      if (error instanceof ApiError) {
-        errorMessage = error.body?.detail || errorMessage;
-      }
-      addToast({ type: 'error', content: errorMessage });
-    },
+    onError: handleMutationError('update user profile'),
   });
 
-  const onSubmit = async (data: Partial<User>) => {
-    const filteredData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v != null && v !== ''));
-    updateUserMutation.mutate(filteredData);
-  };
+  const debouncedUpdateFn = useMemo(
+    () =>
+      debounce((data: UserUpdate) => {
+        const filteredData = Object.fromEntries(
+          Object.entries(data).filter(([_, value]) => value != null && value !== ''),
+        );
+        updateUserMutation.mutate(filteredData as UserUpdate);
+      }, 1500),
+    [updateUserMutation],
+  );
+
+  useEffect(() => {
+    const subscription = watch((value) => debouncedUpdateFn(value as UserUpdate));
+    return () => subscription.unsubscribe();
+  }, [watch, debouncedUpdateFn]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form>
       <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
         <div className="col-span-3">
           <label htmlFor="firstName" className="block text-sm font-medium leading-6 text-white">
@@ -99,7 +107,7 @@ export default function UserForm() {
               id="username"
               {...register('username')}
               autoComplete="username"
-              className=".5 block w-full rounded-md border-0 bg-white/5 py-1 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -149,15 +157,6 @@ export default function UserForm() {
             />
           </div>
         </div>
-      </div>
-
-      <div className="mt-8 flex">
-        <button
-          type="submit"
-          className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-        >
-          Save
-        </button>
       </div>
     </form>
   );
