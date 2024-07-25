@@ -51,15 +51,15 @@ export default function Nav() {
   const displayName = user?.username ? user.username.charAt(0).toUpperCase() + user.username.slice(1) : 'Unknown';
 
   return (
-    <Disclosure as="nav" className="sticky top-0 z-20 bg-gray-800">
+    <Disclosure as="nav" className="sticky top-0 z-20 bg-white dark:bg-gray-800">
       {({ open }) => (
         <>
-          <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+          <div className="mx-auto px-4">
             <div className="relative flex h-16 items-center justify-between">
               <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
                 <Disclosure.Button
                   id={'mobilemenu'}
-                  className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                  className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                 >
                   <span className="sr-only">Open main menu</span>
                   {open ? (
@@ -72,7 +72,7 @@ export default function Nav() {
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex flex-shrink-0 items-center">
                   <Image width={40} height={40} src="/images/logo.svg" alt="Deep Work Timer" />
-                  <h1 className="ms-4 text-white">{displayName}&apos;s Deep Work</h1>
+                  <h1 className="ms-4 text-gray-900 dark:text-white">{displayName}&apos;s Deep Work</h1>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:items-center">
                   <div className="flex space-x-4">
@@ -83,7 +83,9 @@ export default function Nav() {
                           key={item.name}
                           href={item.href}
                           className={classNames(
-                            isActive ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                            isActive
+                              ? 'bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white'
+                              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white',
                             'rounded-md px-3 py-2 text-sm font-medium',
                           )}
                         >
@@ -100,21 +102,24 @@ export default function Nav() {
                     href={`https://github.com/earcherc/deepworktimer/commit/${commitHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mr-3 rounded bg-gray-700 px-2 py-1 text-xs text-gray-300 hover:bg-gray-600"
+                    className="mr-3 rounded bg-gray-100 px-2 py-1 text-xs text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                   >
                     {commitHash.substring(0, 7)}
                   </a>
                 )}
-                <button type="button" className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white mr-2">
+                <button
+                  type="button"
+                  className="text-gray-400 hover:text-gray-500 mr-2 dark:text-gray-400 dark:hover:text-white"
+                >
                   <span className="sr-only">View notifications</span>
                   <BellIcon className="h-6 w-6" aria-hidden="true" />
                 </button>
                 <ThemeToggle />
                 <Menu as="div" className="relative ml-3">
                   <div>
-                    <Menu.Button id={'usermenu'} className="flex rounded-full bg-gray-800 text-sm">
+                    <Menu.Button id={'usermenu'} className="flex rounded-full bg-white text-sm dark:bg-gray-800">
                       <span className="sr-only">Open user menu</span>
-                      <span className="text-white">{displayName}</span>
+                      <span className="text-gray-700 dark:text-white">{displayName}</span>
                     </Menu.Button>
                   </div>
                   <Transition
@@ -126,14 +131,14 @@ export default function Nav() {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-700">
                       <Menu.Item>
                         {({ active }) => (
                           <button
                             onClick={handleLogout}
                             className={classNames(
-                              active ? 'bg-gray-100' : '',
-                              'block w-full px-4 py-2 text-left text-sm text-gray-700',
+                              active ? 'bg-gray-100 dark:bg-gray-600' : '',
+                              'block w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200',
                             )}
                           >
                             Logout
@@ -158,7 +163,9 @@ export default function Nav() {
                     as="a"
                     href={item.href}
                     className={classNames(
-                      isActive ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                      isActive
+                        ? 'bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white'
+                        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white',
                       'block rounded-md px-3 py-2 text-base font-medium',
                     )}
                   >
