@@ -183,6 +183,10 @@ const Timer: React.FC = () => {
     setStudyBlockId(null);
     setDummyActive(false);
     setIsBreakMode(false);
+
+    if (workerRef.current) {
+      workerRef.current.postMessage('stop');
+    }
   }, [mode, activeTimeSettings]);
 
   const handleIncompleteBlock = useCallback(
@@ -240,7 +244,6 @@ const Timer: React.FC = () => {
         playChime('end');
       }
 
-      setIsBreakMode(true);
       setIsActive(false);
 
       if (activeSessionCounter) {
@@ -260,15 +263,20 @@ const Timer: React.FC = () => {
         setTime(minutesToSeconds(5));
       }
 
-      setTimeout(() => {
-        setIsActive(true);
-      }, 100);
+      await new Promise((resolve) => {
+        setIsBreakMode(true);
+        setTimeout(resolve, 0);
+      });
+
+      setIsActive(true);
     },
     [activeSessionCounter, activeTimeSettings, playChime, updateSessionCounterMutation],
   );
 
   const stopTimer = useCallback(
     async (timerFinished: boolean = false) => {
+      setIsActive(false);
+
       if (studyBlockId) {
         await updateStudyBlockMutation.mutateAsync({
           id: studyBlockId,
@@ -288,15 +296,7 @@ const Timer: React.FC = () => {
           resetTimer();
         }
       } else if (isBreakMode) {
-        if (timerFinished) {
-          playChime('break');
-        }
         resetTimer();
-        setIsBreakMode(false);
-
-        setTimeout(() => {
-          setIsActive(true);
-        }, 100);
       } else {
         resetTimer();
       }
@@ -309,7 +309,6 @@ const Timer: React.FC = () => {
       createSessionCounterMutation,
       isBreakMode,
       resetTimer,
-      playChime,
       handleTimerFinished,
     ],
   );
@@ -367,6 +366,9 @@ const Timer: React.FC = () => {
       }
     }
     setIsActive(true);
+    if (workerRef.current) {
+      workerRef.current.postMessage('start');
+    }
   };
 
   const toggleMode = () => {
@@ -425,22 +427,23 @@ const Timer: React.FC = () => {
     <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-lg">
       <div className="flex flex-col items-center">
         <div className="mb-4 flex space-x-4">
-          {Object.values(TimerMode).map((timerMode) => (
-            <button
-              key={timerMode}
-              onClick={toggleMode}
-              disabled={isButtonDisabled(timerMode) || isBreakMode}
-              className={classNames(
-                'text-sm font-medium transition-colors',
-                mode === timerMode
-                  ? 'text-indigo-500 font-semibold'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
-                (isButtonDisabled(timerMode) || isBreakMode) && 'opacity-50 cursor-not-allowed',
-              )}
-            >
-              {timerMode}
-            </button>
-          ))}
+          {!isBreakMode &&
+            Object.values(TimerMode).map((timerMode) => (
+              <button
+                key={timerMode}
+                onClick={toggleMode}
+                disabled={isButtonDisabled(timerMode)}
+                className={classNames(
+                  'text-sm font-medium transition-colors',
+                  mode === timerMode
+                    ? 'text-indigo-500 font-semibold'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+                  isButtonDisabled(timerMode) && 'opacity-50 cursor-not-allowed',
+                )}
+              >
+                {timerMode}
+              </button>
+            ))}
         </div>
         <p className="mb-2 text-6xl font-bold text-gray-900 dark:text-white">{formatTime(time)}</p>
         {mode === TimerMode.Countdown && !isBreakMode && (
@@ -453,7 +456,11 @@ const Timer: React.FC = () => {
             onClick={openSessionsModal}
           />
         )}
-        {isBreakMode && <p className="mb-4 text-lg font-medium text-indigo-500">Break Time</p>}
+        {isBreakMode && (
+          <p className="mb-4 text-lg font-medium text-indigo-500">
+            {time > minutesToSeconds(activeTimeSettings?.short_break_duration || 5) ? 'Long Break' : 'Short Break'}
+          </p>
+        )}
         <div className="flex space-x-3">
           {!isActive && !isBreakMode && (
             <button
