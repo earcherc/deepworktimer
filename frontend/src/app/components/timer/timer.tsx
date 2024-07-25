@@ -317,14 +317,6 @@ const Timer: React.FC = () => {
       if (!activeSessionCounter) {
         setDummyActive(true);
       }
-
-      setTime(
-        mode === TimerMode.Countdown
-          ? activeTimeSettings?.duration
-            ? minutesToSeconds(activeTimeSettings.duration)
-            : DEFAULT_DURATION
-          : 0,
-      );
     }
     setIsActive(true);
   };
