@@ -53,7 +53,7 @@ const Timer: React.FC = () => {
   const [mode, setMode] = useAtom(timerModeAtom);
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
   const [dummyActive, setDummyActive] = useState(false);
-  const [isBreak, setIsBreak] = useState(false);
+  const [isBreakMode, setIsBreakMode] = useState(false);
   const [breakAudio, setBreakAudio] = useState<HTMLAudioElement | null>(null);
   const [intervalAudio, setIntervalAudio] = useState<HTMLAudioElement | null>(null);
   const [endAudio, setEndAudio] = useState<HTMLAudioElement | null>(null);
@@ -182,7 +182,7 @@ const Timer: React.FC = () => {
     setIsActive(false);
     setStudyBlockId(null);
     setDummyActive(false);
-    setIsBreak(false);
+    setIsBreakMode(false);
   }, [mode, activeTimeSettings]);
 
   const handleIncompleteBlock = useCallback(
@@ -221,7 +221,7 @@ const Timer: React.FC = () => {
   }, [studyBlocksData, handleIncompleteBlock, resetTimer]);
 
   useEffect(() => {
-    if (isActive && !isBreak && activeTimeSettings?.sound_interval) {
+    if (isActive && !isBreakMode && activeTimeSettings?.sound_interval) {
       const intervalId = setInterval(() => {
         if (activeTimeSettings.is_sound !== false) {
           playChime('interval');
@@ -231,7 +231,7 @@ const Timer: React.FC = () => {
       return () => clearInterval(intervalId);
     }
     return undefined;
-  }, [isActive, isBreak, activeTimeSettings, playChime]);
+  }, [isActive, isBreakMode, activeTimeSettings, playChime]);
 
   const handleTimerFinished = useCallback(
     async (newCompleted: number) => {
@@ -240,7 +240,7 @@ const Timer: React.FC = () => {
         playChime('end');
       }
 
-      setIsBreak(true);
+      setIsBreakMode(true);
 
       if (activeSessionCounter) {
         await updateSessionCounterMutation.mutateAsync({
@@ -284,11 +284,12 @@ const Timer: React.FC = () => {
         } else {
           resetTimer();
         }
-      } else if (isBreak) {
+      } else if (isBreakMode) {
         if (timerFinished) {
           playChime('break');
         }
         resetTimer();
+        setIsBreakMode(false);
       } else {
         resetTimer();
       }
@@ -299,7 +300,7 @@ const Timer: React.FC = () => {
       mode,
       activeSessionCounter,
       createSessionCounterMutation,
-      isBreak,
+      isBreakMode,
       resetTimer,
       playChime,
       handleTimerFinished,
@@ -308,7 +309,7 @@ const Timer: React.FC = () => {
 
   const handleTick = useCallback(() => {
     setTime((prevTime) => {
-      if (mode === TimerMode.Countdown || isBreak) {
+      if (mode === TimerMode.Countdown || isBreakMode) {
         const newTime = Math.max(prevTime - 1, 0);
         if (newTime === 0) {
           stopTimer(true);
@@ -319,7 +320,7 @@ const Timer: React.FC = () => {
         return prevTime + 1;
       }
     });
-  }, [mode, isBreak, stopTimer]);
+  }, [mode, isBreakMode, stopTimer]);
 
   useEffect(() => {
     if (!workerRef.current) return;
@@ -347,7 +348,7 @@ const Timer: React.FC = () => {
   }, [time, isActive]);
 
   const startTimer = async () => {
-    if (!isBreak) {
+    if (!isBreakMode) {
       const newBlock = await createStudyBlockMutation.mutateAsync({
         is_countdown: mode === TimerMode.Countdown,
         daily_goal_id: activeDailyGoal?.id,
@@ -421,13 +422,13 @@ const Timer: React.FC = () => {
             <button
               key={timerMode}
               onClick={toggleMode}
-              disabled={isButtonDisabled(timerMode) || isBreak}
+              disabled={isButtonDisabled(timerMode) || isBreakMode}
               className={classNames(
                 'text-sm font-medium transition-colors',
                 mode === timerMode
                   ? 'text-indigo-500 font-semibold'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
-                (isButtonDisabled(timerMode) || isBreak) && 'opacity-50 cursor-not-allowed',
+                (isButtonDisabled(timerMode) || isBreakMode) && 'opacity-50 cursor-not-allowed',
               )}
             >
               {timerMode}
@@ -435,7 +436,7 @@ const Timer: React.FC = () => {
           ))}
         </div>
         <p className="mb-2 text-6xl font-bold text-gray-900 dark:text-white">{formatTime(time)}</p>
-        {mode === TimerMode.Countdown && !isBreak && (
+        {mode === TimerMode.Countdown && !isBreakMode && (
           <SessionCounter
             target={activeSessionCounter ? activeSessionCounter.target : 5}
             completed={activeSessionCounter ? activeSessionCounter.completed : 0}
@@ -445,9 +446,9 @@ const Timer: React.FC = () => {
             onClick={openSessionsModal}
           />
         )}
-        {isBreak && <p className="mb-4 text-lg font-medium text-indigo-500">Break Time</p>}
+        {isBreakMode && <p className="mb-4 text-lg font-medium text-indigo-500">Break Time</p>}
         <div className="flex space-x-3">
-          {!isActive && !isBreak && (
+          {!isActive && !isBreakMode && (
             <button
               onClick={openSettingsModal}
               className="rounded-full p-2 transition-colors bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
