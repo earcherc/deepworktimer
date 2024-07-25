@@ -1,14 +1,14 @@
 'use client';
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, StudyCategoriesService, StudyCategory } from '@api';
+import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { useModalContext } from '@context/modal/modal-context';
+import StudyCategoryCreate from './study-category-create';
 import useToast from '@context/toasts/toast-context';
 import { Menu, Transition } from '@headlessui/react';
-import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import classNames from 'classnames';
 import React from 'react';
-import StudyCategoryCreate from './study-category-create';
 
 const StudyCategoryComponent = () => {
   const { addToast } = useToast();
@@ -59,7 +59,7 @@ const StudyCategoryComponent = () => {
     <div className="rounded-lg bg-white dark:bg-gray-800 p-4 shadow-lg sm:p-6">
       <div className="mb-4 flex items-center justify-between">
         <Menu as="div" className="relative w-full">
-          <Menu.Button className="flex w-full items-center justify-between rounded-md bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+          <Menu.Button className="flex w-full items-center justify-between rounded-md bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 ">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Category</h2>
             <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </Menu.Button>
@@ -81,9 +81,11 @@ const StudyCategoryComponent = () => {
                         <button
                           type="button"
                           className={classNames(
-                            active ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300',
+                            active
+                              ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white'
+                              : 'text-gray-700 dark:text-gray-300',
                             category.is_selected ? 'bg-indigo-50 dark:bg-indigo-900 font-semibold' : '',
-                            'block w-full px-4 py-2 text-left text-sm'
+                            'block w-full px-4 py-2 text-left text-sm',
                           )}
                           onClick={() => selectCategory(category)}
                         >
@@ -94,7 +96,9 @@ const StudyCategoryComponent = () => {
                   ))
                 ) : (
                   <Menu.Item>
-                    <div className="block w-full px-4 py-2 text-left text-sm text-gray-500 dark:text-gray-400">No Categories</div>
+                    <div className="block w-full px-4 py-2 text-left text-sm text-gray-500 dark:text-gray-400">
+                      No Categories
+                    </div>
                   </Menu.Item>
                 )}
               </div>
@@ -103,7 +107,7 @@ const StudyCategoryComponent = () => {
         </Menu>
         <button
           onClick={openCreateCategoryModal}
-          className="ml-3 rounded-full p-2 bg-indigo-500 text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+          className="ml-3 rounded-md p-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 "
         >
           <PlusIcon className="h-5 w-5" />
         </button>
