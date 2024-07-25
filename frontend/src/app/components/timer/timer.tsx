@@ -1,5 +1,4 @@
 import {
-  ApiError,
   DailyGoal,
   DailyGoalsService,
   SessionCountersService,
@@ -19,6 +18,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import TimeSettingsModal from '../time-settings/time-settings-view';
 import { useModalContext } from '@app/context/modal/modal-context';
 import SessionCounter from '../session-counter/session-counter';
+import { createMutationErrorHandler } from '@utils/httpUtils';
 import { TimerMode, timerModeAtom } from '../../store/atoms';
 import { Cog6ToothIcon } from '@heroicons/react/20/solid';
 import useToast from '@context/toasts/toast-context';
@@ -35,10 +35,15 @@ const QUERY_KEYS = {
 };
 
 const minutesToSeconds = (minutes: number) => minutes * 60;
+const minutesToMilliseconds = (minutes: number) => minutes * 60 * 1000;
+const secondsToMilliseconds = (seconds: number) => seconds * 1000;
+const millisecondsToSeconds = (milliseconds: number) => Math.floor(milliseconds / 1000);
+
 const DEFAULT_DURATION = minutesToSeconds(60);
 
 const Timer: React.FC = () => {
   const { addToast } = useToast();
+  const handleMutationError = createMutationErrorHandler(addToast);
   const { showModal } = useModalContext();
   const queryClient = useQueryClient();
   const dateRange = getTodayDateRange();
@@ -49,6 +54,9 @@ const Timer: React.FC = () => {
   const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
   const [dummyActive, setDummyActive] = useState(false);
   const [isBreak, setIsBreak] = useState(false);
+  const [breakAudio, setBreakAudio] = useState<HTMLAudioElement | null>(null);
+  const [intervalAudio, setIntervalAudio] = useState<HTMLAudioElement | null>(null);
+  const [endAudio, setEndAudio] = useState<HTMLAudioElement | null>(null);
   const workerRef = useRef<Worker | null>(null);
 
   const { data: categoriesData } = useQuery<StudyCategory[]>({
@@ -87,14 +95,7 @@ const Timer: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.studyBlocks] });
       return data;
     },
-    onError: (error: unknown) => {
-      const errorMessage =
-        error instanceof ApiError
-          ? error.body?.detail || 'Failed to create study block'
-          : 'Failed to create study block';
-      addToast({ type: 'error', content: errorMessage });
-      console.error('Error creating study block:', errorMessage);
-    },
+    onError: handleMutationError('create study block'),
   });
 
   const updateStudyBlockMutation = useMutation({
@@ -103,14 +104,7 @@ const Timer: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.studyBlocks] });
     },
-    onError: (error: unknown) => {
-      const errorMessage =
-        error instanceof ApiError
-          ? error.body?.detail || 'Failed to update study block'
-          : 'Failed to update study block';
-      addToast({ type: 'error', content: errorMessage });
-      console.error('Error updating study block:', errorMessage);
-    },
+    onError: handleMutationError('update study block'),
   });
 
   const createSessionCounterMutation = useMutation({
@@ -119,13 +113,7 @@ const Timer: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.sessionCounters] });
     },
-    onError: (error: unknown) => {
-      const errorMessage =
-        error instanceof ApiError
-          ? error.body?.detail || 'Failed to create session counter'
-          : 'Failed to create session counter';
-      addToast({ type: 'error', content: errorMessage });
-    },
+    onError: handleMutationError('create session counter'),
   });
 
   const updateSessionCounterMutation = useMutation({
@@ -136,14 +124,14 @@ const Timer: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.sessionCounters] });
     },
-    onError: (error: unknown) => {
-      const errorMessage =
-        error instanceof ApiError
-          ? error.body?.detail || 'Failed to update session counter'
-          : 'Failed to update session counter';
-      addToast({ type: 'error', content: errorMessage });
-    },
+    onError: handleMutationError('update session counter'),
   });
+
+  useEffect(() => {
+    setBreakAudio(new Audio('/audio/break_chime.mp3'));
+    setIntervalAudio(new Audio('/audio/interval_chime.mp3'));
+    setEndAudio(new Audio('/audio/end_chime.mp3'));
+  }, []);
 
   useEffect(() => {
     const workerCode = `
@@ -172,6 +160,17 @@ const Timer: React.FC = () => {
     };
   }, []);
 
+  const playChime = useCallback(
+    (type: 'break' | 'interval' | 'end') => {
+      if (!activeTimeSettings?.is_sound) return;
+      const audio = type === 'break' ? breakAudio : type === 'interval' ? intervalAudio : endAudio;
+      if (audio) {
+        audio.play().catch((error) => console.error(`Error playing ${type} audio:`, error));
+      }
+    },
+    [breakAudio, intervalAudio, endAudio, activeTimeSettings],
+  );
+
   const resetTimer = useCallback(() => {
     setTime(
       mode === TimerMode.Countdown
@@ -186,12 +185,8 @@ const Timer: React.FC = () => {
     setIsBreak(false);
   }, [mode, activeTimeSettings]);
 
-  useEffect(() => {
-    if (!studyBlocksData) return;
-
-    const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
-
-    if (incompleteBlock) {
+  const handleIncompleteBlock = useCallback(
+    (incompleteBlock: StudyBlock) => {
       const startTime = toLocalTime(incompleteBlock.start_time).getTime();
       const elapsedMilliseconds = Date.now() - startTime;
 
@@ -200,19 +195,60 @@ const Timer: React.FC = () => {
         const duration = activeTimeSettings?.duration
           ? minutesToSeconds(activeTimeSettings.duration)
           : DEFAULT_DURATION;
-        newTime = Math.max(duration * 1000 - elapsedMilliseconds, 0);
+        newTime = Math.max(secondsToMilliseconds(duration) - elapsedMilliseconds, 0);
       } else {
         newTime = elapsedMilliseconds;
       }
 
-      setTime(Math.floor(newTime / 1000));
+      setTime(millisecondsToSeconds(newTime));
       setIsActive(true);
       setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
       setStudyBlockId(incompleteBlock.id);
+    },
+    [activeTimeSettings, setMode],
+  );
+
+  useEffect(() => {
+    if (!studyBlocksData) return;
+
+    const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
+
+    if (incompleteBlock) {
+      handleIncompleteBlock(incompleteBlock);
     } else {
       resetTimer();
     }
-  }, [studyBlocksData, activeTimeSettings, setMode, resetTimer]);
+  }, [studyBlocksData, handleIncompleteBlock, resetTimer]);
+
+  useEffect(() => {
+    if (isActive && !isBreak && activeTimeSettings?.is_sound && activeTimeSettings.sound_interval) {
+      const intervalId = setInterval(() => {
+        playChime('interval');
+      }, minutesToMilliseconds(activeTimeSettings.sound_interval));
+
+      return () => clearInterval(intervalId);
+    }
+    return undefined;
+  }, [isActive, isBreak, activeTimeSettings, playChime]);
+
+  const handleTimerFinished = useCallback(
+    async (newCompleted: number) => {
+      playChime('end');
+      await updateSessionCounterMutation.mutateAsync({
+        id: activeSessionCounter!.id,
+        completed: newCompleted,
+      });
+
+      setIsBreak(true);
+      if (newCompleted % (activeTimeSettings?.long_break_interval || 4) === 0) {
+        setTime(minutesToSeconds(activeTimeSettings?.long_break_duration || 15));
+      } else {
+        setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
+      }
+      setIsActive(true);
+    },
+    [activeSessionCounter, activeTimeSettings, playChime, updateSessionCounterMutation],
+  );
 
   const stopTimer = useCallback(
     async (timerFinished: boolean = false) => {
@@ -226,22 +262,9 @@ const Timer: React.FC = () => {
         if (timerFinished && mode === TimerMode.Countdown) {
           if (activeSessionCounter && activeTimeSettings) {
             const newCompleted = activeSessionCounter.completed + 1;
-            await updateSessionCounterMutation.mutateAsync({
-              id: activeSessionCounter.id,
-              completed: newCompleted,
-            });
-
-            // Start break timer
-            setIsBreak(true);
-            if (newCompleted % (activeTimeSettings.long_break_interval || 4) === 0) {
-              setTime(minutesToSeconds(activeTimeSettings.long_break_duration || 15));
-            } else {
-              setTime(minutesToSeconds(activeTimeSettings.short_break_duration || 5));
-            }
-            setIsActive(true);
+            await handleTimerFinished(newCompleted);
           } else if (!activeSessionCounter) {
             await createSessionCounterMutation.mutateAsync({ target: 5, completed: 1, is_selected: true });
-            // Start short break
             setIsBreak(true);
             setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
             setIsActive(true);
@@ -250,6 +273,11 @@ const Timer: React.FC = () => {
           resetTimer();
         }
       } else if (isBreak) {
+        if (timerFinished) {
+          playChime('break');
+        }
+        resetTimer();
+      } else {
         resetTimer();
       }
     },
@@ -259,30 +287,31 @@ const Timer: React.FC = () => {
       mode,
       activeSessionCounter,
       activeTimeSettings,
-      updateSessionCounterMutation,
       createSessionCounterMutation,
       isBreak,
       resetTimer,
+      playChime,
+      handleTimerFinished,
     ],
   );
 
+  const handleTick = useCallback(() => {
+    setTime((prevTime) => {
+      if (mode === TimerMode.Countdown || isBreak) {
+        const newTime = Math.max(prevTime - 1, 0);
+        if (newTime === 0) {
+          stopTimer(true);
+          return newTime;
+        }
+        return newTime;
+      } else {
+        return prevTime + 1;
+      }
+    });
+  }, [mode, isBreak, stopTimer]);
+
   useEffect(() => {
     if (!workerRef.current) return;
-
-    const handleTick = () => {
-      setTime((prevTime) => {
-        if (mode === TimerMode.Countdown || isBreak) {
-          const newTime = Math.max(prevTime - 1, 0);
-          if (newTime === 0) {
-            stopTimer(true);
-            return newTime;
-          }
-          return newTime;
-        } else {
-          return prevTime + 1;
-        }
-      });
-    };
 
     workerRef.current.onmessage = handleTick;
 
@@ -295,7 +324,7 @@ const Timer: React.FC = () => {
     return () => {
       workerRef.current?.postMessage('stop');
     };
-  }, [isActive, mode, stopTimer, isBreak]);
+  }, [isActive, handleTick]);
 
   useEffect(() => {
     const formattedTime = formatTime(time);
