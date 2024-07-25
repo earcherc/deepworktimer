@@ -39,7 +39,7 @@ const minutesToMilliseconds = (minutes: number) => minutes * 60 * 1000;
 const secondsToMilliseconds = (seconds: number) => seconds * 1000;
 const millisecondsToSeconds = (milliseconds: number) => Math.floor(milliseconds / 1000);
 
-const DEFAULT_DURATION = minutesToSeconds(0.05);
+const DEFAULT_DURATION = minutesToSeconds(60);
 
 const Timer: React.FC = () => {
   const { addToast } = useToast();
