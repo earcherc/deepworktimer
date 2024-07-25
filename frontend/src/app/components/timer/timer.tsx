@@ -162,7 +162,7 @@ const Timer: React.FC = () => {
 
   const playChime = useCallback(
     (type: 'break' | 'interval' | 'end') => {
-      if (!activeTimeSettings?.is_sound) return;
+      if (activeTimeSettings?.is_sound === false) return;
       const audio = type === 'break' ? breakAudio : type === 'interval' ? intervalAudio : endAudio;
       if (audio) {
         audio.play().catch((error) => console.error(`Error playing ${type} audio:`, error));
@@ -221,9 +221,11 @@ const Timer: React.FC = () => {
   }, [studyBlocksData, handleIncompleteBlock, resetTimer]);
 
   useEffect(() => {
-    if (isActive && !isBreak && activeTimeSettings?.is_sound && activeTimeSettings.sound_interval) {
+    if (isActive && !isBreak && activeTimeSettings?.sound_interval) {
       const intervalId = setInterval(() => {
-        playChime('interval');
+        if (activeTimeSettings.is_sound !== false) {
+          playChime('interval');
+        }
       }, minutesToMilliseconds(activeTimeSettings.sound_interval));
 
       return () => clearInterval(intervalId);
@@ -233,18 +235,30 @@ const Timer: React.FC = () => {
 
   const handleTimerFinished = useCallback(
     async (newCompleted: number) => {
-      playChime('end');
-      await updateSessionCounterMutation.mutateAsync({
-        id: activeSessionCounter!.id,
-        completed: newCompleted,
-      });
+      // Always play the end chime by default, unless explicitly muted
+      if (!activeTimeSettings || activeTimeSettings.is_sound !== false) {
+        playChime('end');
+      }
 
       setIsBreak(true);
-      if (newCompleted % (activeTimeSettings?.long_break_interval || 4) === 0) {
-        setTime(minutesToSeconds(activeTimeSettings?.long_break_duration || 15));
+
+      if (activeSessionCounter) {
+        await updateSessionCounterMutation.mutateAsync({
+          id: activeSessionCounter.id,
+          completed: newCompleted,
+        });
+
+        const longBreakInterval = activeTimeSettings?.long_break_interval || 4;
+        if (newCompleted % longBreakInterval === 0) {
+          setTime(minutesToSeconds(activeTimeSettings?.long_break_duration || 15));
+        } else {
+          setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
+        }
       } else {
-        setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
+        // If no active session counter, use default break duration
+        setTime(minutesToSeconds(5));
       }
+
       setIsActive(true);
     },
     [activeSessionCounter, activeTimeSettings, playChime, updateSessionCounterMutation],
@@ -260,14 +274,12 @@ const Timer: React.FC = () => {
         setStudyBlockId(null);
 
         if (timerFinished && mode === TimerMode.Countdown) {
-          if (activeSessionCounter && activeTimeSettings) {
+          if (activeSessionCounter) {
             const newCompleted = activeSessionCounter.completed + 1;
             await handleTimerFinished(newCompleted);
-          } else if (!activeSessionCounter) {
+          } else {
             await createSessionCounterMutation.mutateAsync({ target: 5, completed: 1, is_selected: true });
-            setIsBreak(true);
-            setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
-            setIsActive(true);
+            await handleTimerFinished(1);
           }
         } else {
           resetTimer();
@@ -286,7 +298,6 @@ const Timer: React.FC = () => {
       updateStudyBlockMutation,
       mode,
       activeSessionCounter,
-      activeTimeSettings,
       createSessionCounterMutation,
       isBreak,
       resetTimer,
