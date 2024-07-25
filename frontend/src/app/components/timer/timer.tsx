@@ -173,7 +173,13 @@ const Timer: React.FC = () => {
   }, []);
 
   const resetTimer = useCallback(() => {
-    setTime(mode === TimerMode.Countdown ? minutesToSeconds(activeTimeSettings?.duration || 60) : 0);
+    setTime(
+      mode === TimerMode.Countdown
+        ? activeTimeSettings?.duration
+          ? minutesToSeconds(activeTimeSettings.duration)
+          : DEFAULT_DURATION
+        : 0,
+    );
     setIsActive(false);
     setStudyBlockId(null);
     setDummyActive(false);
@@ -181,15 +187,23 @@ const Timer: React.FC = () => {
   }, [mode, activeTimeSettings]);
 
   useEffect(() => {
-    if (!studyBlocksData || !activeTimeSettings) return;
+    if (!studyBlocksData) return;
 
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
+
     if (incompleteBlock) {
       const startTime = toLocalTime(incompleteBlock.start_time).getTime();
       const elapsedMilliseconds = Date.now() - startTime;
-      const newTime = incompleteBlock.is_countdown
-        ? Math.max(minutesToSeconds(activeTimeSettings.duration || 60) * 1000 - elapsedMilliseconds, 0)
-        : elapsedMilliseconds;
+
+      let newTime;
+      if (incompleteBlock.is_countdown) {
+        const duration = activeTimeSettings?.duration
+          ? minutesToSeconds(activeTimeSettings.duration)
+          : DEFAULT_DURATION;
+        newTime = Math.max(duration * 1000 - elapsedMilliseconds, 0);
+      } else {
+        newTime = elapsedMilliseconds;
+      }
 
       setTime(Math.floor(newTime / 1000));
       setIsActive(true);
@@ -303,6 +317,14 @@ const Timer: React.FC = () => {
       if (!activeSessionCounter) {
         setDummyActive(true);
       }
+
+      setTime(
+        mode === TimerMode.Countdown
+          ? activeTimeSettings?.duration
+            ? minutesToSeconds(activeTimeSettings.duration)
+            : DEFAULT_DURATION
+          : 0,
+      );
     }
     setIsActive(true);
   };
@@ -311,7 +333,13 @@ const Timer: React.FC = () => {
     if (isActive) return;
     setMode((prevMode) => {
       const newMode = prevMode === TimerMode.Countdown ? TimerMode.OpenSession : TimerMode.Countdown;
-      setTime(newMode === TimerMode.Countdown ? minutesToSeconds(activeTimeSettings?.duration || 60) : 0);
+      setTime(
+        newMode === TimerMode.Countdown
+          ? activeTimeSettings?.duration
+            ? minutesToSeconds(activeTimeSettings.duration)
+            : DEFAULT_DURATION
+          : 0,
+      );
       return newMode;
     });
   };
