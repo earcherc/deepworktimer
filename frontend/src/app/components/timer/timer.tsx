@@ -39,7 +39,7 @@ const minutesToMilliseconds = (minutes: number) => minutes * 60 * 1000;
 const secondsToMilliseconds = (seconds: number) => seconds * 1000;
 const millisecondsToSeconds = (milliseconds: number) => Math.floor(milliseconds / 1000);
 
-const DEFAULT_DURATION = minutesToSeconds(60);
+const DEFAULT_DURATION = minutesToSeconds(0.05);
 
 const Timer: React.FC = () => {
   const { addToast } = useToast();
@@ -241,6 +241,7 @@ const Timer: React.FC = () => {
       }
 
       setIsBreakMode(true);
+      setIsActive(false);
 
       if (activeSessionCounter) {
         await updateSessionCounterMutation.mutateAsync({
@@ -259,7 +260,9 @@ const Timer: React.FC = () => {
         setTime(minutesToSeconds(5));
       }
 
-      setIsActive(true);
+      setTimeout(() => {
+        setIsActive(true);
+      }, 100);
     },
     [activeSessionCounter, activeTimeSettings, playChime, updateSessionCounterMutation],
   );
@@ -290,6 +293,10 @@ const Timer: React.FC = () => {
         }
         resetTimer();
         setIsBreakMode(false);
+
+        setTimeout(() => {
+          setIsActive(true);
+        }, 100);
       } else {
         resetTimer();
       }
@@ -309,7 +316,7 @@ const Timer: React.FC = () => {
 
   const handleTick = useCallback(() => {
     setTime((prevTime) => {
-      if (mode === TimerMode.Countdown || isBreakMode) {
+      if ((mode === TimerMode.Countdown && !isBreakMode) || isBreakMode) {
         const newTime = Math.max(prevTime - 1, 0);
         if (newTime === 0) {
           stopTimer(true);
