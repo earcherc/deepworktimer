@@ -98,7 +98,7 @@ const TimeSettingsCreate: React.FC = () => {
         onChange={handleInputChange}
         disabled={disabled}
         min={min}
-        className={`w-20 text-right rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
+        className={`w-20 text-right rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 ${
           disabled ? 'bg-gray-100 cursor-not-allowed' : ''
         }`}
       />
@@ -211,7 +211,7 @@ const TimeSettingsCreate: React.FC = () => {
               value={formData.sound_interval}
               onChange={handleInputChange}
               min={1}
-              className="w-16 text-right rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="w-16 text-right rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
             />
           )}
         </div>

@@ -25,13 +25,13 @@ const SessionCounter: React.FC<SessionCounterProps> = ({
     for (let i = 0; i < totalDots; i++) {
       const dotClass = classNames('w-4 h-4 rounded-full transition-all duration-300 mb-1', {
         'bg-gray-300': i >= completed,
-        'bg-indigo-500': i < completed,
+        'bg-blue-500': i < completed,
         'relative overflow-hidden': i === completed && isActive,
       });
       dots.push(
         <div key={i} className={dotClass}>
           {i === completed && isActive && (
-            <div className="absolute inset-0 bg-indigo-500" style={{ clipPath: 'inset(0 50% 0 0)' }}></div>
+            <div className="absolute inset-0 bg-blue-500" style={{ clipPath: 'inset(0 50% 0 0)' }}></div>
           )}
         </div>,
       );

@@ -27,7 +27,7 @@ const Modal = ({ children }: { children: React.ReactNode }) => {
     default: {
       icon: null,
       bgColor: 'bg-gray-100',
-      buttonColor: 'bg-indigo-600 hover:bg-indigo-500',
+      buttonColor: 'bg-blue-600 hover:bg-blue-500',
     },
   };
 

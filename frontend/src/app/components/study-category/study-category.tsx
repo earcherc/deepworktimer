@@ -84,7 +84,7 @@ const StudyCategoryComponent = () => {
                             active
                               ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white'
                               : 'text-gray-700 dark:text-gray-300',
-                            category.is_selected ? 'bg-indigo-50 dark:bg-indigo-900 font-semibold' : '',
+                            category.is_selected ? 'bg-blue-50 dark:bg-blue-900 font-semibold' : '',
                             'block w-full px-4 py-2 text-left text-sm',
                           )}
                           onClick={() => selectCategory(category)}

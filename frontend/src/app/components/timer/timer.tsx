@@ -436,7 +436,7 @@ const Timer: React.FC = () => {
                 className={classNames(
                   'text-sm font-medium transition-colors',
                   mode === timerMode
-                    ? 'text-indigo-500 font-semibold'
+                    ? 'text-blue-500 font-semibold'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
                   isButtonDisabled(timerMode) && 'opacity-50 cursor-not-allowed',
                 )}
@@ -457,7 +457,7 @@ const Timer: React.FC = () => {
           />
         )}
         {isBreakMode && (
-          <p className="mb-4 text-lg font-medium text-indigo-500">
+          <p className="mb-4 text-lg font-medium text-blue-500">
             {time > minutesToSeconds(activeTimeSettings?.short_break_duration || 5) ? 'Long Break' : 'Short Break'}
           </p>
         )}
@@ -477,7 +477,7 @@ const Timer: React.FC = () => {
             onClick={isActive ? () => stopTimer(false) : startTimer}
             className={classNames(
               'rounded-full px-6 py-2 text-sm font-semibold text-white transition-colors',
-              isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-indigo-500 hover:bg-indigo-600',
+              isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600',
             )}
           >
             {isActive ? 'Stop' : 'Start'}
