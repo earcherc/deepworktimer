@@ -29,6 +29,7 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
   const queryClient = useQueryClient();
 
   const [isFormChanged, setIsFormChanged] = useState(false);
+  const isCurrentSession = !block.end_time;
 
   const { data: categories = [] } = useQuery<StudyCategory[]>({
     queryKey: ['studyCategories'],
@@ -108,9 +109,7 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
       key={value}
       type="button"
       onClick={() => setRating(value)}
-      className={`px-3 py-1 border ${
-        rating === value ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'
-      } rounded-md`}
+      className={`px-3 py-1 border ${rating === value ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'} rounded-md`}
     >
       {value}
     </button>
@@ -124,27 +123,29 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
             <strong>Start:</strong> {formatToLocalTime(toLocalTime(block.start_time), 'PPpp')}
           </div>
           <div>
-            <strong>Category:</strong> {category?.title || 'Unknown'}
+            <strong>Category:</strong> {category?.title || 'No category selected'}
           </div>
           <div>
-            <strong>Goal:</strong> {goal ? `${goal.block_size} minutes x ${goal.quantity}` : 'Unknown'}
+            <strong>Goal:</strong> {goal ? `${goal.block_size} minutes x ${goal.quantity}` : 'No goal selected'}
           </div>
         </div>
       </div>
 
-      <div>
-        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-4">
-          End
-        </label>
-        <input
-          id="endTime"
-          type="datetime-local"
-          value={endTime}
-          onChange={(e) => setEndTime(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-          autoFocus={false}
-        />
-      </div>
+      {!isCurrentSession && (
+        <div>
+          <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-4">
+            End
+          </label>
+          <input
+            id="endTime"
+            type="datetime-local"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+            autoFocus={false}
+          />
+        </div>
+      )}
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-4">Rating</label>
@@ -152,14 +153,16 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
       </div>
 
       <div className="flex justify-between space-x-2">
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="px-4 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-        >
-          Delete
-        </button>
-        <div className="flex space-x-2">
+        {!isCurrentSession && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="px-4 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            Delete
+          </button>
+        )}
+        <div className="flex space-x-2 ml-auto">
           <button
             type="button"
             onClick={hideModal}
