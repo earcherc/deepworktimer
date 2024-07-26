@@ -22,7 +22,6 @@ import { createMutationErrorHandler } from '@utils/httpUtils';
 import { TimerMode, timerModeAtom } from '../../store/atoms';
 import { Cog6ToothIcon } from '@heroicons/react/20/solid';
 import useToast from '@context/toasts/toast-context';
-import { Tooltip } from 'react-tooltip';
 import classNames from 'classnames';
 import { useAtom } from 'jotai';
 
@@ -466,9 +465,6 @@ const Timer: React.FC = () => {
             <button
               onClick={openSettingsModal}
               className="rounded-full p-2 transition-colors bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-              data-tooltip-id="timer-tooltip"
-              data-tooltip-content="Time Settings"
-              data-tooltip-delay-show={1000}
             >
               <Cog6ToothIcon className="h-5 w-5" />
             </button>
@@ -484,7 +480,6 @@ const Timer: React.FC = () => {
           </button>
         </div>
       </div>
-      <Tooltip id="timer-tooltip" />
     </div>
   );
 };
