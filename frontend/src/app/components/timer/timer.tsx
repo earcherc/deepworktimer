@@ -11,7 +11,7 @@ import {
   TimeSettings,
   TimeSettingsService,
 } from '@api';
-import { getCurrentUTC, getTodayDateRange, toLocalTime } from '@utils/dateUtils';
+import { getCurrentUTC, getTodayDateRange, toLocalTime, toUTC } from '@utils/dateUtils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import SessionCounterModal from '../session-counter/session-counter-modal';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -162,7 +162,10 @@ const Timer: React.FC = () => {
   const playChime = useCallback(
     (type: 'break' | 'interval' | 'end') => {
       if (activeTimeSettings?.is_sound === false) return;
-      const audio = type === 'break' ? breakAudio : type === 'interval' ? intervalAudio : endAudio;
+      let audio;
+      if (type === 'break') audio = breakAudio;
+      if (type == 'interval') audio = intervalAudio;
+      if (type == 'end') audio = endAudio;
       if (audio) {
         audio.play().catch((error) => console.error(`Error playing ${type} audio:`, error));
       }
@@ -171,57 +174,55 @@ const Timer: React.FC = () => {
   );
 
   const resetTimer = useCallback(() => {
-    setTime(
-      mode === TimerMode.Countdown
-        ? activeTimeSettings?.duration
-          ? minutesToSeconds(activeTimeSettings.duration)
-          : DEFAULT_DURATION
-        : 0,
-    );
+    if (workerRef.current) workerRef.current.postMessage('stop');
     setIsActive(false);
     setStudyBlockId(null);
-    setDummyActive(false);
     setIsBreakMode(false);
 
-    if (workerRef.current) {
-      workerRef.current.postMessage('stop');
+    if (mode == TimerMode.Countdown) {
+      setTime(activeTimeSettings?.duration ? minutesToSeconds(activeTimeSettings.duration) : DEFAULT_DURATION);
+    } else {
+      setTime(0);
     }
   }, [mode, activeTimeSettings]);
 
-  const handleIncompleteBlock = useCallback(
-    (incompleteBlock: StudyBlock) => {
-      const startTime = toLocalTime(incompleteBlock.start_time).getTime();
-      const elapsedMilliseconds = Date.now() - startTime;
-
-      let newTime;
-      if (incompleteBlock.is_countdown) {
-        const duration = activeTimeSettings?.duration
-          ? minutesToSeconds(activeTimeSettings.duration)
-          : DEFAULT_DURATION;
-        newTime = Math.max(secondsToMilliseconds(duration) - elapsedMilliseconds, 0);
-      } else {
-        newTime = elapsedMilliseconds;
-      }
-
-      setTime(millisecondsToSeconds(newTime));
-      setIsActive(true);
-      setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
-      setStudyBlockId(incompleteBlock.id);
+  const completeDueStudyBlock = useCallback(
+    async (studyBlockId: number, endTime: string) => {
+      await updateStudyBlockMutation.mutateAsync({
+        id: studyBlockId,
+        block: { end_time: endTime },
+      });
     },
-    [activeTimeSettings, setMode],
+    [updateStudyBlockMutation],
   );
 
   useEffect(() => {
     if (!studyBlocksData) return;
-
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
-
     if (incompleteBlock) {
-      handleIncompleteBlock(incompleteBlock);
-    } else {
-      resetTimer();
+      const startTime = toLocalTime(incompleteBlock.start_time).getTime();
+      const elapsedMilliseconds = Date.now() - startTime;
+      let newTime;
+      let duration;
+      if (incompleteBlock.is_countdown) {
+        duration = activeTimeSettings?.duration ? minutesToSeconds(activeTimeSettings.duration) : DEFAULT_DURATION;
+        newTime = secondsToMilliseconds(duration) - elapsedMilliseconds;
+        if (newTime <= 0) {
+          const durationInMilliseconds = secondsToMilliseconds(duration);
+          const finalTime = new Date(startTime + durationInMilliseconds);
+          const finalTimeUTC = toUTC(finalTime);
+          completeDueStudyBlock(incompleteBlock.id, finalTimeUTC);
+          return;
+        }
+      } else {
+        newTime = elapsedMilliseconds;
+      }
+      setStudyBlockId(incompleteBlock.id);
+      setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
+      setTime(millisecondsToSeconds(newTime));
+      setIsActive(true);
     }
-  }, [studyBlocksData, handleIncompleteBlock, resetTimer]);
+  }, [studyBlocksData, completeDueStudyBlock, setMode, activeTimeSettings]);
 
   useEffect(() => {
     if (isActive && !isBreakMode && activeTimeSettings?.sound_interval) {
