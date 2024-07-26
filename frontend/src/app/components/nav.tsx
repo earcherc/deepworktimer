@@ -9,7 +9,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import useToast from '@context/toasts/toast-context';
 import classNames from 'classnames';
 import { Fragment } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 const navigation = [
@@ -71,7 +70,15 @@ export default function Nav() {
               </div>
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex flex-shrink-0 items-center">
-                  <Image width={40} height={40} src="/images/logo.svg" alt="Deep Work Timer" />
+                  <svg
+                    width="40"
+                    height="40"
+                    viewBox="0 0 78 78"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="text-gray-400 dark:text-gray-900"
+                  >
+                    <circle cx="39" cy="39" r="39" className="fill-current" />
+                  </svg>
                   <h1 className="ms-4 text-gray-900 dark:text-white">{displayName}&apos;s Deep Work</h1>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:items-center">
