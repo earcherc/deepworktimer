@@ -185,9 +185,16 @@ const Timer: React.FC = () => {
   );
 
   useEffect(() => {
+    if (activeTimeSettings && activeTimeSettings.duration) {
+      setTime(minutesToSeconds(activeTimeSettings.duration));
+    }
+  }, [activeTimeSettings]);
+
+  useEffect(() => {
     if (!studyBlocksData || initialCheckDone.current) return;
 
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
+
     if (incompleteBlock) {
       const startTime = toLocalTime(incompleteBlock.start_time).getTime();
       const elapsedMilliseconds = Date.now() - startTime;
@@ -214,7 +221,7 @@ const Timer: React.FC = () => {
     }
 
     initialCheckDone.current = true;
-  }, [activeTimeSettings?.duration, completeDueStudyBlock, setMode, studyBlocksData]);
+  }, [activeTimeSettings, activeTimeSettings?.duration, completeDueStudyBlock, mode, setMode, studyBlocksData]);
 
   useEffect(() => {
     if (isActive && !isBreakMode && activeTimeSettings?.sound_interval) {
@@ -305,10 +312,11 @@ const Timer: React.FC = () => {
 
   const handleTick = useCallback(() => {
     setTime((prevTime) => {
-      if ((mode === TimerMode.Countdown && !isBreakMode) || isBreakMode) {
+      if (mode === TimerMode.Countdown) {
         const newTime = Math.max(prevTime - 1, 0);
         if (newTime === 0) {
-          stopTimer(true);
+          if (isBreakMode) stopTimer();
+          if (!isBreakMode) stopTimer(true);
           return newTime;
         }
         return newTime;
