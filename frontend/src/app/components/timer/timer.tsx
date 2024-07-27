@@ -185,13 +185,7 @@ const Timer: React.FC = () => {
   );
 
   useEffect(() => {
-    if (activeTimeSettings && activeTimeSettings.duration) {
-      setTime(minutesToSeconds(activeTimeSettings.duration));
-    }
-  }, [activeTimeSettings]);
-
-  useEffect(() => {
-    if (!studyBlocksData || initialCheckDone.current) return;
+    if (!studyBlocksData || !timeSettingsData || initialCheckDone.current) return;
 
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
 
@@ -218,10 +212,13 @@ const Timer: React.FC = () => {
       setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
       setTime(millisecondsToSeconds(newTime));
       setIsActive(true);
+      if (workerRef.current) workerRef.current.postMessage('start');
+    } else if (activeTimeSettings && activeTimeSettings.duration) {
+      setTime(minutesToSeconds(activeTimeSettings.duration));
     }
 
     initialCheckDone.current = true;
-  }, [activeTimeSettings, activeTimeSettings?.duration, completeDueStudyBlock, mode, setMode, studyBlocksData]);
+  }, [activeTimeSettings, completeDueStudyBlock, mode, setMode, studyBlocksData, timeSettingsData]);
 
   useEffect(() => {
     if (isActive && !isBreakMode && activeTimeSettings?.sound_interval) {
@@ -269,6 +266,7 @@ const Timer: React.FC = () => {
 
   const stopTimer = useCallback(
     async (completed = false) => {
+      setIsActive(false);
       if (studyBlockId) {
         await updateStudyBlockMutation.mutateAsync({
           id: studyBlockId,
@@ -280,7 +278,6 @@ const Timer: React.FC = () => {
       if (!activeSessionCounter) setDummyActive(false);
 
       if (!completed) {
-        setIsActive(false);
         setIsBreakMode(false);
         if (workerRef.current) workerRef.current.postMessage('stop');
 
