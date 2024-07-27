@@ -174,10 +174,9 @@ const Timer: React.FC = () => {
   );
 
   const resetTimer = useCallback(() => {
-    if (workerRef.current) workerRef.current.postMessage('stop');
     setIsActive(false);
-    setStudyBlockId(null);
     setIsBreakMode(false);
+    if (workerRef.current) workerRef.current.postMessage('stop');
 
     if (mode == TimerMode.Countdown) {
       setTime(activeTimeSettings?.duration ? minutesToSeconds(activeTimeSettings.duration) : DEFAULT_DURATION);
@@ -198,15 +197,20 @@ const Timer: React.FC = () => {
 
   useEffect(() => {
     if (!studyBlocksData) return;
+
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
+
     if (incompleteBlock) {
       const startTime = toLocalTime(incompleteBlock.start_time).getTime();
       const elapsedMilliseconds = Date.now() - startTime;
+
       let newTime;
       let duration;
+
       if (incompleteBlock.is_countdown) {
         duration = activeTimeSettings?.duration ? minutesToSeconds(activeTimeSettings.duration) : DEFAULT_DURATION;
         newTime = secondsToMilliseconds(duration) - elapsedMilliseconds;
+
         if (newTime <= 0) {
           const durationInMilliseconds = secondsToMilliseconds(duration);
           const finalTime = new Date(startTime + durationInMilliseconds);
@@ -217,6 +221,7 @@ const Timer: React.FC = () => {
       } else {
         newTime = elapsedMilliseconds;
       }
+
       setStudyBlockId(incompleteBlock.id);
       setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
       setTime(millisecondsToSeconds(newTime));
@@ -239,43 +244,38 @@ const Timer: React.FC = () => {
 
   const handleTimerFinished = useCallback(
     async (newCompleted: number) => {
-      // Always play the end chime by default, unless explicitly muted
       if (!activeTimeSettings || activeTimeSettings.is_sound !== false) {
         playChime('end');
       }
 
-      setIsActive(false);
+      setIsBreakMode(true);
 
       if (activeSessionCounter) {
         await updateSessionCounterMutation.mutateAsync({
           id: activeSessionCounter.id,
           completed: newCompleted,
         });
-
-        const longBreakInterval = activeTimeSettings?.long_break_interval || 4;
-        if (newCompleted % longBreakInterval === 0) {
-          setTime(minutesToSeconds(activeTimeSettings?.long_break_duration || 15));
-        } else {
-          setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
-        }
       } else {
-        // If no active session counter, use default break duration
-        setTime(minutesToSeconds(5));
+        await createSessionCounterMutation.mutateAsync({
+          completed: newCompleted,
+          target: 5,
+          is_selected: true,
+        });
       }
 
-      await new Promise((resolve) => {
-        setIsBreakMode(true);
-        setTimeout(resolve, 0);
-      });
-
-      setIsActive(true);
+      const longBreakInterval = activeTimeSettings?.long_break_interval || 2;
+      if (newCompleted % longBreakInterval === 0) {
+        setTime(minutesToSeconds(activeTimeSettings?.long_break_duration || 30));
+      } else {
+        setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
+      }
     },
-    [activeSessionCounter, activeTimeSettings, playChime, updateSessionCounterMutation],
+    [activeSessionCounter, activeTimeSettings, playChime, updateSessionCounterMutation, createSessionCounterMutation],
   );
 
   const stopTimer = useCallback(
-    async (timerFinished: boolean = false) => {
-      setIsActive(false);
+    async (completed = false) => {
+      resetTimer();
 
       if (studyBlockId) {
         await updateStudyBlockMutation.mutateAsync({
@@ -283,34 +283,18 @@ const Timer: React.FC = () => {
           block: { end_time: getCurrentUTC() },
         });
         setStudyBlockId(null);
+      }
 
-        if (timerFinished && mode === TimerMode.Countdown) {
-          if (activeSessionCounter) {
-            const newCompleted = activeSessionCounter.completed + 1;
-            await handleTimerFinished(newCompleted);
-          } else {
-            await createSessionCounterMutation.mutateAsync({ target: 5, completed: 1, is_selected: true });
-            await handleTimerFinished(1);
-          }
+      if (completed && mode === TimerMode.Countdown) {
+        if (activeSessionCounter) {
+          const newCompleted = activeSessionCounter.completed + 1;
+          await handleTimerFinished(newCompleted);
         } else {
-          resetTimer();
+          await handleTimerFinished(1);
         }
-      } else if (isBreakMode) {
-        resetTimer();
-      } else {
-        resetTimer();
       }
     },
-    [
-      studyBlockId,
-      updateStudyBlockMutation,
-      mode,
-      activeSessionCounter,
-      createSessionCounterMutation,
-      isBreakMode,
-      resetTimer,
-      handleTimerFinished,
-    ],
+    [studyBlockId, updateStudyBlockMutation, mode, activeSessionCounter, handleTimerFinished, resetTimer],
   );
 
   const handleTick = useCallback(() => {
@@ -354,34 +338,27 @@ const Timer: React.FC = () => {
   }, [time, isActive]);
 
   const startTimer = async () => {
-    if (!isBreakMode) {
-      const newBlock = await createStudyBlockMutation.mutateAsync({
-        is_countdown: mode === TimerMode.Countdown,
-        daily_goal_id: activeDailyGoal?.id,
-        study_category_id: activeCategory?.id,
-      });
-      setStudyBlockId(newBlock.id);
-      if (!activeSessionCounter) {
-        setDummyActive(true);
-      }
-    }
+    const newBlock = await createStudyBlockMutation.mutateAsync({
+      is_countdown: mode === TimerMode.Countdown,
+      daily_goal_id: activeDailyGoal?.id,
+      study_category_id: activeCategory?.id,
+    });
+
+    setStudyBlockId(newBlock.id);
     setIsActive(true);
-    if (workerRef.current) {
-      workerRef.current.postMessage('start');
-    }
+    if (workerRef.current) workerRef.current.postMessage('start');
   };
 
   const toggleMode = () => {
     if (isActive) return;
     setMode((prevMode) => {
       const newMode = prevMode === TimerMode.Countdown ? TimerMode.OpenSession : TimerMode.Countdown;
-      setTime(
-        newMode === TimerMode.Countdown
-          ? activeTimeSettings?.duration
-            ? minutesToSeconds(activeTimeSettings.duration)
-            : DEFAULT_DURATION
-          : 0,
-      );
+      if (mode == TimerMode.Countdown) {
+        setTime(activeTimeSettings?.duration ? minutesToSeconds(activeTimeSettings.duration) : DEFAULT_DURATION);
+      } else {
+        setTime(0);
+      }
+
       return newMode;
     });
   };
@@ -462,7 +439,7 @@ const Timer: React.FC = () => {
           </p>
         )}
         <div className="flex space-x-3">
-          {!isActive && !isBreakMode && (
+          {!isActive && (
             <button
               onClick={openSettingsModal}
               className="rounded-full p-2 transition-colors bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
@@ -470,15 +447,25 @@ const Timer: React.FC = () => {
               <Cog6ToothIcon className="h-5 w-5" />
             </button>
           )}
-          <button
-            onClick={isActive ? () => stopTimer(false) : startTimer}
-            className={classNames(
-              'rounded-full px-6 py-2 text-sm font-semibold text-white transition-colors',
-              isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600',
-            )}
-          >
-            {isActive ? 'Stop' : 'Start'}
-          </button>
+          {!isBreakMode && (
+            <button
+              onClick={isActive ? () => stopTimer() : startTimer}
+              className={classNames(
+                'rounded-full px-6 py-2 text-sm font-semibold text-white transition-colors',
+                isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600',
+              )}
+            >
+              {isActive ? 'Stop' : 'Start'}
+            </button>
+          )}
+          {isBreakMode && (
+            <button
+              onClick={() => resetTimer()}
+              className="rounded-full px-6 py-2 text-sm font-semibold text-white transition-colors bg-red-500 hover:bg-red-600"
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
     </div>
