@@ -222,6 +222,7 @@ const Timer: React.FC = () => {
       setTime(millisecondsToSeconds(newTime));
       setIsActive(true);
       if (workerRef.current) workerRef.current.postMessage('start');
+      if (!activeSessionCounter) setDummyActive(true);
     }
 
     setInitialTimeSet(true);
