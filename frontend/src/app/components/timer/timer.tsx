@@ -226,7 +226,7 @@ const Timer: React.FC = () => {
   useEffect(() => {
     if (isActive && !isBreakMode && activeTimeSettings?.sound_interval) {
       const intervalId = setInterval(() => {
-        if (activeTimeSettings.is_sound !== false) {
+        if (activeTimeSettings.is_sound !== false && time > 1) {
           playChime('interval');
         }
       }, minutesToMilliseconds(activeTimeSettings.sound_interval));
@@ -234,7 +234,7 @@ const Timer: React.FC = () => {
       return () => clearInterval(intervalId);
     }
     return undefined;
-  }, [isActive, isBreakMode, activeTimeSettings, playChime]);
+  }, [isActive, isBreakMode, activeTimeSettings, playChime, time]);
 
   const handleTimerFinished = useCallback(
     async (newCompleted: number) => {
@@ -260,8 +260,10 @@ const Timer: React.FC = () => {
       const longBreakInterval = activeTimeSettings?.long_break_interval || 2;
       if (newCompleted % longBreakInterval === 0) {
         setTime(minutesToSeconds(activeTimeSettings?.long_break_duration || 30));
+        playChime('break');
       } else {
         setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
+        playChime('break');
       }
     },
     [activeSessionCounter, activeTimeSettings, playChime, updateSessionCounterMutation, createSessionCounterMutation],
