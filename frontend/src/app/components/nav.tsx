@@ -47,7 +47,11 @@ export default function Nav() {
     logoutMutation.mutate();
   };
 
-  const displayName = user?.username ? user.username.charAt(0).toUpperCase() + user.username.slice(1) : 'Unknown';
+  const displayName = user
+    ? user.first_name && user.last_name
+      ? `${user.first_name} ${user.last_name}`
+      : user.first_name || user.last_name || user.username?.charAt(0).toUpperCase() + user.username?.slice(1)
+    : 'Unknown';
 
   return (
     <Disclosure as="nav" className="sticky top-0 z-20 bg-white dark:bg-gray-800">
@@ -79,7 +83,9 @@ export default function Nav() {
                   >
                     <circle cx="39" cy="39" r="39" className="fill-current" />
                   </svg>
-                  <h1 className="ms-4 text-gray-900 dark:text-white">{displayName}&apos;s Deep Work</h1>
+                  <h1 className="ms-4 font-semibold text-gray-900 dark:text-gray-200">
+                    {displayName}&apos;s Deep Work
+                  </h1>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:items-center">
                   <div className="flex space-x-4">
@@ -126,7 +132,9 @@ export default function Nav() {
                   <div>
                     <Menu.Button id={'usermenu'} className="flex rounded-full bg-white text-sm dark:bg-gray-800">
                       <span className="sr-only">Open user menu</span>
-                      <span className="text-gray-700 dark:text-white">{displayName}</span>
+                      <span className="font-semibold text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white">
+                        {displayName}
+                      </span>
                     </Menu.Button>
                   </div>
                   <Transition
