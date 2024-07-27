@@ -57,6 +57,7 @@ const Timer: React.FC = () => {
   const [intervalAudio, setIntervalAudio] = useState<HTMLAudioElement | null>(null);
   const [endAudio, setEndAudio] = useState<HTMLAudioElement | null>(null);
   const workerRef = useRef<Worker | null>(null);
+  const initialCheckDone = useRef(false);
 
   const { data: categoriesData } = useQuery<StudyCategory[]>({
     queryKey: [QUERY_KEYS.studyCategories],
@@ -173,19 +174,6 @@ const Timer: React.FC = () => {
     [breakAudio, intervalAudio, endAudio, activeTimeSettings],
   );
 
-  const resetTimer = useCallback(() => {
-    setIsActive(false);
-    setIsBreakMode(false);
-    if (!activeSessionCounter) setDummyActive(false);
-    if (workerRef.current) workerRef.current.postMessage('stop');
-
-    if (mode == TimerMode.Countdown) {
-      setTime(activeTimeSettings?.duration ? minutesToSeconds(activeTimeSettings.duration) : DEFAULT_DURATION);
-    } else {
-      setTime(0);
-    }
-  }, [mode, activeTimeSettings, activeSessionCounter]);
-
   const completeDueStudyBlock = useCallback(
     async (studyBlockId: number, endTime: string) => {
       await updateStudyBlockMutation.mutateAsync({
@@ -197,38 +185,36 @@ const Timer: React.FC = () => {
   );
 
   useEffect(() => {
-    if (!studyBlocksData) return;
+    if (!studyBlocksData || initialCheckDone.current) return;
 
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
-
     if (incompleteBlock) {
       const startTime = toLocalTime(incompleteBlock.start_time).getTime();
       const elapsedMilliseconds = Date.now() - startTime;
-
       let newTime;
       let duration;
-
       if (incompleteBlock.is_countdown) {
         duration = activeTimeSettings?.duration ? minutesToSeconds(activeTimeSettings.duration) : DEFAULT_DURATION;
         newTime = secondsToMilliseconds(duration) - elapsedMilliseconds;
-
         if (newTime <= 0) {
           const durationInMilliseconds = secondsToMilliseconds(duration);
           const finalTime = new Date(startTime + durationInMilliseconds);
           const finalTimeUTC = toUTC(finalTime);
           completeDueStudyBlock(incompleteBlock.id, finalTimeUTC);
+          initialCheckDone.current = true;
           return;
         }
       } else {
         newTime = elapsedMilliseconds;
       }
-
       setStudyBlockId(incompleteBlock.id);
       setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
       setTime(millisecondsToSeconds(newTime));
       setIsActive(true);
     }
-  }, [studyBlocksData, completeDueStudyBlock, setMode, activeTimeSettings]);
+
+    initialCheckDone.current = true;
+  }, [activeTimeSettings?.duration, completeDueStudyBlock, setMode, studyBlocksData]);
 
   useEffect(() => {
     if (isActive && !isBreakMode && activeTimeSettings?.sound_interval) {
@@ -276,14 +262,26 @@ const Timer: React.FC = () => {
 
   const stopTimer = useCallback(
     async (completed = false) => {
-      resetTimer();
-
       if (studyBlockId) {
         await updateStudyBlockMutation.mutateAsync({
           id: studyBlockId,
           block: { end_time: getCurrentUTC() },
         });
         setStudyBlockId(null);
+      }
+
+      if (!activeSessionCounter) setDummyActive(false);
+
+      if (!completed) {
+        setIsActive(false);
+        setIsBreakMode(false);
+        if (workerRef.current) workerRef.current.postMessage('stop');
+
+        if (mode == TimerMode.Countdown) {
+          setTime(activeTimeSettings?.duration ? minutesToSeconds(activeTimeSettings.duration) : DEFAULT_DURATION);
+        } else {
+          setTime(0);
+        }
       }
 
       if (completed && mode === TimerMode.Countdown) {
@@ -295,7 +293,14 @@ const Timer: React.FC = () => {
         }
       }
     },
-    [studyBlockId, updateStudyBlockMutation, mode, activeSessionCounter, handleTimerFinished, resetTimer],
+    [
+      studyBlockId,
+      activeSessionCounter,
+      mode,
+      updateStudyBlockMutation,
+      activeTimeSettings?.duration,
+      handleTimerFinished,
+    ],
   );
 
   const handleTick = useCallback(() => {
@@ -314,20 +319,10 @@ const Timer: React.FC = () => {
   }, [mode, isBreakMode, stopTimer]);
 
   useEffect(() => {
-    if (!workerRef.current) return;
-
-    workerRef.current.onmessage = handleTick;
-
-    if (isActive) {
-      workerRef.current.postMessage('start');
-    } else {
-      workerRef.current.postMessage('stop');
+    if (workerRef.current) {
+      workerRef.current.onmessage = handleTick;
     }
-
-    return () => {
-      workerRef.current?.postMessage('stop');
-    };
-  }, [isActive, handleTick]);
+  }, [handleTick]);
 
   useEffect(() => {
     const formattedTime = formatTime(time);
@@ -462,7 +457,7 @@ const Timer: React.FC = () => {
           )}
           {isBreakMode && (
             <button
-              onClick={() => resetTimer()}
+              onClick={() => stopTimer()}
               className="rounded-full px-6 py-2 text-sm font-semibold text-white transition-colors bg-red-500 hover:bg-red-600"
             >
               Clear
