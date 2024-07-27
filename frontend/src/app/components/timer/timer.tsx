@@ -228,26 +228,6 @@ const Timer: React.FC = () => {
     setInitialTimeSet(true);
   }, [activeTimeSettings, completeDueStudyBlock, initialTimeSet, mode, setMode, studyBlocksData, timeSettingsData]);
 
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
-    if (isActive && !isBreakMode && activeTimeSettings?.sound_interval && activeTimeSettings.is_sound !== false) {
-      intervalId = setInterval(() => {
-        const remainingTime = secondsToMilliseconds(time);
-        if (remainingTime <= FINAL_BELL_BUFFER) {
-          console.log('Skipping interval sound as final bell is approaching');
-          return;
-        }
-        playChime('interval');
-      }, minutesToMilliseconds(activeTimeSettings.sound_interval));
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isActive, isBreakMode, activeTimeSettings, playChime]);
-
   const handleTimerFinished = useCallback(
     async (newCompleted: number) => {
       if (!activeTimeSettings || activeTimeSettings.is_sound !== false) {
@@ -324,23 +304,28 @@ const Timer: React.FC = () => {
 
   const handleTick = useCallback(() => {
     setTime((prevTime) => {
-      if (mode === TimerMode.Countdown) {
-        const newTime = Math.max(prevTime - 1, 0);
-        if (newTime === 0) {
-          if (isBreakMode) {
-            stopTimer();
-            playChime('break');
-          } else {
-            stopTimer(true);
-          }
-          return newTime;
+      const newTime = mode === TimerMode.Countdown ? Math.max(prevTime - 1, 0) : prevTime + 1;
+
+      // Check for interval sound
+      if (isActive && !isBreakMode && activeTimeSettings?.sound_interval && activeTimeSettings.is_sound !== false) {
+        const remainingTime = secondsToMilliseconds(newTime);
+        if (remainingTime > FINAL_BELL_BUFFER && newTime % minutesToSeconds(activeTimeSettings.sound_interval) === 0) {
+          playChime('interval');
         }
-        return newTime;
-      } else {
-        return prevTime + 1;
       }
+
+      if (mode === TimerMode.Countdown && newTime === 0) {
+        if (isBreakMode) {
+          stopTimer();
+          playChime('break');
+        } else {
+          stopTimer(true);
+        }
+      }
+
+      return newTime;
     });
-  }, [mode, isBreakMode, stopTimer, playChime]);
+  }, [mode, isActive, isBreakMode, activeTimeSettings, stopTimer, playChime]);
 
   useEffect(() => {
     if (workerRef.current) {
