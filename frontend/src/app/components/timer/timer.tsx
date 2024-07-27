@@ -260,10 +260,8 @@ const Timer: React.FC = () => {
       const longBreakInterval = activeTimeSettings?.long_break_interval || 2;
       if (newCompleted % longBreakInterval === 0) {
         setTime(minutesToSeconds(activeTimeSettings?.long_break_duration || 30));
-        playChime('break');
       } else {
         setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
-        playChime('break');
       }
     },
     [activeSessionCounter, activeTimeSettings, playChime, updateSessionCounterMutation, createSessionCounterMutation],
@@ -317,7 +315,10 @@ const Timer: React.FC = () => {
       if (mode === TimerMode.Countdown) {
         const newTime = Math.max(prevTime - 1, 0);
         if (newTime === 0) {
-          if (isBreakMode) stopTimer();
+          if (isBreakMode) {
+            stopTimer();
+            playChime('break');
+          }
           if (!isBreakMode) stopTimer(true);
           return newTime;
         }
@@ -326,7 +327,7 @@ const Timer: React.FC = () => {
         return prevTime + 1;
       }
     });
-  }, [mode, isBreakMode, stopTimer]);
+  }, [mode, isBreakMode, stopTimer, playChime]);
 
   useEffect(() => {
     if (workerRef.current) {
