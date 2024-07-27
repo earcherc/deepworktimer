@@ -176,6 +176,7 @@ const Timer: React.FC = () => {
   const resetTimer = useCallback(() => {
     setIsActive(false);
     setIsBreakMode(false);
+    if (!activeSessionCounter) setDummyActive(false);
     if (workerRef.current) workerRef.current.postMessage('stop');
 
     if (mode == TimerMode.Countdown) {
@@ -183,7 +184,7 @@ const Timer: React.FC = () => {
     } else {
       setTime(0);
     }
-  }, [mode, activeTimeSettings]);
+  }, [mode, activeTimeSettings, activeSessionCounter]);
 
   const completeDueStudyBlock = useCallback(
     async (studyBlockId: number, endTime: string) => {
@@ -346,6 +347,8 @@ const Timer: React.FC = () => {
 
     setStudyBlockId(newBlock.id);
     setIsActive(true);
+
+    if (!activeSessionCounter) setDummyActive(true);
     if (workerRef.current) workerRef.current.postMessage('start');
   };
 
@@ -353,12 +356,11 @@ const Timer: React.FC = () => {
     if (isActive) return;
     setMode((prevMode) => {
       const newMode = prevMode === TimerMode.Countdown ? TimerMode.OpenSession : TimerMode.Countdown;
-      if (mode == TimerMode.Countdown) {
+      if (newMode === TimerMode.Countdown) {
         setTime(activeTimeSettings?.duration ? minutesToSeconds(activeTimeSettings.duration) : DEFAULT_DURATION);
       } else {
         setTime(0);
       }
-
       return newMode;
     });
   };
