@@ -349,12 +349,24 @@ const Timer: React.FC = () => {
 
   useEffect(() => {
     const formattedTime = formatTime(time);
-    document.title = isActive ? formattedTime : 'Timer';
+    let title = 'Timer';
+
+    if (isActive || isBreakMode) {
+      if (isBreakMode) {
+        title = `${formattedTime} - BREAK`;
+      } else if (mode === TimerMode.Countdown) {
+        title = `${formattedTime} - ${activeSessionCounter ? activeSessionCounter.completed + 1 : 1}/${activeSessionCounter ? activeSessionCounter.target : 5}`;
+      } else {
+        title = formattedTime;
+      }
+    }
+
+    document.title = title;
 
     return () => {
       document.title = 'Timer';
     };
-  }, [time, isActive]);
+  }, [time, isActive, isBreakMode, activeSessionCounter, mode]);
 
   const startTimer = async () => {
     const newBlock = await createStudyBlockMutation.mutateAsync({
