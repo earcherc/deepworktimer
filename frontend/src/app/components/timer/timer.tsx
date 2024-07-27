@@ -57,7 +57,7 @@ const Timer: React.FC = () => {
   const [intervalAudio, setIntervalAudio] = useState<HTMLAudioElement | null>(null);
   const [endAudio, setEndAudio] = useState<HTMLAudioElement | null>(null);
   const workerRef = useRef<Worker | null>(null);
-  const initialCheckDone = useRef(false);
+  const [initialTimeSet, setInitialTimeSet] = useState(false);
 
   const { data: categoriesData } = useQuery<StudyCategory[]>({
     queryKey: [QUERY_KEYS.studyCategories],
@@ -185,7 +185,13 @@ const Timer: React.FC = () => {
   );
 
   useEffect(() => {
-    if (!studyBlocksData || !timeSettingsData || initialCheckDone.current) return;
+    if (!isActive && initialTimeSet && activeTimeSettings && activeTimeSettings.duration) {
+      setTime(minutesToSeconds(activeTimeSettings.duration));
+    }
+  }, [activeTimeSettings, isActive, initialTimeSet]);
+
+  useEffect(() => {
+    if (!studyBlocksData || !timeSettingsData || initialTimeSet) return;
 
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
 
@@ -202,7 +208,7 @@ const Timer: React.FC = () => {
           const finalTime = new Date(startTime + durationInMilliseconds);
           const finalTimeUTC = toUTC(finalTime);
           completeDueStudyBlock(incompleteBlock.id, finalTimeUTC);
-          initialCheckDone.current = true;
+          setInitialTimeSet(true);
           return;
         }
       } else {
@@ -213,12 +219,10 @@ const Timer: React.FC = () => {
       setTime(millisecondsToSeconds(newTime));
       setIsActive(true);
       if (workerRef.current) workerRef.current.postMessage('start');
-    } else if (activeTimeSettings && activeTimeSettings.duration) {
-      setTime(minutesToSeconds(activeTimeSettings.duration));
     }
 
-    initialCheckDone.current = true;
-  }, [activeTimeSettings, completeDueStudyBlock, mode, setMode, studyBlocksData, timeSettingsData]);
+    setInitialTimeSet(true);
+  }, [activeTimeSettings, completeDueStudyBlock, initialTimeSet, mode, setMode, studyBlocksData, timeSettingsData]);
 
   useEffect(() => {
     if (isActive && !isBreakMode && activeTimeSettings?.sound_interval) {
