@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
   DailyGoal,
   DailyGoalsService,
@@ -39,6 +40,7 @@ const secondsToMilliseconds = (seconds: number) => seconds * 1000;
 const millisecondsToSeconds = (milliseconds: number) => Math.floor(milliseconds / 1000);
 
 const DEFAULT_DURATION = minutesToSeconds(60);
+const FINAL_BELL_BUFFER = 5000;
 
 const Timer: React.FC = () => {
   const { addToast } = useToast();
@@ -165,8 +167,9 @@ const Timer: React.FC = () => {
       if (activeTimeSettings?.is_sound === false) return;
       let audio;
       if (type === 'break') audio = breakAudio;
-      if (type == 'interval') audio = intervalAudio;
-      if (type == 'end') audio = endAudio;
+      if (type === 'interval') audio = intervalAudio;
+      if (type === 'end') audio = endAudio;
+
       if (audio) {
         audio.play().catch((error) => console.error(`Error playing ${type} audio:`, error));
       }
@@ -225,17 +228,24 @@ const Timer: React.FC = () => {
   }, [activeTimeSettings, completeDueStudyBlock, initialTimeSet, mode, setMode, studyBlocksData, timeSettingsData]);
 
   useEffect(() => {
-    if (isActive && !isBreakMode && activeTimeSettings?.sound_interval) {
-      const intervalId = setInterval(() => {
-        if (activeTimeSettings.is_sound !== false && time > 1) {
-          playChime('interval');
+    let intervalId: NodeJS.Timeout | null = null;
+    if (isActive && !isBreakMode && activeTimeSettings?.sound_interval && activeTimeSettings.is_sound !== false) {
+      intervalId = setInterval(() => {
+        const remainingTime = secondsToMilliseconds(time);
+        if (remainingTime <= FINAL_BELL_BUFFER) {
+          console.log('Skipping interval sound as final bell is approaching');
+          return;
         }
+        playChime('interval');
       }, minutesToMilliseconds(activeTimeSettings.sound_interval));
-
-      return () => clearInterval(intervalId);
     }
-    return undefined;
-  }, [isActive, isBreakMode, activeTimeSettings, playChime, time]);
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isActive, isBreakMode, activeTimeSettings, playChime]);
 
   const handleTimerFinished = useCallback(
     async (newCompleted: number) => {
