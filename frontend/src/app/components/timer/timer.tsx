@@ -307,8 +307,13 @@ const Timer: React.FC = () => {
 
       // Check for interval sound
       if (isActive && !isBreakMode && activeTimeSettings?.sound_interval && activeTimeSettings.is_sound !== false) {
-        const remainingTime = secondsToMilliseconds(newTime);
-        if (remainingTime > FINAL_BELL_BUFFER && newTime % minutesToSeconds(activeTimeSettings.sound_interval) === 0) {
+        const elapsedTime = mode === TimerMode.Countdown ? (activeTimeSettings.duration || 0) * 60 - newTime : newTime;
+        const remainingTime = secondsToMilliseconds(mode === TimerMode.Countdown ? newTime : elapsedTime);
+        if (
+          remainingTime > FINAL_BELL_BUFFER &&
+          elapsedTime > 0 &&
+          elapsedTime % minutesToSeconds(activeTimeSettings.sound_interval) === 0
+        ) {
           playChime('interval');
         }
       }
