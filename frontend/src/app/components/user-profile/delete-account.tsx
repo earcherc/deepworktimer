@@ -54,7 +54,7 @@ export default function DeleteAccountForm() {
     <form onSubmit={handleSubmit(onSubmit)}>
       <button
         type="submit"
-        className="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400"
+        className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 dark:bg-red-700 dark:hover:bg-red-600"
       >
         Yes, delete my account
       </button>

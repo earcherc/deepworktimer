@@ -114,7 +114,7 @@ export default function ImageUploadForm() {
           <Image
             src={user.profile_photo_urls.original || ''}
             alt="Profile Image"
-            className="h-24 w-24 flex-none rounded-lg bg-gray-800 object-cover"
+            className="h-24 w-24 flex-none rounded-lg bg-gray-100 object-cover dark:bg-gray-800"
             width={96}
             height={96}
           />
@@ -122,18 +122,18 @@ export default function ImageUploadForm() {
           <Image
             src={preview}
             alt="Preview Image"
-            className="h-24 w-24 flex-none rounded-lg bg-gray-800 object-cover"
+            className="h-24 w-24 flex-none rounded-lg bg-gray-100 object-cover dark:bg-gray-800"
             width={96}
             height={96}
           />
         ) : (
-          <div className="h-24 w-24 flex-none rounded-lg bg-gray-800" />
+          <div className="h-24 w-24 flex-none rounded-lg bg-gray-200 dark:bg-gray-800" />
         )}
         <div>
           {user && user.profile_photo_urls ? (
             <button
               type="button"
-              className="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400"
+              className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 dark:bg-red-700 dark:hover:bg-red-600"
               onClick={removeProfilePhoto}
               disabled={removeMutation.isPending}
             >
@@ -142,7 +142,7 @@ export default function ImageUploadForm() {
           ) : (
             <button
               type="button"
-              className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/20"
+              className="rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
               onClick={() => imageInputRef.current?.click()}
             >
               Select Image
@@ -152,14 +152,14 @@ export default function ImageUploadForm() {
             <>
               <button
                 type="button"
-                className="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400 ml-2"
+                className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 dark:bg-red-700 dark:hover:bg-red-600 ml-2"
                 onClick={removeImage}
               >
                 Remove
               </button>
               <button
                 type="submit"
-                className="rounded-md bg-blue-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ml-2"
+                className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600 ml-2"
                 disabled={uploadMutation.isPending}
               >
                 {uploadMutation.isPending ? 'Uploading...' : 'Upload Image'}
@@ -175,7 +175,7 @@ export default function ImageUploadForm() {
             })}
             ref={imageInputRef}
           />
-          <p className="mt-2 text-xs leading-5 text-gray-400">JPG, JPEG, PNG. 10MB max.</p>
+          <p className="mt-2 text-xs leading-5 text-gray-600 dark:text-gray-400">JPG, JPEG, PNG. 5MB max.</p>
         </div>
       </div>
     </form>

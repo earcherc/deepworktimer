@@ -55,7 +55,7 @@ export default function UserForm() {
     <form>
       <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
         <div className="col-span-3">
-          <label htmlFor="firstName" className="block text-sm font-medium leading-6 text-white">
+          <label htmlFor="firstName" className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">
             First Name
           </label>
           <div className="mt-2">
@@ -63,13 +63,13 @@ export default function UserForm() {
               type="text"
               id="firstName"
               {...register('first_name')}
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:ring-gray-700 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
 
         <div className="col-span-3">
-          <label htmlFor="last_name" className="block text-sm font-medium leading-6 text-white">
+          <label htmlFor="last_name" className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">
             Last Name
           </label>
           <div className="mt-2">
@@ -77,13 +77,13 @@ export default function UserForm() {
               type="text"
               id="last_name"
               {...register('last_name')}
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:ring-gray-700 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
 
         <div className="col-span-full">
-          <label htmlFor="email" className="block text-sm font-medium leading-6 text-white">
+          <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">
             Email address
           </label>
           <div className="mt-2">
@@ -92,13 +92,13 @@ export default function UserForm() {
               {...register('email')}
               type="email"
               autoComplete="email"
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:ring-gray-700 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
 
         <div className="col-span-full">
-          <label htmlFor="username" className="block text-sm font-medium leading-6 text-white">
+          <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">
             Username
           </label>
           <div className="mt-2">
@@ -107,13 +107,16 @@ export default function UserForm() {
               id="username"
               {...register('username')}
               autoComplete="username"
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:ring-gray-700 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
 
         <div className="col-span-3">
-          <label htmlFor="date_of_birth" className="block text-sm font-medium leading-6 text-white">
+          <label
+            htmlFor="date_of_birth"
+            className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200"
+          >
             Date of Birth
           </label>
           <div className="mt-2">
@@ -121,20 +124,20 @@ export default function UserForm() {
               type="date"
               id="date_of_birth"
               {...register('date_of_birth')}
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:ring-gray-700 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
 
         <div className="col-span-3">
-          <label htmlFor="gender" className="block text-sm font-medium leading-6 text-white">
+          <label htmlFor="gender" className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">
             Gender
           </label>
           <div className="mt-2">
             <select
               id="gender"
               {...register('gender')}
-              className="block w-full rounded-md border-0 bg-white/5 py-2.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white py-2.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:ring-gray-700 sm:text-sm sm:leading-6"
             >
               <option value="">Select Gender</option>
               <option value="MALE">Male</option>
@@ -146,14 +149,14 @@ export default function UserForm() {
         </div>
 
         <div className="col-span-full">
-          <label htmlFor="bio" className="block text-sm font-medium leading-6 text-white">
+          <label htmlFor="bio" className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">
             Bio
           </label>
           <div className="mt-2">
             <textarea
               id="bio"
               {...register('bio')}
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 pl-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-white py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:ring-gray-700 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
