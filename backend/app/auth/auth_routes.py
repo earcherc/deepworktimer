@@ -44,17 +44,18 @@ async def login(
     )
     if not user_id:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
-    session_id = await create_session(redis, user_id)
     result = await session.execute(select(UserModel).where(UserModel.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    session_id = await create_session(redis, user_id, expiry=3600)
     response.set_cookie(
         key="session_id",
         value=session_id,
         httponly=True,
         secure=True,
         samesite="lax",
+        max_age=3600,
     )
     user_data = user.__dict__
     user_data.pop("hashed_password", None)
