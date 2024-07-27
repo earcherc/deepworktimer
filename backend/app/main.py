@@ -57,8 +57,18 @@ def create_app() -> FastAPI:
             user_id = await get_user_id_from_session(redis, session_id)
             if user_id:
                 request.state.user_id = int(user_id)
-        response = await call_next(request)
-        return response
+                response = await call_next(request)
+                # Refresh the cookie
+                response.set_cookie(
+                    key="session_id",
+                    value=session_id,
+                    httponly=True,
+                    secure=True,
+                    samesite="lax",
+                    max_age=3600,
+                )
+                return response
+        return await call_next(request)
 
     # Include routers
     app.include_router(auth_router, prefix="/auth", tags=["Authentication"])

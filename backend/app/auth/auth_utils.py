@@ -20,15 +20,11 @@ async def create_session(redis: Redis, user_id: int, expiry: int = 3600) -> str:
     return session_id
 
 
-async def get_user_id_from_session(
-    redis: Redis, session_id: str, extend_expiry: bool = True
-) -> int | None:
+async def get_user_id_from_session(redis: Redis, session_id: str) -> int | None:
     key = f"session:{session_id}"
     user_id = await redis.get(key)
-    if user_id and extend_expiry:
-        ttl = await redis.ttl(key)
-        if ttl < 3000:
-            await redis.expire(key, 3600)
+    if user_id:
+        await redis.expire(key, 3600)
     return int(user_id) if user_id else None
 
 
