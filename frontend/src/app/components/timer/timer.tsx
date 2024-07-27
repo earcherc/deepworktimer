@@ -315,8 +315,9 @@ const Timer: React.FC = () => {
           if (isBreakMode) {
             stopTimer();
             playChime('break');
+          } else {
+            stopTimer(true);
           }
-          if (!isBreakMode) stopTimer(true);
           return newTime;
         }
         return newTime;
