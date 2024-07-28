@@ -35,7 +35,7 @@ const ManageMetadataModal: React.FC<ManageMetadataModalProps> = ({ onAdd, onRemo
           <div
             key={componentName}
             className={`flex items-center justify-between p-3 mb-2 rounded-lg cursor-pointer transition-colors duration-200 ${
-              isVisible ? 'bg-blue-300 text-white hover:bg-blue-400' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              isVisible ? 'bg-blue-400 text-white hover:bg-blue-500' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
             onClick={() => handleToggle(componentName)}
           >

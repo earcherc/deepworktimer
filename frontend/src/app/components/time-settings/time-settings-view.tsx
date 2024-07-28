@@ -111,7 +111,7 @@ const TimeSettingsModal: React.FC = () => {
               key={settings.id}
               className={`relative flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors duration-200 ${
                 settings.is_selected
-                  ? 'bg-blue-300 text-white hover:bg-blue-400'
+                  ? 'bg-blue-400 text-white hover:bg-blue-500'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
               onClick={() => handleSelect(settings)}
