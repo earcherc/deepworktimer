@@ -1,14 +1,17 @@
 'use client';
 
 import { ApiError, DailyGoal, DailyGoalsService, StudyCategoriesService, StudyCategory } from '@api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { activeComponentsAtom, ComponentName } from '../../store/atoms';
 import StudyCategoryComponent from '../study-category/study-category';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useModalContext } from '@context/modal/modal-context';
 import DailyGoalComponent from '../daily-goal/daily-goal';
+import ManageMetadataModal from './manage-metadata-modal';
+import React, { useCallback, useEffect } from 'react';
 import useToast from '@context/toasts/toast-context';
-import AddMetadataModal from './add-metadata-modal';
-import React, { useState } from 'react';
+import { PlusIcon } from '@heroicons/react/20/solid';
 import Timer from '../timer/timer';
+import { useAtom } from 'jotai';
 
 const QUERY_KEYS = {
   studyCategories: 'studyCategories',
@@ -18,10 +21,7 @@ const QUERY_KEYS = {
   timeSettings: 'timeSettings',
 } as const;
 
-type ComponentName = 'timer' | 'dailyGoal' | 'category';
-
-const componentMap: Record<ComponentName, React.ComponentType<{ onRemove?: () => void }>> = {
-  timer: Timer,
+const componentMap: Record<ComponentName, React.ComponentType> = {
   dailyGoal: DailyGoalComponent,
   category: StudyCategoryComponent,
 };
@@ -30,7 +30,7 @@ export default function Sidebar() {
   const { addToast } = useToast();
   const { showModal } = useModalContext();
   const queryClient = useQueryClient();
-  const [activeComponents, setActiveComponents] = useState<ComponentName[]>(['timer']);
+  const [activeComponents, setActiveComponents] = useAtom(activeComponentsAtom);
 
   const handleMutationError = (operation: string) => (error: unknown) => {
     let errorMessage = `Failed to ${operation}`;
@@ -56,7 +56,7 @@ export default function Sidebar() {
         throw new Error('Category ID is undefined');
       }
       return StudyCategoriesService.updateStudyCategoryStudyCategoriesStudyCategoryIdPatch(category.id, {
-        is_selected: false,
+        is_selected: category.is_selected,
       });
     },
     onSuccess: () => {
@@ -65,77 +65,95 @@ export default function Sidebar() {
     onError: handleMutationError('update study category'),
   });
 
-  const addComponent = (componentName: ComponentName) => {
-    setActiveComponents((prev) => [...prev, componentName]);
-  };
+  const { data: categoriesData } = useQuery<StudyCategory[]>({
+    queryKey: [QUERY_KEYS.studyCategories],
+    queryFn: () => StudyCategoriesService.readStudyCategoriesStudyCategoriesGet(),
+  });
 
-  const removeComponent = async (componentName: ComponentName) => {
-    setActiveComponents((prev) => prev.filter((name) => name !== componentName));
+  const { data: dailyGoalsData } = useQuery<DailyGoal[]>({
+    queryKey: [QUERY_KEYS.dailyGoals],
+    queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet(),
+  });
 
-    // Update backend
-    if (componentName === 'dailyGoal') {
-      const dailyGoals = await queryClient.fetchQuery<DailyGoal[]>({
-        queryKey: [QUERY_KEYS.dailyGoals],
-        queryFn: () => DailyGoalsService.readDailyGoalsDailyGoalsGet(),
-      });
-      const activeGoal = dailyGoals.find((goal) => goal.is_selected);
-      if (activeGoal) {
-        updateDailyGoalMutation.mutate({ ...activeGoal, is_selected: false });
-      }
-    } else if (componentName === 'category') {
-      const categories = await queryClient.fetchQuery<StudyCategory[]>({
-        queryKey: [QUERY_KEYS.studyCategories],
-        queryFn: () => StudyCategoriesService.readStudyCategoriesStudyCategoriesGet(),
-      });
-      const activeCategory = categories.find((cat: StudyCategory) => cat.is_selected);
-      if (activeCategory) {
-        updateStudyCategoryMutation.mutate(activeCategory);
-      }
+  useEffect(() => {
+    if (!dailyGoalsData || !categoriesData) return;
+
+    const newActiveComponents: ComponentName[] = [];
+
+    if (dailyGoalsData.some((goal) => goal.is_selected)) {
+      newActiveComponents.push('dailyGoal');
     }
-  };
 
-  const openAddMetadataModal = () => {
+    if (categoriesData.some((category) => category.is_selected)) {
+      newActiveComponents.push('category');
+    }
+
+    setActiveComponents(newActiveComponents);
+  }, [categoriesData, dailyGoalsData, setActiveComponents]);
+
+  const toggleComponent = useCallback(
+    async (componentName: ComponentName) => {
+      if (activeComponents.includes(componentName)) {
+        // Remove component
+        if (componentName === 'dailyGoal') {
+          const activeGoal = dailyGoalsData?.find((goal) => goal.is_selected);
+          if (activeGoal) {
+            await updateDailyGoalMutation.mutateAsync({ ...activeGoal, is_selected: false });
+          }
+        } else if (componentName === 'category') {
+          const activeCategory = categoriesData?.find((cat) => cat.is_selected);
+          if (activeCategory) {
+            await updateStudyCategoryMutation.mutateAsync({ ...activeCategory, is_selected: false });
+          }
+        }
+        setActiveComponents((prev) => prev.filter((name) => name !== componentName));
+      } else {
+        // Add component (no API call, just update local state)
+        setActiveComponents((prev) => [...prev, componentName]);
+      }
+    },
+    [
+      activeComponents,
+      categoriesData,
+      dailyGoalsData,
+      updateDailyGoalMutation,
+      updateStudyCategoryMutation,
+      setActiveComponents,
+    ],
+  );
+
+  const openManageMetadataModal = useCallback(() => {
     showModal({
       type: 'default',
-      title: 'Add Metadata',
+      title: 'Manage Metadata',
       content: (
-        <AddMetadataModal
-          onAdd={addComponent}
-          availableComponents={
-            Object.keys(componentMap).filter(
-              (name) => !activeComponents.includes(name as ComponentName),
-            ) as ComponentName[]
-          }
+        <ManageMetadataModal
+          onToggle={toggleComponent}
+          availableComponents={Object.keys(componentMap) as ComponentName[]}
         />
       ),
     });
-  };
+  }, [showModal, toggleComponent]);
 
   return (
-    <div className="h-100 flex w-1/3 flex-col">
-      <div className="flex grow flex-col overflow-y-auto overflow-x-hidden">
-        <nav className="flex flex-1 flex-col">
-          <ul role="list" className="flex flex-1 flex-col gap-y-4">
-            {activeComponents.map((componentName) => {
-              const Component = componentMap[componentName];
-              return (
-                <li key={componentName}>
-                  <Component onRemove={() => removeComponent(componentName)} />
-                </li>
-              );
-            })}
-            {activeComponents.length < Object.keys(componentMap).length && (
-              <li>
-                <button
-                  onClick={openAddMetadataModal}
-                  className="w-full rounded-lg bg-gray-100 dark:bg-gray-700 p-4 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                >
-                  + Metadata
-                </button>
-              </li>
-            )}
-          </ul>
-        </nav>
+    <div className="h-full flex w-1/3 flex-col">
+      <div className="flex grow flex-col space-y-4 overflow-y-auto">
+        <Timer />
+        {activeComponents.map((componentName) => {
+          const Component = componentMap[componentName];
+          return (
+            <div key={componentName} className="relative">
+              <Component />
+            </div>
+          );
+        })}
+        <button
+          onClick={openManageMetadataModal}
+          className="w-full rounded-md bg-gray-200 dark:bg-gray-800 p-4 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors duration-200 flex items-center justify-center"
+        >
+          <PlusIcon className="h-5 w-5 mr-2" />
+          Metadata
+        </button>
       </div>
     </div>
   );
