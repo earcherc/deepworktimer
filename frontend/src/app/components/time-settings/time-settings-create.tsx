@@ -79,7 +79,7 @@ const TimeSettingsCreate: React.FC = () => {
           <ClockIcon className="h-5 w-5 text-gray-400" />
           <label className="ml-2 font-bold">Mode</label>
           <QuestionMarkCircleIcon data-tooltip-id="tooltip-mode" className="h-4 w-4 text-gray-400 ml-1 cursor-help" />
-          <Tooltip id="tooltip-mode" content="Choose between a countdown timer or an stopwatch session" />
+          <Tooltip id="tooltip-mode" content="Choose between countdown or stopwatch" />
         </div>
         <div className="flex space-x-2">
           <button
@@ -110,7 +110,7 @@ const TimeSettingsCreate: React.FC = () => {
                   data-tooltip-id="tooltip-duration"
                   className="h-4 w-4 text-gray-400 ml-1 cursor-help"
                 />
-                <Tooltip id="tooltip-duration" content="The length of each focused work session" />
+                <Tooltip id="tooltip-duration" content="Duration of each work session (minutes)" />
               </div>
               <Controller
                 name="duration"
@@ -142,7 +142,7 @@ const TimeSettingsCreate: React.FC = () => {
                   data-tooltip-id="tooltip-short-break"
                   className="h-4 w-4 text-gray-400 ml-1 cursor-help"
                 />
-                <Tooltip id="tooltip-short-break" content="The length of short breaks between work sessions" />
+                <Tooltip id="tooltip-short-break" content="Duration of short breaks between work sessions (minutes)" />
               </div>
               <Controller
                 name="short_break_duration"
@@ -176,7 +176,7 @@ const TimeSettingsCreate: React.FC = () => {
                 />
                 <Tooltip
                   id="tooltip-long-break"
-                  content="The length of the longer break after multiple work sessions"
+                  content="Duration of long break after completing multiple sessions (minutes)"
                 />
               </div>
               <Controller
@@ -241,7 +241,7 @@ const TimeSettingsCreate: React.FC = () => {
                   data-tooltip-id="tooltip-end-bell"
                   className="h-4 w-4 text-gray-400 ml-1 cursor-help"
                 />
-                <Tooltip id="tooltip-end-bell" content="Play a sound at the end of each session" />
+                <Tooltip id="tooltip-end-bell" content="Play a sound at end of each session" />
               </div>
               <Controller
                 name="is_sound"
@@ -272,7 +272,10 @@ const TimeSettingsCreate: React.FC = () => {
               data-tooltip-id="tooltip-reminder-sound"
               className="h-4 w-4 text-gray-400 ml-1 cursor-help"
             />
-            <Tooltip id="tooltip-reminder-sound" content="Play a sound at regular intervals during the session" />
+            <Tooltip
+              id="tooltip-reminder-sound"
+              content="Play sound at regularly spaced intervals (minutes) through session"
+            />
           </div>
           <Controller
             name="sound_interval"

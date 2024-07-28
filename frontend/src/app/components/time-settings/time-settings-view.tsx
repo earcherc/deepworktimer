@@ -87,17 +87,25 @@ const TimeSettingsModal: React.FC = () => {
   return (
     <div className="bg-white rounded-lg w-full p-4">
       <div className="flex items-center justify-between mb-4 text-sm text-gray-500 mx-px px-3">
-        <ClockIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Type" />
-        <PlayIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Duration" />
-        <PauseIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Short Break" />
-        <MoonIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Long Break" />
+        <ClockIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Time mode" />
+        <PlayIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Work session duration" />
+        <PauseIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Short break duration" />
+        <MoonIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Long break duration" />
         <ArrowPathIcon
           className="h-5 w-5"
           data-tooltip-id="icon-tooltip"
-          data-tooltip-content="Number of sessions till Long Break"
+          data-tooltip-content="Number of sessions till a long break"
         />
-        <BellIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Sound" />
-        <BoltIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Sound reminder interval" />
+        <BellIcon
+          className="h-5 w-5"
+          data-tooltip-id="icon-tooltip"
+          data-tooltip-content="Play sound at the end of each session"
+        />
+        <BoltIcon
+          className="h-5 w-5"
+          data-tooltip-id="icon-tooltip"
+          data-tooltip-content="Sound reminder at regular intervals (minutes) "
+        />
       </div>
 
       <div className="max-h-80 overflow-y-auto mb-4">
