@@ -27,10 +27,10 @@ const TimeSettingsCreate: React.FC = () => {
   const { control, handleSubmit, watch, setValue } = useForm<TimeSettingsCreateType>({
     defaultValues: {
       is_countdown: true,
-      duration: 55,
-      short_break_duration: 5,
+      duration: 50,
+      short_break_duration: 2,
       long_break_duration: 30,
-      long_break_interval: 3,
+      long_break_interval: 4,
       is_sound: true,
       sound_interval: undefined,
     },

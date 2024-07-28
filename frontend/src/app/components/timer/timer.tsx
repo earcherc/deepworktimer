@@ -520,9 +520,10 @@ const Timer: React.FC = () => {
           {!timerState.isActive && (
             <button
               onClick={openSettingsModal}
-              className="rounded-full p-2 transition-colors bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              className="flex items-center rounded-full p-2 px-4 transition-colors bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
             >
-              <Cog6ToothIcon className="h-5 w-5" />
+              <Cog6ToothIcon className="h-5 w-5 mr-2" />
+              <span className="whitespace-nowrap">Settings</span>
             </button>
           )}
           {!timerState.isBreakMode && (
