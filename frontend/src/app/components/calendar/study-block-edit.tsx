@@ -21,9 +21,10 @@ interface StudyBlockEditProps {
 }
 
 const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
-  const initialEndTime = block.end_time ? format(toLocalTime(block.end_time), "yyyy-MM-dd'T'HH:mm") : '';
+  const initialEndTime = block.end_time ? format(toLocalTime(block.end_time), "yyyy-MM-dd'T'HH:mm:ss") : '';
   const [endTime, setEndTime] = useState(initialEndTime);
   const [rating, setRating] = useState(block.rating || 0);
+  const [isEndTimeChanged, setIsEndTimeChanged] = useState(false);
   const { hideModal } = useModalContext();
   const { addToast } = useToast();
   const queryClient = useQueryClient();
@@ -42,10 +43,9 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
   });
 
   useEffect(() => {
-    const isEndTimeChanged = endTime !== initialEndTime;
     const isRatingChanged = rating !== (block.rating || 0);
     setIsFormChanged(isEndTimeChanged || isRatingChanged);
-  }, [endTime, rating, initialEndTime, block.rating]);
+  }, [endTime, rating, block.rating, isEndTimeChanged]);
 
   const updateStudyBlockMutation = useMutation({
     mutationFn: (updatedBlock: Partial<StudyBlock>) =>
@@ -80,25 +80,37 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const startTimeDate = toLocalTime(block.start_time);
-    const endTimeDate = parseISO(endTime);
 
-    if (endTimeDate <= startTimeDate) {
-      addToast({ type: 'error', content: 'End time must be greater than the start time.' });
-      return;
-    }
-
-    const updatedBlock = {
+    const updatedBlock: Partial<StudyBlock> = {
       ...block,
-      end_time: toUTC(endTimeDate),
       rating,
     };
+
+    if (isEndTimeChanged) {
+      const startTimeDate = toLocalTime(block.start_time);
+      const endTimeDate = parseISO(endTime);
+
+      if (endTimeDate < startTimeDate) {
+        addToast({ type: 'error', content: 'End time must be greater than or equal to the start time.' });
+        return;
+      }
+
+      const adjustedEndTime =
+        endTimeDate.getTime() === startTimeDate.getTime() ? new Date(endTimeDate.getTime() + 1000) : endTimeDate;
+
+      updatedBlock.end_time = toUTC(adjustedEndTime);
+    }
 
     updateStudyBlockMutation.mutate(updatedBlock);
   };
 
   const handleDelete = () => {
     deleteStudyBlockMutation.mutate();
+  };
+
+  const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEndTime(e.target.value);
+    setIsEndTimeChanged(true);
   };
 
   const category = categories.find((c) => c.id === block.study_category_id);
@@ -140,9 +152,9 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
             id="endTime"
             type="datetime-local"
             value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-            autoFocus={false}
+            onChange={handleEndTimeChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+            step="1"
           />
         </div>
       )}
@@ -157,7 +169,7 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
           <button
             type="button"
             onClick={handleDelete}
-            className="px-4 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            className="px-4 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-50"
           >
             Delete
           </button>
@@ -166,14 +178,14 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
           <button
             type="button"
             onClick={hideModal}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={!isFormChanged}
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Save Changes
           </button>
