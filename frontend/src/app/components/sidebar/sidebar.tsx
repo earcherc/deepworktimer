@@ -128,6 +128,8 @@ export default function Sidebar() {
     showModal({
       type: 'default',
       title: 'Manage Metadata',
+      message:
+        'Enhance work sessions with custom metadata. Add valuable context to each session, enabling deeper insights.',
       content: (
         <ManageMetadataModal onAdd={addComponent} onRemove={removeComponent} availableComponents={componentOrder} />
       ),
@@ -149,7 +151,7 @@ export default function Sidebar() {
         })}
         <button
           onClick={openManageMetadataModal}
-          className="w-full rounded-md bg-gray-200 dark:bg-gray-800 p-4 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors duration-200 flex items-center justify-center"
+          className="w-full rounded-md bg-gray-200 dark:bg-gray-900 p-4 text-gray-700 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center"
         >
           Manage Metadata
         </button>

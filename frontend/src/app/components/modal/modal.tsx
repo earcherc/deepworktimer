@@ -67,15 +67,13 @@ const Modal = ({ children }: { children: React.ReactNode }) => {
                     {icon}
                   </div>
                 )}
-                <div className="mt-3 text-center sm:mt-5">
-                  <Dialog.Title as="h2" className="mb-8 text-xl font-semibold leading-6 text-gray-900">
-                    {modalConfig?.title}
-                  </Dialog.Title>
-                  {modalConfig?.message && (
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">{modalConfig.message}</p>
-                    </div>
-                  )}
+                <div className="mt-3  text-center sm:mt-5">
+                  <div className="mb-6">
+                    <Dialog.Title as="h2" className="mb-4 text-xl font-semibold leading-6 text-gray-900">
+                      {modalConfig?.title}
+                    </Dialog.Title>
+                    {modalConfig?.message && <p className="text-sm text-gray-500">{modalConfig.message}</p>}
+                  </div>
                   {children}
                 </div>
                 {modalConfig && modalConfig.buttons && (
