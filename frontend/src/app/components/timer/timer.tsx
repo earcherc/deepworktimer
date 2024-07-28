@@ -1,4 +1,9 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Cog6ToothIcon } from '@heroicons/react/20/solid';
+import classNames from 'classnames';
+import { useAtom } from 'jotai';
+
 import {
   DailyGoal,
   DailyGoalsService,
@@ -13,19 +18,15 @@ import {
   TimeSettingsService,
 } from '@api';
 import { getCurrentUTC, getTodayDateRange, toLocalTime, toUTC } from '@utils/dateUtils';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import SessionCounterModal from '../session-counter/session-counter-modal';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import TimeSettingsModal from '../time-settings/time-settings-view';
 import { useModalContext } from '@app/context/modal/modal-context';
 import SessionCounter from '../session-counter/session-counter';
 import { createMutationErrorHandler } from '@utils/httpUtils';
 import { TimerMode, timerModeAtom } from '../../store/atoms';
-import { Cog6ToothIcon } from '@heroicons/react/20/solid';
 import useToast from '@context/toasts/toast-context';
-import classNames from 'classnames';
-import { useAtom } from 'jotai';
 
+// Constants and utility functions
 const QUERY_KEYS = {
   studyCategories: 'studyCategories',
   dailyGoals: 'dailyGoals',
@@ -41,25 +42,40 @@ const millisecondsToSeconds = (milliseconds: number) => Math.floor(milliseconds 
 const DEFAULT_DURATION = minutesToSeconds(60);
 const FINAL_BELL_BUFFER = 5000;
 
+type TimerState = {
+  time: number;
+  isActive: boolean;
+  isBreakMode: boolean;
+  studyBlockId: number | null;
+  dummyActive: boolean;
+};
+
 const Timer: React.FC = () => {
   const { addToast } = useToast();
   const handleMutationError = createMutationErrorHandler(addToast);
   const { showModal } = useModalContext();
   const queryClient = useQueryClient();
-  const dateRange = getTodayDateRange();
+  const dateRange = useMemo(() => getTodayDateRange(), []);
 
-  const [time, setTime] = useState<number>(DEFAULT_DURATION);
-  const [isActive, setIsActive] = useState<boolean>(false);
   const [mode, setMode] = useAtom(timerModeAtom);
-  const [studyBlockId, setStudyBlockId] = useState<number | null>(null);
-  const [dummyActive, setDummyActive] = useState(false);
-  const [isBreakMode, setIsBreakMode] = useState(false);
-  const [breakAudio, setBreakAudio] = useState<HTMLAudioElement | null>(null);
-  const [intervalAudio, setIntervalAudio] = useState<HTMLAudioElement | null>(null);
-  const [endAudio, setEndAudio] = useState<HTMLAudioElement | null>(null);
-  const workerRef = useRef<Worker | null>(null);
+  const [timerState, setTimerState] = useState<TimerState>({
+    time: DEFAULT_DURATION,
+    isActive: false,
+    isBreakMode: false,
+    studyBlockId: null,
+    dummyActive: false,
+  });
   const [initialTimeSet, setInitialTimeSet] = useState(false);
 
+  const audioRef = useRef<{ break: HTMLAudioElement; interval: HTMLAudioElement; end: HTMLAudioElement }>({
+    break: new Audio('/audio/break_chime.mp3'),
+    interval: new Audio('/audio/interval_chime.mp3'),
+    end: new Audio('/audio/end_chime.mp3'),
+  });
+
+  const workerRef = useRef<Worker | null>(null);
+
+  // Queries
   const { data: categoriesData } = useQuery<StudyCategory[]>({
     queryKey: [QUERY_KEYS.studyCategories],
     queryFn: () => StudyCategoriesService.readStudyCategoriesStudyCategoriesGet(),
@@ -85,11 +101,19 @@ const Timer: React.FC = () => {
     queryFn: () => TimeSettingsService.readTimeSettingsListTimeSetttingsGet(),
   });
 
-  const activeCategory = categoriesData?.find((cat) => cat.is_selected);
-  const activeDailyGoal = dailyGoalsData?.find((goal) => goal.is_selected);
-  const activeSessionCounter = sessionCountersData.find((counter) => counter.is_selected);
-  const activeTimeSettings = timeSettingsData?.find((settings) => settings.is_selected);
+  // Memoized values
+  const activeCategory = useMemo(() => categoriesData?.find((cat) => cat.is_selected), [categoriesData]);
+  const activeDailyGoal = useMemo(() => dailyGoalsData?.find((goal) => goal.is_selected), [dailyGoalsData]);
+  const activeSessionCounter = useMemo(
+    () => sessionCountersData.find((counter) => counter.is_selected),
+    [sessionCountersData],
+  );
+  const activeTimeSettings = useMemo(
+    () => timeSettingsData?.find((settings) => settings.is_selected),
+    [timeSettingsData],
+  );
 
+  // Mutations
   const createStudyBlockMutation = useMutation({
     mutationFn: StudyBlocksService.createStudyBlockStudyBlocksPost,
     onSuccess: (data) => {
@@ -128,12 +152,7 @@ const Timer: React.FC = () => {
     onError: handleMutationError('update session counter'),
   });
 
-  useEffect(() => {
-    setBreakAudio(new Audio('/audio/break_chime.mp3'));
-    setIntervalAudio(new Audio('/audio/interval_chime.mp3'));
-    setEndAudio(new Audio('/audio/end_chime.mp3'));
-  }, []);
-
+  // Effects and callbacks
   useEffect(() => {
     const workerCode = `
       let interval = null;
@@ -164,16 +183,41 @@ const Timer: React.FC = () => {
   const playChime = useCallback(
     (type: 'break' | 'interval' | 'end') => {
       if (activeTimeSettings?.is_sound === false) return;
-      let audio;
-      if (type === 'break') audio = breakAudio;
-      if (type === 'interval') audio = intervalAudio;
-      if (type === 'end') audio = endAudio;
-
-      if (audio) {
-        audio.play().catch((error) => console.error(`Error playing ${type} audio:`, error));
-      }
+      audioRef.current[type].play().catch((error) => console.error(`Error playing ${type} audio:`, error));
     },
-    [breakAudio, intervalAudio, endAudio, activeTimeSettings],
+    [activeTimeSettings?.is_sound],
+  );
+
+  const handleTimerFinished = useCallback(
+    async (newCompleted: number) => {
+      playChime('end');
+
+      if (activeSessionCounter) {
+        await updateSessionCounterMutation.mutateAsync({
+          id: activeSessionCounter.id,
+          completed: newCompleted,
+        });
+      } else {
+        await createSessionCounterMutation.mutateAsync({
+          completed: newCompleted,
+          target: 5,
+          is_selected: true,
+        });
+      }
+
+      const longBreakInterval = activeTimeSettings?.long_break_interval || 2;
+      const breakDuration =
+        newCompleted % longBreakInterval === 0
+          ? activeTimeSettings?.long_break_duration || 30
+          : activeTimeSettings?.short_break_duration || 5;
+
+      setTimerState((prev) => ({
+        ...prev,
+        isBreakMode: true,
+        time: minutesToSeconds(breakDuration),
+      }));
+    },
+    [activeSessionCounter, activeTimeSettings, playChime, updateSessionCounterMutation, createSessionCounterMutation],
   );
 
   const completeDueStudyBlock = useCallback(
@@ -196,14 +240,98 @@ const Timer: React.FC = () => {
         });
       }
     },
-    [updateStudyBlockMutation],
+    [updateStudyBlockMutation, activeSessionCounter, updateSessionCounterMutation, createSessionCounterMutation],
   );
 
+  const stopTimer = useCallback(
+    async (completed = false) => {
+      if (timerState.studyBlockId) {
+        await updateStudyBlockMutation.mutateAsync({
+          id: timerState.studyBlockId,
+          block: { end_time: getCurrentUTC() },
+        });
+      }
+
+      if (!completed) {
+        setTimerState((prev) => ({
+          ...prev,
+          isActive: false,
+          isBreakMode: false,
+          studyBlockId: null,
+          time:
+            mode === TimerMode.Countdown
+              ? activeTimeSettings?.duration
+                ? minutesToSeconds(activeTimeSettings.duration)
+                : DEFAULT_DURATION
+              : 0,
+        }));
+        if (workerRef.current) workerRef.current.postMessage('stop');
+      }
+
+      if (completed && mode === TimerMode.Countdown) {
+        const newCompleted = (activeSessionCounter?.completed || 0) + 1;
+        await handleTimerFinished(newCompleted);
+      }
+    },
+    [
+      timerState.studyBlockId,
+      activeSessionCounter,
+      mode,
+      updateStudyBlockMutation,
+      handleTimerFinished,
+      activeTimeSettings,
+    ],
+  );
+
+  const handleTick = useCallback(() => {
+    setTimerState((prev) => {
+      const newTime = mode === TimerMode.Countdown ? Math.max(prev.time - 1, 0) : prev.time + 1;
+
+      // Check for interval sound
+      if (
+        prev.isActive &&
+        !prev.isBreakMode &&
+        activeTimeSettings?.sound_interval &&
+        activeTimeSettings.is_sound !== false
+      ) {
+        const elapsedTime = mode === TimerMode.Countdown ? (activeTimeSettings.duration || 0) * 60 - newTime : newTime;
+        const remainingTime = secondsToMilliseconds(mode === TimerMode.Countdown ? newTime : elapsedTime);
+        if (
+          remainingTime > FINAL_BELL_BUFFER &&
+          elapsedTime > 0 &&
+          elapsedTime % minutesToSeconds(activeTimeSettings.sound_interval) === 0
+        ) {
+          playChime('interval');
+        }
+      }
+
+      if (mode === TimerMode.Countdown && newTime === 0) {
+        if (prev.isBreakMode) {
+          stopTimer();
+          playChime('break');
+        } else {
+          stopTimer(true);
+        }
+      }
+
+      return { ...prev, time: newTime };
+    });
+  }, [mode, activeTimeSettings, stopTimer, playChime]);
+
   useEffect(() => {
-    if (!isActive && initialTimeSet && activeTimeSettings && activeTimeSettings.duration) {
-      setTime(minutesToSeconds(activeTimeSettings.duration));
+    if (workerRef.current) {
+      workerRef.current.onmessage = handleTick;
     }
-  }, [activeTimeSettings, isActive, initialTimeSet]);
+  }, [handleTick]);
+
+  useEffect(() => {
+    if (!timerState.isActive && initialTimeSet && activeTimeSettings) {
+      setTimerState((prev) => ({
+        ...prev,
+        time: minutesToSeconds(activeTimeSettings.duration || DEFAULT_DURATION / 60),
+      }));
+    }
+  }, [activeTimeSettings, initialTimeSet, timerState.isActive]);
 
   useEffect(() => {
     if (!studyBlocksData || !timeSettingsData || !sessionCountersData || initialTimeSet) return;
@@ -229,136 +357,45 @@ const Timer: React.FC = () => {
       } else {
         newTime = elapsedMilliseconds;
       }
-      setStudyBlockId(incompleteBlock.id);
+      setTimerState((prev) => ({
+        ...prev,
+        studyBlockId: incompleteBlock.id,
+        time: millisecondsToSeconds(newTime),
+        isActive: true,
+        dummyActive: !activeSessionCounter,
+      }));
       setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
-      setTime(millisecondsToSeconds(newTime));
-      setIsActive(true);
       if (workerRef.current) workerRef.current.postMessage('start');
-      if (!activeSessionCounter) setDummyActive(true);
+    } else if (activeTimeSettings) {
+      setTimerState((prev) => ({
+        ...prev,
+        time: minutesToSeconds(activeTimeSettings.duration || DEFAULT_DURATION / 60),
+      }));
     }
 
     setInitialTimeSet(true);
-  }, [activeTimeSettings, completeDueStudyBlock, initialTimeSet, mode, setMode, studyBlocksData, timeSettingsData]);
-
-  const handleTimerFinished = useCallback(
-    async (newCompleted: number) => {
-      if (!activeTimeSettings || activeTimeSettings.is_sound !== false) {
-        playChime('end');
-      }
-
-      setIsBreakMode(true);
-
-      if (activeSessionCounter) {
-        await updateSessionCounterMutation.mutateAsync({
-          id: activeSessionCounter.id,
-          completed: newCompleted,
-        });
-      } else {
-        await createSessionCounterMutation.mutateAsync({
-          completed: newCompleted,
-          target: 5,
-          is_selected: true,
-        });
-      }
-
-      const longBreakInterval = activeTimeSettings?.long_break_interval || 2;
-      if (newCompleted % longBreakInterval === 0) {
-        setTime(minutesToSeconds(activeTimeSettings?.long_break_duration || 30));
-      } else {
-        setTime(minutesToSeconds(activeTimeSettings?.short_break_duration || 5));
-      }
-    },
-    [activeSessionCounter, activeTimeSettings, playChime, updateSessionCounterMutation, createSessionCounterMutation],
-  );
-
-  const stopTimer = useCallback(
-    async (completed = false) => {
-      setIsActive(false);
-      if (studyBlockId) {
-        await updateStudyBlockMutation.mutateAsync({
-          id: studyBlockId,
-          block: { end_time: getCurrentUTC() },
-        });
-        setStudyBlockId(null);
-      }
-
-      if (!activeSessionCounter) setDummyActive(false);
-
-      if (!completed) {
-        setIsBreakMode(false);
-        if (workerRef.current) workerRef.current.postMessage('stop');
-
-        if (mode == TimerMode.Countdown) {
-          setTime(activeTimeSettings?.duration ? minutesToSeconds(activeTimeSettings.duration) : DEFAULT_DURATION);
-        } else {
-          setTime(0);
-        }
-      }
-
-      if (completed && mode === TimerMode.Countdown) {
-        if (activeSessionCounter) {
-          const newCompleted = activeSessionCounter.completed + 1;
-          await handleTimerFinished(newCompleted);
-        } else {
-          await handleTimerFinished(1);
-        }
-      }
-    },
-    [
-      studyBlockId,
-      activeSessionCounter,
-      mode,
-      updateStudyBlockMutation,
-      activeTimeSettings?.duration,
-      handleTimerFinished,
-    ],
-  );
-
-  const handleTick = useCallback(() => {
-    setTime((prevTime) => {
-      const newTime = mode === TimerMode.Countdown ? Math.max(prevTime - 1, 0) : prevTime + 1;
-
-      // Check for interval sound
-      if (isActive && !isBreakMode && activeTimeSettings?.sound_interval && activeTimeSettings.is_sound !== false) {
-        const elapsedTime = mode === TimerMode.Countdown ? (activeTimeSettings.duration || 0) * 60 - newTime : newTime;
-        const remainingTime = secondsToMilliseconds(mode === TimerMode.Countdown ? newTime : elapsedTime);
-        if (
-          remainingTime > FINAL_BELL_BUFFER &&
-          elapsedTime > 0 &&
-          elapsedTime % minutesToSeconds(activeTimeSettings.sound_interval) === 0
-        ) {
-          playChime('interval');
-        }
-      }
-
-      if (mode === TimerMode.Countdown && newTime === 0) {
-        if (isBreakMode) {
-          stopTimer();
-          playChime('break');
-        } else {
-          stopTimer(true);
-        }
-      }
-
-      return newTime;
-    });
-  }, [mode, isActive, isBreakMode, activeTimeSettings, stopTimer, playChime]);
+  }, [
+    studyBlocksData,
+    timeSettingsData,
+    sessionCountersData,
+    initialTimeSet,
+    activeTimeSettings,
+    activeSessionCounter,
+    completeDueStudyBlock,
+    setMode,
+  ]);
 
   useEffect(() => {
-    if (workerRef.current) {
-      workerRef.current.onmessage = handleTick;
-    }
-  }, [handleTick]);
-
-  useEffect(() => {
-    const formattedTime = formatTime(time);
+    const formattedTime = formatTime(timerState.time);
     let title = 'Timer';
 
-    if (isActive || isBreakMode) {
-      if (isBreakMode) {
+    if (timerState.isActive || timerState.isBreakMode) {
+      if (timerState.isBreakMode) {
         title = `${formattedTime} - BREAK`;
       } else if (mode === TimerMode.Countdown) {
-        title = `${formattedTime} - ${activeSessionCounter ? activeSessionCounter.completed + 1 : 1}/${activeSessionCounter ? activeSessionCounter.target : 5}`;
+        title = `${formattedTime} - ${activeSessionCounter ? activeSessionCounter.completed + 1 : 1}/${
+          activeSessionCounter ? activeSessionCounter.target : 5
+        }`;
       } else {
         title = formattedTime;
       }
@@ -369,7 +406,7 @@ const Timer: React.FC = () => {
     return () => {
       document.title = 'Timer';
     };
-  }, [time, isActive, isBreakMode, activeSessionCounter, mode]);
+  }, [timerState, activeSessionCounter, mode]);
 
   const startTimer = async () => {
     const newBlock = await createStudyBlockMutation.mutateAsync({
@@ -378,22 +415,26 @@ const Timer: React.FC = () => {
       study_category_id: activeCategory?.id,
     });
 
-    setStudyBlockId(newBlock.id);
-    setIsActive(true);
-
-    if (!activeSessionCounter) setDummyActive(true);
+    setTimerState((prev) => ({
+      ...prev,
+      isActive: true,
+      studyBlockId: newBlock.id,
+      dummyActive: !activeSessionCounter,
+    }));
     if (workerRef.current) workerRef.current.postMessage('start');
   };
 
   const toggleMode = () => {
-    if (isActive) return;
+    if (timerState.isActive) return;
     setMode((prevMode) => {
       const newMode = prevMode === TimerMode.Countdown ? TimerMode.OpenSession : TimerMode.Countdown;
-      if (newMode === TimerMode.Countdown) {
-        setTime(activeTimeSettings?.duration ? minutesToSeconds(activeTimeSettings.duration) : DEFAULT_DURATION);
-      } else {
-        setTime(0);
-      }
+      const newTime =
+        newMode === TimerMode.Countdown
+          ? activeTimeSettings?.duration
+            ? minutesToSeconds(activeTimeSettings.duration)
+            : DEFAULT_DURATION
+          : 0;
+      setTimerState((prev) => ({ ...prev, time: newTime }));
       return newMode;
     });
   };
@@ -410,7 +451,7 @@ const Timer: React.FC = () => {
   };
 
   const isButtonDisabled = (timerMode: TimerMode) => {
-    return isActive && mode !== timerMode;
+    return timerState.isActive && mode !== timerMode;
   };
 
   const openSettingsModal = () => {
@@ -439,7 +480,7 @@ const Timer: React.FC = () => {
     <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
       <div className="flex flex-col items-center">
         <div className="mb-4 flex space-x-4">
-          {!isBreakMode &&
+          {!timerState.isBreakMode &&
             Object.values(TimerMode).map((timerMode) => (
               <button
                 key={timerMode}
@@ -457,24 +498,26 @@ const Timer: React.FC = () => {
               </button>
             ))}
         </div>
-        <p className="mb-2 text-6xl font-bold text-gray-900 dark:text-white">{formatTime(time)}</p>
-        {mode === TimerMode.Countdown && !isBreakMode && (
+        <p className="mb-2 text-6xl font-bold text-gray-900 dark:text-white">{formatTime(timerState.time)}</p>
+        {mode === TimerMode.Countdown && !timerState.isBreakMode && (
           <SessionCounter
             target={activeSessionCounter ? activeSessionCounter.target : 5}
             completed={activeSessionCounter ? activeSessionCounter.completed : 0}
-            isActive={activeSessionCounter ? isActive : dummyActive}
+            isActive={activeSessionCounter ? timerState.isActive : timerState.dummyActive}
             isDummy={!activeSessionCounter}
             onReset={resetSessionCounter}
             onClick={openSessionsModal}
           />
         )}
-        {isBreakMode && (
+        {timerState.isBreakMode && (
           <p className="mb-4 text-lg font-medium text-blue-500">
-            {time > minutesToSeconds(activeTimeSettings?.short_break_duration || 5) ? 'Long Break' : 'Short Break'}
+            {timerState.time > minutesToSeconds(activeTimeSettings?.short_break_duration || 5)
+              ? 'Long Break'
+              : 'Short Break'}
           </p>
         )}
         <div className="flex space-x-3">
-          {!isActive && (
+          {!timerState.isActive && (
             <button
               onClick={openSettingsModal}
               className="rounded-full p-2 transition-colors bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
@@ -482,18 +525,18 @@ const Timer: React.FC = () => {
               <Cog6ToothIcon className="h-5 w-5" />
             </button>
           )}
-          {!isBreakMode && (
+          {!timerState.isBreakMode && (
             <button
-              onClick={isActive ? () => stopTimer() : startTimer}
+              onClick={timerState.isActive ? () => stopTimer() : startTimer}
               className={classNames(
                 'rounded-full px-6 py-2 text-sm font-semibold text-white transition-colors',
-                isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600',
+                timerState.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600',
               )}
             >
-              {isActive ? 'Stop' : 'Start'}
+              {timerState.isActive ? 'Stop' : 'Start'}
             </button>
           )}
-          {isBreakMode && (
+          {timerState.isBreakMode && (
             <button
               onClick={() => stopTimer()}
               className="rounded-full px-6 py-2 text-sm font-semibold text-white transition-colors bg-red-500 hover:bg-red-600"
