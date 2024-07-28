@@ -48,9 +48,7 @@ export default function Nav() {
   };
 
   const displayName = user
-    ? user.first_name && user.last_name
-      ? `${user.first_name} ${user.last_name}`
-      : user.first_name || user.last_name || user.username?.charAt(0).toUpperCase() + user.username?.slice(1)
+    ? user.first_name || user.username?.charAt(0).toUpperCase() + user.username?.slice(1)
     : 'Unknown';
 
   return (
