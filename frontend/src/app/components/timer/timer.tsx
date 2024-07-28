@@ -471,6 +471,7 @@ const Timer: React.FC = () => {
     showModal({
       type: 'default',
       title: 'Session Counter',
+      message: 'Create a targeted streak counter that will continue to grow as you fully complete sessions.',
       content: <SessionCounterModal />,
     });
   };
