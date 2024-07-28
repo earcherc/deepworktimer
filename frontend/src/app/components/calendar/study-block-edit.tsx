@@ -121,7 +121,8 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
       key={value}
       type="button"
       onClick={() => setRating(value)}
-      className={`px-3 py-1 border ${rating === value ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'} rounded-md`}
+      className={`px-3 py-1 border rounded-md transition-colors duration-200
+      ${rating === value ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-white text-gray-700 hover:bg-blue-100'}`}
     >
       {value}
     </button>

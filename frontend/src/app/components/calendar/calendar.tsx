@@ -99,7 +99,8 @@ const Calendar: React.FC<CalendarProps> = () => {
   const openEditStudyBlockModal = (block: StudyBlock) => {
     showModal({
       type: 'default',
-      title: 'Edit Study Block',
+      title: 'Edit Work Session',
+      message: 'Add a subjective rating to keep track of your mental state.',
       content: <StudyBlockEdit block={block} />,
     });
   };
