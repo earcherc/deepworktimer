@@ -10,8 +10,8 @@ import {
   PlayIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/20/solid';
-import { Controller, ControllerRenderProps, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { ApiError, TimeSettingsCreate as TimeSettingsCreateType, TimeSettingsService } from '@api';
+import { Controller, ControllerRenderProps, FieldError, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useModalContext } from '@context/modal/modal-context';
 import useToast from '@context/toasts/toast-context';
@@ -73,7 +73,10 @@ const TimeSettingsCreate: React.FC = () => {
   };
 
   interface TimeInputProps {
-    field: ControllerRenderProps<FieldValues, string>;
+    field: ControllerRenderProps<
+      TimeSettingsCreateType,
+      'duration' | 'short_break_duration' | 'long_break_duration' | 'long_break_interval' | 'sound_interval'
+    >;
     error: FieldError | undefined;
   }
 
@@ -83,6 +86,7 @@ const TimeSettingsCreate: React.FC = () => {
         <input
           type="number"
           {...field}
+          value={field.value === undefined || typeof field.value === 'boolean' ? '' : field.value}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             field.onChange(e.target.value === '' ? '' : Number(e.target.value))
           }
