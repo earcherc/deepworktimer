@@ -79,7 +79,7 @@ const TimeSettingsCreate: React.FC = () => {
           <ClockIcon className="h-5 w-5 text-gray-400" />
           <label className="ml-2 font-bold">Mode</label>
           <QuestionMarkCircleIcon data-tooltip-id="tooltip-mode" className="h-4 w-4 text-gray-400 ml-1 cursor-help" />
-          <Tooltip id="tooltip-mode" content="Choose between a countdown timer or an open-ended session" />
+          <Tooltip id="tooltip-mode" content="Choose between a countdown timer or an stopwatch session" />
         </div>
         <div className="flex space-x-2">
           <button
@@ -94,7 +94,7 @@ const TimeSettingsCreate: React.FC = () => {
             onClick={() => handleModeChange(false)}
             className={`px-3 py-1 rounded-md ${!isCountdown ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
           >
-            Open
+            Stopwatch
           </button>
         </div>
       </div>
