@@ -15,6 +15,7 @@ export default function Header() {
   return (
     <header className="absolute inset-x-0 top-0 z-50">
       <nav className="relative flex items-center justify-between p-6 lg:px-8" aria-label="Global">
+        {/* Mobile menu button */}
         <div className="flex lg:hidden">
           <button
             type="button"
@@ -25,6 +26,7 @@ export default function Header() {
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
+        {/* Desktop navigation */}
         <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:items-center">
           <div className="flex space-x-8">
             {navigation.map((item) => (
@@ -40,24 +42,25 @@ export default function Header() {
             ))}
           </div>
         </div>
+        {/* Desktop register and login buttons */}
         <div className="hidden lg:flex lg:items-center">
           <div className="absolute right-0 mr-6 flex items-center space-x-4">
             <Link
               href="/register"
-              className="text-sm font-semibold leading-6 text-gray-900 hover:text-black transition-colors"
+              className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
             >
               Register
             </Link>
             <Link
               href="/login"
-              className="text-sm font-semibold leading-6 text-gray-900 hover:text-black transition-colors"
+              className="px-4 py-2 text-sm font-semibold text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
             >
-              Log in
+              Sign in
             </Link>
           </div>
         </div>
       </nav>
-      {/* Mobile menu, show/hide based on menu open state. */}
+      {/* Mobile menu */}
       <div className={`lg:hidden ${isMenuOpen ? '' : 'hidden'}`} role="dialog" aria-modal="true">
         <div className="fixed inset-0 z-50"></div>
         <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
@@ -84,18 +87,18 @@ export default function Header() {
                   </Link>
                 ))}
               </div>
-              <div className="py-6">
+              <div className="py-6 space-y-4">
                 <Link
                   href="/register"
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                  className="block w-full px-4 py-2 text-center text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
                 >
                   Register
                 </Link>
                 <Link
                   href="/login"
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                  className="block w-full px-4 py-2 text-center text-sm font-semibold text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
                 >
-                  Log in
+                  Sign in
                 </Link>
               </div>
             </div>
