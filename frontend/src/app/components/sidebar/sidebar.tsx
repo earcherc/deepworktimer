@@ -2,14 +2,13 @@
 
 import { ApiError, DailyGoal, DailyGoalsService, StudyCategoriesService, StudyCategory } from '@api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { activeComponentsAtom, ComponentName } from '../../store/atoms';
+import { ComponentName, visibleComponentsAtom } from '../../store/atoms';
 import StudyCategoryComponent from '../study-category/study-category';
 import { useModalContext } from '@context/modal/modal-context';
 import DailyGoalComponent from '../daily-goal/daily-goal';
 import ManageMetadataModal from './manage-metadata-modal';
 import React, { useCallback, useEffect } from 'react';
 import useToast from '@context/toasts/toast-context';
-import { PlusIcon } from '@heroicons/react/20/solid';
 import Timer from '../timer/timer';
 import { useAtom } from 'jotai';
 
@@ -26,11 +25,13 @@ const componentMap: Record<ComponentName, React.ComponentType> = {
   category: StudyCategoryComponent,
 };
 
+const componentOrder: ComponentName[] = ['dailyGoal', 'category'];
+
 export default function Sidebar() {
   const { addToast } = useToast();
   const { showModal } = useModalContext();
   const queryClient = useQueryClient();
-  const [activeComponents, setActiveComponents] = useAtom(activeComponentsAtom);
+  const [visibleComponents, setVisibleComponents] = useAtom(visibleComponentsAtom);
 
   const handleMutationError = (operation: string) => (error: unknown) => {
     let errorMessage = `Failed to ${operation}`;
@@ -56,7 +57,7 @@ export default function Sidebar() {
         throw new Error('Category ID is undefined');
       }
       return StudyCategoriesService.updateStudyCategoryStudyCategoriesStudyCategoryIdPatch(category.id, {
-        is_selected: category.is_selected,
+        is_selected: false,
       });
     },
     onSuccess: () => {
@@ -78,48 +79,49 @@ export default function Sidebar() {
   useEffect(() => {
     if (!dailyGoalsData || !categoriesData) return;
 
-    const newActiveComponents: ComponentName[] = [];
+    const newVisibleComponents: ComponentName[] = [];
 
     if (dailyGoalsData.some((goal) => goal.is_selected)) {
-      newActiveComponents.push('dailyGoal');
+      newVisibleComponents.push('dailyGoal');
     }
 
     if (categoriesData.some((category) => category.is_selected)) {
-      newActiveComponents.push('category');
+      newVisibleComponents.push('category');
     }
 
-    setActiveComponents(newActiveComponents);
-  }, [categoriesData, dailyGoalsData, setActiveComponents]);
+    setVisibleComponents((prev) => {
+      const combined = [...new Set([...prev, ...newVisibleComponents])];
+      return componentOrder.filter((comp) => combined.includes(comp));
+    });
+  }, [categoriesData, dailyGoalsData, setVisibleComponents]);
 
-  const toggleComponent = useCallback(
-    async (componentName: ComponentName) => {
-      if (activeComponents.includes(componentName)) {
-        // Remove component
-        if (componentName === 'dailyGoal') {
-          const activeGoal = dailyGoalsData?.find((goal) => goal.is_selected);
-          if (activeGoal) {
-            await updateDailyGoalMutation.mutateAsync({ ...activeGoal, is_selected: false });
-          }
-        } else if (componentName === 'category') {
-          const activeCategory = categoriesData?.find((cat) => cat.is_selected);
-          if (activeCategory) {
-            await updateStudyCategoryMutation.mutateAsync({ ...activeCategory, is_selected: false });
-          }
-        }
-        setActiveComponents((prev) => prev.filter((name) => name !== componentName));
-      } else {
-        // Add component (no API call, just update local state)
-        setActiveComponents((prev) => [...prev, componentName]);
-      }
+  const addComponent = useCallback(
+    (componentName: ComponentName) => {
+      setVisibleComponents((prev) => {
+        if (prev.includes(componentName)) return prev;
+        const newComponents = [...prev, componentName];
+        return componentOrder.filter((comp) => newComponents.includes(comp));
+      });
     },
-    [
-      activeComponents,
-      categoriesData,
-      dailyGoalsData,
-      updateDailyGoalMutation,
-      updateStudyCategoryMutation,
-      setActiveComponents,
-    ],
+    [setVisibleComponents],
+  );
+
+  const removeComponent = useCallback(
+    async (componentName: ComponentName) => {
+      if (componentName === 'dailyGoal') {
+        const activeGoal = dailyGoalsData?.find((goal) => goal.is_selected);
+        if (activeGoal) {
+          await updateDailyGoalMutation.mutateAsync({ ...activeGoal, is_selected: false });
+        }
+      } else if (componentName === 'category') {
+        const activeCategory = categoriesData?.find((category) => category.is_selected);
+        if (activeCategory) {
+          await updateStudyCategoryMutation.mutateAsync(activeCategory);
+        }
+      }
+      setVisibleComponents((prev) => prev.filter((name) => name !== componentName));
+    },
+    [dailyGoalsData, categoriesData, updateDailyGoalMutation, updateStudyCategoryMutation, setVisibleComponents],
   );
 
   const openManageMetadataModal = useCallback(() => {
@@ -127,19 +129,17 @@ export default function Sidebar() {
       type: 'default',
       title: 'Manage Metadata',
       content: (
-        <ManageMetadataModal
-          onToggle={toggleComponent}
-          availableComponents={Object.keys(componentMap) as ComponentName[]}
-        />
+        <ManageMetadataModal onAdd={addComponent} onRemove={removeComponent} availableComponents={componentOrder} />
       ),
     });
-  }, [showModal, toggleComponent]);
+  }, [showModal, addComponent, removeComponent]);
 
   return (
     <div className="h-full flex w-1/3 flex-col">
       <div className="flex grow flex-col space-y-4 overflow-y-auto">
         <Timer />
-        {activeComponents.map((componentName) => {
+        {componentOrder.map((componentName) => {
+          if (!visibleComponents.includes(componentName)) return null;
           const Component = componentMap[componentName];
           return (
             <div key={componentName} className="relative">
@@ -151,8 +151,7 @@ export default function Sidebar() {
           onClick={openManageMetadataModal}
           className="w-full rounded-md bg-gray-200 dark:bg-gray-800 p-4 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors duration-200 flex items-center justify-center"
         >
-          <PlusIcon className="h-5 w-5 mr-2" />
-          Metadata
+          Manage Metadata
         </button>
       </div>
     </div>
