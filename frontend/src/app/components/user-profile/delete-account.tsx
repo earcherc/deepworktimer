@@ -16,7 +16,7 @@ export default function DeleteAccountForm() {
   const { handleSubmit } = useForm();
 
   const deleteUserMutation = useMutation({
-    mutationFn: () => UsersService.deleteCurrentUserUsersDelete(),
+    mutationFn: () => UsersService.deleteAccountUsersDeleteAccountDelete(),
     onSuccess: () => {
       hideModal();
       queryClient.setQueryData(['currentUser'], null);

@@ -52,17 +52,6 @@ export class UsersService {
         });
     }
     /**
-     * Delete Current User
-     * @returns boolean Successful Response
-     * @throws ApiError
-     */
-    public static deleteCurrentUserUsersDelete(): CancelablePromise<boolean> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/users/',
-        });
-    }
-    /**
      * Update Current User
      * @param requestBody
      * @returns User Successful Response
@@ -110,6 +99,17 @@ export class UsersService {
             errors: {
                 422: `Validation Error`,
             },
+        });
+    }
+    /**
+     * Delete Account
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static deleteAccountUsersDeleteAccountDelete(): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/users/delete-account',
         });
     }
 }
