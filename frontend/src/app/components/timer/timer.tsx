@@ -457,7 +457,7 @@ const Timer: React.FC = () => {
   const openSettingsModal = () => {
     showModal({
       type: 'default',
-      title: 'Time Settings',
+      title: 'Time Settings Menu',
       content: <TimeSettingsModal />,
     });
   };

@@ -94,10 +94,10 @@ const TimeSettingsModal: React.FC = () => {
         <ArrowPathIcon
           className="h-5 w-5"
           data-tooltip-id="icon-tooltip"
-          data-tooltip-content="Sessions till Long Break"
+          data-tooltip-content="Number of sessions till Long Break"
         />
         <BellIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Sound" />
-        <BoltIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Sound Interval" />
+        <BoltIcon className="h-5 w-5" data-tooltip-id="icon-tooltip" data-tooltip-content="Sound reminder interval" />
       </div>
 
       <div className="max-h-80 overflow-y-auto mb-4">
@@ -146,7 +146,7 @@ const TimeSettingsModal: React.FC = () => {
             </div>
           ))
         ) : (
-          <p className="text-sm text-gray-700 font-medium">No Time Settings</p>
+          <p className="text-sm text-gray-700 font-semibold">You have no Time Settings</p>
         )}
       </div>
 
