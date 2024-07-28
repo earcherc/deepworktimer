@@ -76,6 +76,7 @@ const TimeSettingsModal: React.FC = () => {
     showModal({
       type: 'default',
       title: 'Create Time Setting',
+      message: 'Use the default values for ideal productivity, or create your own.',
       content: <TimeSettingsCreate />,
     });
   };

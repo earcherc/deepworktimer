@@ -462,7 +462,7 @@ const Timer: React.FC = () => {
     showModal({
       type: 'default',
       title: 'Time Settings Menu',
-      message: 'Create and choose between different time settings. Customise the timer to your preferences.',
+      message: 'Select from different time settings. Customise the timer to your preferences.',
       content: <TimeSettingsModal />,
     });
   };
