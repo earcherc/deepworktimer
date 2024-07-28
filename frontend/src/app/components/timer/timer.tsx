@@ -325,10 +325,14 @@ const Timer: React.FC = () => {
   }, [handleTick]);
 
   useEffect(() => {
-    if (!timerState.isActive && initialTimeSet && activeTimeSettings) {
+    if (!timerState.isActive && initialTimeSet) {
+      const newTime = activeTimeSettings
+        ? minutesToSeconds(activeTimeSettings.duration || DEFAULT_DURATION / 60)
+        : DEFAULT_DURATION;
+
       setTimerState((prev) => ({
         ...prev,
-        time: minutesToSeconds(activeTimeSettings.duration || DEFAULT_DURATION / 60),
+        time: newTime,
       }));
     }
   }, [activeTimeSettings, initialTimeSet, timerState.isActive]);

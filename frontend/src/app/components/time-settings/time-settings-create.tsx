@@ -10,8 +10,8 @@ import {
   PlayIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/20/solid';
+import { Controller, ControllerRenderProps, FieldError, FieldValues, useForm } from 'react-hook-form';
 import { ApiError, TimeSettingsCreate as TimeSettingsCreateType, TimeSettingsService } from '@api';
-import { Controller, ControllerRenderProps, FieldError, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useModalContext } from '@context/modal/modal-context';
 import useToast from '@context/toasts/toast-context';
@@ -73,7 +73,7 @@ const TimeSettingsCreate: React.FC = () => {
   };
 
   interface TimeInputProps {
-    field: ControllerRenderProps<unknown, string>;
+    field: ControllerRenderProps<FieldValues, string>;
     error: FieldError | undefined;
   }
 

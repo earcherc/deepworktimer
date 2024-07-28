@@ -7,7 +7,6 @@ import {
   BellIcon,
   BoltIcon,
   ClockIcon,
-  CogIcon,
   MoonIcon,
   PauseIcon,
   PlayIcon,
@@ -36,7 +35,9 @@ const TimeSettingsModal: React.FC = () => {
 
   const updateTimeSettingsMutation = useMutation({
     mutationFn: (settings: TimeSettings) =>
-      TimeSettingsService.updateTimeSettingsTimeSetttingsTimeSettingsIdPatch(settings.id, { is_selected: true }),
+      TimeSettingsService.updateTimeSettingsTimeSetttingsTimeSettingsIdPatch(settings.id, {
+        is_selected: !settings.is_selected,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['timeSettings'] });
     },
@@ -79,11 +80,6 @@ const TimeSettingsModal: React.FC = () => {
     });
   };
 
-  const handleEdit = (settings: TimeSettings) => {
-    // This is a placeholder for the edit functionality
-    console.log('Edit settings:', settings);
-  };
-
   return (
     <div className="bg-white rounded-lg w-full p-4">
       <div className="flex items-center justify-between mb-4 text-sm text-gray-500 mx-px px-3">
@@ -108,12 +104,16 @@ const TimeSettingsModal: React.FC = () => {
         />
       </div>
 
-      <div className="max-h-80 overflow-y-auto mb-4">
+      <div className="max-h-80 overflow-y-auto mb-4 space-y-2">
         {sortedTimeSettings.length > 0 ? (
           sortedTimeSettings.map((settings) => (
             <div
               key={settings.id}
-              className={`relative flex items-center justify-between p-3 mb-2 rounded-lg cursor-pointer hover:bg-gray-100 ${settings.is_selected ? 'bg-blue-100' : ''}`}
+              className={`relative flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors duration-200 ${
+                settings.is_selected
+                  ? 'bg-blue-300 text-white hover:bg-blue-400'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
               onClick={() => handleSelect(settings)}
               onMouseEnter={() => setHoveredId(settings.id)}
               onMouseLeave={() => setHoveredId(null)}
@@ -121,9 +121,15 @@ const TimeSettingsModal: React.FC = () => {
               <div className="flex items-center justify-between w-full">
                 <span className="w-6 flex justify-center">
                   {settings.is_countdown ? (
-                    <ArrowDownCircleIcon className="h-5 w-5 text-blue-500" aria-label="Timer" />
+                    <ArrowDownCircleIcon
+                      className={`h-6 w-6 ${settings.is_selected ? 'text-white' : 'text-blue-500'}`}
+                      aria-label="Timer"
+                    />
                   ) : (
-                    <ArrowUpCircleIcon className="h-5 w-5 text-green-500" aria-label="Open" />
+                    <ArrowUpCircleIcon
+                      className={`h-6 w-6 ${settings.is_selected ? 'text-white' : 'text-green-500'}`}
+                      aria-label="Open"
+                    />
                   )}
                 </span>
                 <span className="w-8 text-center">{settings.duration}</span>
@@ -135,13 +141,6 @@ const TimeSettingsModal: React.FC = () => {
               </div>
               {hoveredId === settings.id && (
                 <div className="absolute right-2 flex space-x-2 bg-gray-800 bg-opacity-90 rounded p-1">
-                  <CogIcon
-                    className="h-5 w-5 text-white hover:text-gray-200"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(settings);
-                    }}
-                  />
                   <TrashIcon
                     className="h-5 w-5 text-red-500 hover:text-red-400"
                     onClick={(e) => {
@@ -158,7 +157,10 @@ const TimeSettingsModal: React.FC = () => {
         )}
       </div>
 
-      <button className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600" onClick={handleCreate}>
+      <button
+        className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200"
+        onClick={handleCreate}
+      >
         Create New Setting
       </button>
 
