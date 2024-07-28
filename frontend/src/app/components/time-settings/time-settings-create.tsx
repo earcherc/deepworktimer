@@ -11,9 +11,9 @@ import {
   QuestionMarkCircleIcon,
 } from '@heroicons/react/20/solid';
 import { ApiError, TimeSettingsCreate as TimeSettingsCreateType, TimeSettingsService } from '@api';
+import { Controller, ControllerRenderProps, FieldError, useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useModalContext } from '@context/modal/modal-context';
-import { Controller, useForm } from 'react-hook-form';
 import useToast from '@context/toasts/toast-context';
 import { Switch } from '@headlessui/react';
 import { Tooltip } from 'react-tooltip';
@@ -72,6 +72,30 @@ const TimeSettingsCreate: React.FC = () => {
     }
   };
 
+  interface TimeInputProps {
+    field: ControllerRenderProps<unknown, string>;
+    error: FieldError | undefined;
+  }
+
+  const TimeInput: React.FC<TimeInputProps> = ({ field, error }) => (
+    <div className="flex flex-col items-end">
+      <div className="flex items-center">
+        <input
+          type="number"
+          {...field}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            field.onChange(e.target.value === '' ? '' : Number(e.target.value))
+          }
+          className={`w-16 text-right rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 ${
+            error ? 'border-red-500' : ''
+          }`}
+        />
+        <span className="text-sm text-gray-500">m</span>
+      </div>
+      {error && <p className="text-red-500 text-sm mt-1">{error.message}</p>}
+    </div>
+  );
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
       <div className="flex items-center justify-between mb-4">
@@ -116,19 +140,7 @@ const TimeSettingsCreate: React.FC = () => {
                 name="duration"
                 control={control}
                 rules={{ required: 'This field is required', min: { value: 1, message: 'Must be at least 1' } }}
-                render={({ field, fieldState: { error } }) => (
-                  <div className="flex flex-col items-end">
-                    <input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
-                      className={`w-20 text-right rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 ${
-                        error ? 'border-red-500' : ''
-                      }`}
-                    />
-                    {error && <p className="text-red-500 text-sm mt-1">{error.message}</p>}
-                  </div>
-                )}
+                render={({ field, fieldState: { error } }) => <TimeInput field={field} error={error} />}
               />
             </div>
           </div>
@@ -148,19 +160,7 @@ const TimeSettingsCreate: React.FC = () => {
                 name="short_break_duration"
                 control={control}
                 rules={{ required: 'This field is required', min: { value: 1, message: 'Must be at least 1' } }}
-                render={({ field, fieldState: { error } }) => (
-                  <div className="flex flex-col items-end">
-                    <input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
-                      className={`w-20 text-right rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 ${
-                        error ? 'border-red-500' : ''
-                      }`}
-                    />
-                    {error && <p className="text-red-500 text-sm mt-1">{error.message}</p>}
-                  </div>
-                )}
+                render={({ field, fieldState: { error } }) => <TimeInput field={field} error={error} />}
               />
             </div>
           </div>
@@ -183,19 +183,7 @@ const TimeSettingsCreate: React.FC = () => {
                 name="long_break_duration"
                 control={control}
                 rules={{ required: 'This field is required', min: { value: 1, message: 'Must be at least 1' } }}
-                render={({ field, fieldState: { error } }) => (
-                  <div className="flex flex-col items-end">
-                    <input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
-                      className={`w-20 text-right rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 ${
-                        error ? 'border-red-500' : ''
-                      }`}
-                    />
-                    {error && <p className="text-red-500 text-sm mt-1">{error.message}</p>}
-                  </div>
-                )}
+                render={({ field, fieldState: { error } }) => <TimeInput field={field} error={error} />}
               />
             </div>
           </div>
@@ -217,14 +205,17 @@ const TimeSettingsCreate: React.FC = () => {
                 rules={{ required: 'This field is required', min: { value: 2, message: 'Must be at least 2' } }}
                 render={({ field, fieldState: { error } }) => (
                   <div className="flex flex-col items-end">
-                    <input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
-                      className={`w-20 text-right rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 ${
-                        error ? 'border-red-500' : ''
-                      }`}
-                    />
+                    <div className="flex items-end">
+                      <input
+                        type="number"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                        className={`w-20 text-right rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 ${
+                          error ? 'border-red-500' : ''
+                        }`}
+                      />
+                      <span className="text-sm text-gray-500">x</span>
+                    </div>
                     {error && <p className="text-red-500 text-sm mt-1">{error.message}</p>}
                   </div>
                 )}
@@ -267,7 +258,7 @@ const TimeSettingsCreate: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <BoltIcon className="h-5 w-5 text-gray-400" />
-            <label className="ml-2 font-bold">Reminder sound</label>
+            <label className="ml-2 font-bold">Reminder sound interval</label>
             <QuestionMarkCircleIcon
               data-tooltip-id="tooltip-reminder-sound"
               className="h-4 w-4 text-gray-400 ml-1 cursor-help"
@@ -301,19 +292,22 @@ const TimeSettingsCreate: React.FC = () => {
                     />
                   </Switch>
                   {field.value !== undefined && (
-                    <input
-                      type="number"
-                      value={field.value === undefined ? '' : field.value}
-                      onChange={(e) => {
-                        const newValue = e.target.value;
-                        if (newValue === '') {
-                          field.onChange(null);
-                        } else {
-                          field.onChange(Number(newValue));
-                        }
-                      }}
-                      className={`w-16 text-right rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 ${error ? 'border-red-500' : ''}`}
-                    />
+                    <div className="flex items-center">
+                      <input
+                        type="number"
+                        value={field.value === undefined ? '' : field.value}
+                        onChange={(e) => {
+                          const newValue = e.target.value;
+                          if (newValue === '') {
+                            field.onChange(null);
+                          } else {
+                            field.onChange(Number(newValue));
+                          }
+                        }}
+                        className={`w-16 text-right rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 ${error ? 'border-red-500' : ''}`}
+                      />
+                      <span className="text-sm text-gray-500">m</span>
+                    </div>
                   )}
                 </div>
                 {error && <p className="text-red-500 text-sm mt-1">{error.message}</p>}
