@@ -182,6 +182,19 @@ const Timer: React.FC = () => {
         id: studyBlockId,
         block: { end_time: endTime },
       });
+
+      if (activeSessionCounter) {
+        await updateSessionCounterMutation.mutateAsync({
+          id: activeSessionCounter.id,
+          completed: activeSessionCounter.completed + 1,
+        });
+      } else {
+        await createSessionCounterMutation.mutateAsync({
+          completed: 1,
+          target: 5,
+          is_selected: true,
+        });
+      }
     },
     [updateStudyBlockMutation],
   );
@@ -193,7 +206,7 @@ const Timer: React.FC = () => {
   }, [activeTimeSettings, isActive, initialTimeSet]);
 
   useEffect(() => {
-    if (!studyBlocksData || !timeSettingsData || initialTimeSet) return;
+    if (!studyBlocksData || !timeSettingsData || !sessionCountersData || initialTimeSet) return;
 
     const incompleteBlock = studyBlocksData.find((block) => !block.end_time);
 
