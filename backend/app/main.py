@@ -2,19 +2,19 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.trustedhost import TrustedHostMiddleware
 from redis.asyncio import Redis
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from .auth.auth_routes import router as auth_router
 from .auth.auth_utils import get_user_id_from_session
 from .config import settings
 from .routers.daily_goal import router as daily_goal_router
-from .routers.study_category import router as study_category_router
-from .routers.user import router as user_router
-from .routers.study_block import router as study_block_router
-from .uploads.upload_routes import router as upload_router
-from .auth.auth_routes import router as auth_router
-from .routers.time_settings import router as time_settings_router
 from .routers.session_counter import router as session_counter_router
+from .routers.study_block import router as study_block_router
+from .routers.study_category import router as study_category_router
+from .routers.time_settings import router as time_settings_router
+from .routers.user import router as user_router
+from .uploads.upload_routes import router as upload_router
 
 
 @asynccontextmanager
@@ -58,14 +58,13 @@ def create_app() -> FastAPI:
             if user_id:
                 request.state.user_id = int(user_id)
                 response = await call_next(request)
-                # Refresh the cookie
                 response.set_cookie(
                     key="session_id",
                     value=session_id,
                     httponly=True,
                     secure=True,
                     samesite="lax",
-                    max_age=3600,
+                    max_age=30 * 24 * 3600,
                 )
                 return response
         return await call_next(request)

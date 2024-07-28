@@ -1,13 +1,17 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from ..auth.auth_utils import hash_password
+from app.dependencies import get_redis
+
+from ..auth.auth_utils import delete_session, hash_password
 from ..database import get_session
 from ..models.user import User
-from ..schemas.user import UserCreate, UserUpdate, User as UserSchema
+from ..schemas.user import User as UserSchema
+from ..schemas.user import UserCreate, UserUpdate
 from ..uploads.upload_services import get_profile_photo_urls
 from .utils import get_current_user_id
 
@@ -97,14 +101,25 @@ async def update_current_user(
     return user_dict
 
 
-@router.delete("/", response_model=bool)
-async def delete_current_user(
-    db: AsyncSession = Depends(get_session), user_id: int = Depends(get_current_user_id)
+@router.delete("/delete-account")
+async def delete_account(
+    response: Response,
+    request: Request,
+    redis: Redis = Depends(get_redis),
+    db: AsyncSession = Depends(get_session),
+    user_id: int = Depends(get_current_user_id),
 ):
     result = await db.execute(select(User).where(User.id == user_id))
     db_user = result.scalar_one_or_none()
     if db_user is None:
-        return False
+        raise HTTPException(status_code=404, detail="User not found")
     await db.delete(db_user)
     await db.commit()
-    return True
+
+    session_id = request.cookies.get("session_id")
+    if session_id:
+        await delete_session(redis, session_id)
+
+    response.delete_cookie(key="session_id")
+
+    return {"message": "Account deleted successfully"}

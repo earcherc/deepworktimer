@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from ..config import settings
 
+from ..config import settings
 from ..database import get_session
 from ..dependencies import get_redis
 from ..models.user import User as UserModel
@@ -48,14 +48,14 @@ async def login(
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    session_id = await create_session(redis, user_id, expiry=3600)
+    session_id = await create_session(redis, user_id, expiry=30 * 24 * 3600)
     response.set_cookie(
         key="session_id",
         value=session_id,
         httponly=True,
         secure=True,
         samesite="lax",
-        max_age=3600,
+        max_age=30 * 24 * 3600,
     )
     user_data = user.__dict__
     user_data.pop("hashed_password", None)
