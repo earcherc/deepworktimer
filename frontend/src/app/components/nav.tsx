@@ -52,7 +52,7 @@ export default function Nav() {
     : 'Unknown';
 
   return (
-    <Disclosure as="nav" className="sticky top-0 z-20 bg-white shadow-md md:shadown-none dark:bg-gray-800">
+    <Disclosure as="nav" className="sticky top-0 z-30 bg-white shadow-md md:shadown-none dark:bg-gray-800">
       {({ open }) => (
         <>
           <div className="mx-auto px-4">
