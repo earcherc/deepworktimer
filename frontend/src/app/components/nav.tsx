@@ -106,7 +106,7 @@ export default function Nav() {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-4 mr-1">
                 {commitHash && (
                   <a
                     href={`https://github.com/earcherc/deepworktimer/commit/${commitHash}`}
