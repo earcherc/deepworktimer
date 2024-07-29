@@ -137,25 +137,23 @@ export default function Sidebar() {
   }, [showModal, addComponent, removeComponent]);
 
   return (
-    <div className="h-full flex w-1/3 flex-col">
-      <div className="flex grow flex-col space-y-4 overflow-y-auto">
-        <Timer />
-        {componentOrder.map((componentName) => {
-          if (!visibleComponents.includes(componentName)) return null;
-          const Component = componentMap[componentName];
-          return (
-            <div key={componentName} className="relative">
-              <Component />
-            </div>
-          );
-        })}
-        <button
-          onClick={openManageMetadataModal}
-          className="w-full rounded-md bg-gray-200 dark:bg-gray-900 p-4 text-gray-700 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center"
-        >
-          Manage Metadata
-        </button>
-      </div>
+    <div className="h-full flex flex-col space-y-4">
+      <Timer />
+      {componentOrder.map((componentName) => {
+        if (!visibleComponents.includes(componentName)) return null;
+        const Component = componentMap[componentName];
+        return (
+          <div key={componentName} className="relative">
+            <Component />
+          </div>
+        );
+      })}
+      <button
+        onClick={openManageMetadataModal}
+        className="w-full rounded-md bg-gray-200 dark:bg-gray-900 p-4 text-gray-700 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center"
+      >
+        Manage Metadata
+      </button>
     </div>
   );
 }

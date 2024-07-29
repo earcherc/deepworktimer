@@ -118,7 +118,7 @@ const Calendar: React.FC<CalendarProps> = () => {
   };
 
   return (
-    <div className="flex h-full rounded-lg flex-col overflow-hidden relative bg-white dark:bg-gray-900">
+    <div className="flex flex-col h-full rounded-lg overflow-hidden relative bg-white dark:bg-gray-900">
       <div className="absolute top-0 left-0 rounded-t-lg right-0 z-10 flex items-center justify-between py-1 px-4 bg-white dark:bg-gray-800">
         <button
           onClick={goToPreviousDay}
@@ -150,8 +150,8 @@ const Calendar: React.FC<CalendarProps> = () => {
         </button>
       </div>
 
-      <div className="flex flex-auto overflow-hidden mt-8">
-        <div ref={containerRef} className="flex flex-auto flex-col overflow-auto hide-scrollbar">
+      <div className="flex-grow overflow-hidden">
+        <div ref={containerRef} className="h-full overflow-auto hide-scrollbar">
           <div className="flex w-full flex-auto relative">
             <div className="w-14 flex-none bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" />
             <div className="flex-1">
