@@ -128,8 +128,7 @@ export default function Sidebar() {
     showModal({
       type: 'default',
       title: 'Manage Metadata',
-      message:
-        'Enhance work sessions with custom metadata. Add valuable context to each session, enabling deeper insights.',
+      message: 'Enhance work sessions with custom metadata. Add valuable context to each session for deeper insights.',
       content: (
         <ManageMetadataModal onAdd={addComponent} onRemove={removeComponent} availableComponents={componentOrder} />
       ),
