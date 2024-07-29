@@ -16,7 +16,7 @@ const Profile = () => {
                     Personal Information
                   </h2>
                   <p className="mt-1 text-sm leading-6 text-gray-600 dark:text-gray-400">
-                    Use a permanent address where you can receive mail.
+                    Update your profile information.
                   </p>
                 </div>
                 <div className="md:col-span-2">
@@ -41,8 +41,8 @@ const Profile = () => {
                 <div>
                   <h2 className="text-base font-semibold leading-7 text-gray-900 dark:text-white">Delete account</h2>
                   <p className="mt-1 text-sm leading-6 text-gray-600 dark:text-gray-400">
-                    No longer want to use our service? You can delete your account here. This action is not reversible.
-                    All information related to this account will be deleted permanently.
+                    No longer want to use our app? You can delete your account here. This action is not reversible. All
+                    information related to this account will be deleted permanently.
                   </p>
                 </div>
                 <div className="flex items-start md:col-span-2">

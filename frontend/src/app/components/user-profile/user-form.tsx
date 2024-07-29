@@ -4,9 +4,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createMutationErrorHandler } from '@utils/httpUtils';
 import { User, UserUpdate, UsersService } from '@api';
 import useToast from '@context/toasts/toast-context';
-import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import debounce from 'lodash/debounce';
+import classNames from 'classnames';
+import { useEffect } from 'react';
 
 export default function UserForm() {
   const { addToast } = useToast();
@@ -18,7 +18,12 @@ export default function UserForm() {
     queryFn: () => UsersService.readCurrentUserUsersMeGet(),
   });
 
-  const { register, reset, watch } = useForm<UserUpdate>();
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { isDirty },
+  } = useForm<UserUpdate>();
 
   useEffect(() => {
     if (user) {
@@ -31,28 +36,18 @@ export default function UserForm() {
     onSuccess: (updatedUser) => {
       queryClient.setQueryData(['currentUser'], updatedUser);
       addToast({ type: 'success', content: 'User profile updated successfully.' });
+      reset(updatedUser);
     },
     onError: handleMutationError('update user profile'),
   });
 
-  const debouncedUpdateFn = useMemo(
-    () =>
-      debounce((data: UserUpdate) => {
-        const filteredData = Object.fromEntries(
-          Object.entries(data).filter(([_, value]) => value != null && value !== ''),
-        );
-        updateUserMutation.mutate(filteredData as UserUpdate);
-      }, 1500),
-    [updateUserMutation],
-  );
-
-  useEffect(() => {
-    const subscription = watch((value) => debouncedUpdateFn(value as UserUpdate));
-    return () => subscription.unsubscribe();
-  }, [watch, debouncedUpdateFn]);
+  const onSubmit = (data: UserUpdate) => {
+    const filteredData = Object.fromEntries(Object.entries(data).filter(([_, value]) => value != null && value !== ''));
+    updateUserMutation.mutate(filteredData as UserUpdate);
+  };
 
   return (
-    <form>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
         <div className="col-span-3">
           <label htmlFor="firstName" className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">
@@ -130,6 +125,21 @@ export default function UserForm() {
             />
           </div>
         </div>
+      </div>
+
+      <div className="mt-8 flex">
+        <button
+          type="submit"
+          title="Modify your data before saving"
+          disabled={!isDirty || updateUserMutation.isPending}
+          className={classNames('rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm', {
+            'bg-blue-600 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400':
+              isDirty && !updateUserMutation.isPending,
+            'bg-gray-400 cursor-not-allowed': !isDirty || updateUserMutation.isPending,
+          })}
+        >
+          {updateUserMutation.isPending ? 'Saving...' : 'Save'}
+        </button>
       </div>
     </form>
   );
