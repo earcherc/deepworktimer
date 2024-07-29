@@ -82,21 +82,6 @@ export default function UserForm() {
           </div>
         </div>
 
-        <div className="col-span-full">
-          <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200">
-            Username
-          </label>
-          <div className="mt-2">
-            <input
-              type="text"
-              id="username"
-              {...register('username')}
-              autoComplete="username"
-              className="block w-full rounded-md border-0 bg-white py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:ring-gray-700 sm:text-sm sm:leading-6"
-            />
-          </div>
-        </div>
-
         <div className="col-span-3">
           <label
             htmlFor="date_of_birth"
