@@ -7,8 +7,8 @@ import useToast from '@context/toasts/toast-context';
 import { ApiError, DailyGoalsService } from '@api';
 
 interface FormData {
-  hours: number;
-  minutes: number;
+  hours: string;
+  minutes: string;
 }
 
 const DailyGoalCreateComponent = () => {
@@ -23,18 +23,27 @@ const DailyGoalCreateComponent = () => {
     trigger,
   } = useForm<FormData>({
     defaultValues: {
-      hours: 2,
-      minutes: 0,
+      hours: '2',
+      minutes: '0',
     },
     mode: 'onChange',
   });
 
   const createDailyGoalMutation = useMutation({
-    mutationFn: (formData: FormData) =>
-      DailyGoalsService.createDailyGoalDailyGoalsPost({
-        total_minutes: formData.hours * 60 + formData.minutes,
+    mutationFn: (formData: FormData) => {
+      const hours = parseInt(formData.hours) || 0;
+      const minutes = parseInt(formData.minutes) || 0;
+      const totalMinutes = hours * 60 + minutes;
+
+      if (totalMinutes === 0) {
+        throw new Error('Total time must be at least 1 minute');
+      }
+
+      return DailyGoalsService.createDailyGoalDailyGoalsPost({
+        total_minutes: totalMinutes,
         is_selected: true,
-      }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dailyGoals'] });
       hideModal();
@@ -43,6 +52,8 @@ const DailyGoalCreateComponent = () => {
       let errorMessage = 'Failed to create daily goal';
       if (error instanceof ApiError) {
         errorMessage = error.body?.detail || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
       addToast({ type: 'error', content: errorMessage });
     },
@@ -52,8 +63,9 @@ const DailyGoalCreateComponent = () => {
     createDailyGoalMutation.mutate(data);
   };
 
-  const validateTotalTime = (hours: number, minutes: number) => {
-    return (hours || 0) * 60 + (minutes || 0) > 0 || 'Total time must be at least 1 minute';
+  const validateTotalTime = (hours: string, minutes: string) => {
+    const totalMinutes = (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0);
+    return totalMinutes > 0 || 'Total time must be at least 1 minute';
   };
 
   return (
@@ -63,9 +75,6 @@ const DailyGoalCreateComponent = () => {
           name="hours"
           control={control}
           rules={{
-            required: 'Hours are required',
-            min: { value: 0, message: 'Hours must be at least 0' },
-            max: { value: 24, message: 'Hours must be at most 24' },
             validate: (value, formValues) => validateTotalTime(value, formValues.minutes),
           }}
           render={({ field }) => (
@@ -77,9 +86,11 @@ const DailyGoalCreateComponent = () => {
                 type="number"
                 {...field}
                 onChange={(e) => {
-                  field.onChange(e.target.value === '' ? '' : Number(e.target.value));
+                  field.onChange(e.target.value);
                   trigger('minutes');
                 }}
+                min="0"
+                max="24"
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
               />
             </div>
@@ -89,9 +100,6 @@ const DailyGoalCreateComponent = () => {
           name="minutes"
           control={control}
           rules={{
-            required: 'Minutes are required',
-            min: { value: 0, message: 'Minutes must be at least 0' },
-            max: { value: 59, message: 'Minutes must be at most 59' },
             validate: (value, formValues) => validateTotalTime(formValues.hours, value),
           }}
           render={({ field }) => (
@@ -103,9 +111,11 @@ const DailyGoalCreateComponent = () => {
                 type="number"
                 {...field}
                 onChange={(e) => {
-                  field.onChange(e.target.value === '' ? '' : Number(e.target.value));
+                  field.onChange(e.target.value);
                   trigger('hours');
                 }}
+                min="0"
+                max="59"
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
               />
             </div>
@@ -122,7 +132,7 @@ const DailyGoalCreateComponent = () => {
       <div className="mt-5 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
         <button
           type="button"
-          className="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1"
+          className="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1"
           onClick={hideModal}
         >
           Dismiss
