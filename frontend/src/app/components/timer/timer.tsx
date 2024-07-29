@@ -155,6 +155,35 @@ const Timer: React.FC = () => {
     onError: handleMutationError('update session counter'),
   });
 
+  const updateFavicon = useCallback((state: 'default' | 'active' | 'break') => {
+    const link = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
+    if (link && link.href !== `/images/favicon-${state}.ico`) {
+      link.href = `/images/favicon-${state}.ico`;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (timerState.isActive && !timerState.isBreakMode) {
+      updateFavicon('active');
+    } else if (timerState.isActive && timerState.isBreakMode) {
+      updateFavicon('break');
+    } else {
+      updateFavicon('default');
+    }
+  }, [timerState.isActive, timerState.isBreakMode, updateFavicon]);
+
+  const sendNotification = useCallback((title: string, body: string) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body });
+    }
+  }, []);
+
+  useEffect(() => {
+    if ('Notification' in window) {
+      Notification.requestPermission();
+    }
+  }, []);
+
   // Effects and callbacks
   useEffect(() => {
     const workerCode = `
@@ -213,6 +242,7 @@ const Timer: React.FC = () => {
   const handleTimerFinished = useCallback(
     async (newCompleted: number) => {
       playChime('end');
+      sendNotification('Timer Finished', 'Time to take a break!');
 
       if (activeSessionCounter) {
         await updateSessionCounterMutation.mutateAsync({
@@ -272,6 +302,10 @@ const Timer: React.FC = () => {
           id: timerState.studyBlockId,
           block: { end_time: getCurrentUTC() },
         });
+      }
+
+      if (completed) {
+        sendNotification('Break Finished', 'Time to start working!');
       }
 
       if (!completed) {
@@ -435,6 +469,10 @@ const Timer: React.FC = () => {
   }, [timerState, activeSessionCounter, mode]);
 
   const startTimer = async () => {
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      await Notification.requestPermission();
+    }
+
     const newBlock = await createStudyBlockMutation.mutateAsync({
       is_countdown: mode === TimerMode.Countdown,
       daily_goal_id: activeDailyGoal?.id,

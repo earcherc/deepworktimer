@@ -9,7 +9,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="shortcut icon" href="/images/favicon-default.ico" />
         <title>Deep Work Timer</title>
         <meta name="description" content="Focus on what matters" key="desc" />
       </head>
