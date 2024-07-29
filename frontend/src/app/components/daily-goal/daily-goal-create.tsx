@@ -1,10 +1,15 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ApiError, DailyGoalCreate, DailyGoalsService } from '@api';
 import { useModalContext } from '@context/modal/modal-context';
+import { Controller, useForm } from 'react-hook-form';
 import useToast from '@context/toasts/toast-context';
-import { useForm } from 'react-hook-form';
+import { ApiError, DailyGoalsService } from '@api';
+
+interface FormData {
+  hours: number;
+  minutes: number;
+}
 
 const DailyGoalCreateComponent = () => {
   const { addToast } = useToast();
@@ -12,27 +17,26 @@ const DailyGoalCreateComponent = () => {
   const queryClient = useQueryClient();
 
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors },
-    reset,
-  } = useForm<DailyGoalCreate>({
+    trigger,
+  } = useForm<FormData>({
     defaultValues: {
-      block_size: 60,
-      quantity: 2,
+      hours: 2,
+      minutes: 0,
     },
+    mode: 'onChange',
   });
 
   const createDailyGoalMutation = useMutation({
-    mutationFn: (formData: DailyGoalCreate) =>
+    mutationFn: (formData: FormData) =>
       DailyGoalsService.createDailyGoalDailyGoalsPost({
-        quantity: formData.quantity,
-        block_size: formData.block_size,
+        total_minutes: formData.hours * 60 + formData.minutes,
         is_selected: true,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dailyGoals'] });
-      reset();
       hideModal();
     },
     onError: (error: unknown) => {
@@ -44,62 +48,91 @@ const DailyGoalCreateComponent = () => {
     },
   });
 
-  const onSubmit = (formData: DailyGoalCreate) => {
-    createDailyGoalMutation.mutate(formData);
+  const onSubmit = (data: FormData) => {
+    createDailyGoalMutation.mutate(data);
+  };
+
+  const validateTotalTime = (hours: number, minutes: number) => {
+    return (hours || 0) * 60 + (minutes || 0) > 0 || 'Total time must be at least 1 minute';
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div>
-        <label htmlFor="blockSize" className="block text-left text-sm font-medium leading-6 text-gray-900">
-          Study Cycle Duration (minutes)
-        </label>
-        <div className="mt-2">
-          <input
-            {...register('block_size', { required: true, valueAsNumber: true })}
-            type="number"
-            name="block_size"
-            id="block_size"
-            className="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600 sm:text-sm sm:leading-6"
-            placeholder="Enter study block duration (minutes)"
-            disabled={createDailyGoalMutation.isPending}
-          />
-          {errors.block_size && <span className="text-sm text-red-600">This field is required</span>}
-        </div>
+      <div className="flex justify-center space-x-12">
+        <Controller
+          name="hours"
+          control={control}
+          rules={{
+            required: 'Hours are required',
+            min: { value: 0, message: 'Hours must be at least 0' },
+            max: { value: 24, message: 'Hours must be at most 24' },
+            validate: (value, formValues) => validateTotalTime(value, formValues.minutes),
+          }}
+          render={({ field }) => (
+            <div className="w-16">
+              <label htmlFor="hours" className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Hours
+              </label>
+              <input
+                type="number"
+                {...field}
+                onChange={(e) => {
+                  field.onChange(e.target.value === '' ? '' : Number(e.target.value));
+                  trigger('minutes');
+                }}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+              />
+            </div>
+          )}
+        />
+        <Controller
+          name="minutes"
+          control={control}
+          rules={{
+            required: 'Minutes are required',
+            min: { value: 0, message: 'Minutes must be at least 0' },
+            max: { value: 59, message: 'Minutes must be at most 59' },
+            validate: (value, formValues) => validateTotalTime(formValues.hours, value),
+          }}
+          render={({ field }) => (
+            <div className="w-16">
+              <label htmlFor="minutes" className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Minutes
+              </label>
+              <input
+                type="number"
+                {...field}
+                onChange={(e) => {
+                  field.onChange(e.target.value === '' ? '' : Number(e.target.value));
+                  trigger('hours');
+                }}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+              />
+            </div>
+          )}
+        />
       </div>
 
-      <div>
-        <label htmlFor="quantity" className="block text-left text-sm font-medium leading-6 text-gray-900">
-          Study Cycle Count
-        </label>
-        <div className="mt-2">
-          <input
-            {...register('quantity', { required: true, valueAsNumber: true })}
-            type="number"
-            name="quantity"
-            id="quantity"
-            className="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600 sm:text-sm sm:leading-6"
-            placeholder="Enter ideal block quantity for day"
-            disabled={createDailyGoalMutation.isPending}
-          />
-          {errors.quantity && <span className="text-sm text-red-600">This field is required</span>}
-        </div>
-      </div>
+      {(errors.hours || errors.minutes) && (
+        <p className="text-red-500 text-sm text-center mt-2">
+          {errors.hours?.message || errors.minutes?.message || 'Invalid input'}
+        </p>
+      )}
 
-      <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+      <div className="mt-5 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+        <button
+          type="button"
+          className="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1"
+          onClick={hideModal}
+        >
+          Dismiss
+        </button>
         <button
           type="submit"
           className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:col-start-2"
           disabled={createDailyGoalMutation.isPending}
         >
           {createDailyGoalMutation.isPending ? 'Creating...' : 'Create'}
-        </button>
-        <button
-          type="button"
-          className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
-          onClick={hideModal}
-        >
-          Dismiss
         </button>
       </div>
     </form>

@@ -3,8 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type DailyGoal = {
-    quantity: number;
-    block_size: number;
+    total_minutes: number;
     is_selected?: boolean;
     id: number;
     user_id: number;

@@ -1,7 +1,7 @@
 'use client';
 
-import { ChevronDownIcon, PlusIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { useModalContext } from '@context/modal/modal-context';
 import { ApiError, DailyGoal, DailyGoalsService } from '@api';
 import useToast from '@context/toasts/toast-context';
@@ -45,17 +45,26 @@ const DailyGoalComponent = () => {
       type: 'default',
       title: 'Create Daily Goal',
       content: <DailyGoalCreate />,
+      message: 'Create a daily goal for the duration of focused work you would like to achieve.',
     });
   };
 
   const activeGoal = goals.find((goal) => goal.is_selected);
+
+  const formatMinutes = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (hours === 0) return `${remainingMinutes}m`;
+    if (remainingMinutes === 0) return `${hours}h`;
+    return `${hours}h ${remainingMinutes}m`;
+  };
 
   return (
     <div className="rounded-lg bg-white dark:bg-gray-800 p-4 shadow sm:p-6">
       <div className="mb-4 flex items-center justify-between">
         <Menu as="div" className="relative w-full">
           <Menu.Button className="flex w-full items-center justify-between rounded-md bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 ">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Daily Goal</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Select daily goal</h2>
             <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </Menu.Button>
           <Transition
@@ -86,11 +95,7 @@ const DailyGoalComponent = () => {
                         >
                           <div className="flex justify-center">
                             <div className="w-2/3 inline-flex items-center justify-center">
-                              <span className="font-bold">{goal.quantity}</span>
-                              <span className="inline-flex items-center mx-2">
-                                <XMarkIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-                              </span>
-                              <span className="font-bold">{goal.block_size}m</span>
+                              <span className="font-bold">{formatMinutes(goal.total_minutes)}</span>
                             </div>
                           </div>
                         </button>
@@ -118,11 +123,9 @@ const DailyGoalComponent = () => {
       {activeGoal && (
         <div className="mt-4 flex justify-center">
           <div className="w-2/3 text-center inline-flex items-center justify-center">
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">{activeGoal.quantity}</span>
-            <span className="inline-flex items-center mx-2">
-              <XMarkIcon className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+            <span className="text-3xl font-bold text-gray-900 dark:text-white">
+              {formatMinutes(activeGoal.total_minutes)}
             </span>
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">{activeGoal.block_size}m</span>
           </div>
         </div>
       )}

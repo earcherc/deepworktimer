@@ -1,8 +1,10 @@
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import and_, select, update
+
 from ..database import get_session
 from ..models.daily_goal import DailyGoal
 from ..schemas.daily_goal import DailyGoal as DailyGoalSchema
@@ -28,7 +30,6 @@ async def create_daily_goal(
         )
         .values(is_selected=False)
     )
-
     db_daily_goal = DailyGoal(**daily_goal.dict(), user_id=user_id)
     db.add(db_daily_goal)
     try:
@@ -87,9 +88,7 @@ async def update_daily_goal(
     db_daily_goal = result.scalar_one_or_none()
     if db_daily_goal is None:
         raise HTTPException(status_code=404, detail="DailyGoal not found")
-
     daily_goal_data = daily_goal.dict(exclude_unset=True)
-
     if daily_goal_data.get("is_selected") == True:
         await db.execute(
             update(DailyGoal)
@@ -101,10 +100,8 @@ async def update_daily_goal(
             )
             .values(is_selected=False)
         )
-
     for key, value in daily_goal_data.items():
         setattr(db_daily_goal, key, value)
-
     await db.commit()
     await db.refresh(db_daily_goal)
     return db_daily_goal

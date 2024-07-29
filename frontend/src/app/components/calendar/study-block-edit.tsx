@@ -116,6 +116,14 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
   const category = categories.find((c) => c.id === block.study_category_id);
   const goal = goals.find((g) => g.id === block.daily_goal_id);
 
+  const formatMinutes = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (hours === 0) return `${remainingMinutes}m`;
+    if (remainingMinutes === 0) return `${hours}h`;
+    return `${hours}h ${remainingMinutes}m`;
+  };
+
   const ratingButtons = [1, 2, 3, 4, 5].map((value) => (
     <button
       key={value}
@@ -139,7 +147,7 @@ const StudyBlockEdit: React.FC<StudyBlockEditProps> = ({ block }) => {
             <strong>Category:</strong> {category?.title || 'No category selected'}
           </div>
           <div>
-            <strong>Goal:</strong> {goal ? `${goal.block_size} minutes x ${goal.quantity}` : 'No goal selected'}
+            <strong>Daily Goal:</strong> {goal ? formatMinutes(goal.total_minutes) : 'No goal selected'}
           </div>
         </div>
       </div>

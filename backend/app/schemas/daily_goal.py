@@ -4,10 +4,8 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-# Base model with shared properties
 class DailyGoalBase(BaseModel):
-    quantity: int
-    block_size: int
+    total_minutes: int
     is_selected: bool = Field(default=False)
 
 
@@ -16,8 +14,7 @@ class DailyGoalCreate(DailyGoalBase):
 
 
 class DailyGoalUpdate(BaseModel):
-    quantity: Optional[int] = None
-    block_size: Optional[int] = None
+    total_minutes: Optional[int] = None
     is_selected: Optional[bool] = None
 
 

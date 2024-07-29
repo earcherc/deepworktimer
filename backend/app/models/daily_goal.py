@@ -11,8 +11,7 @@ if TYPE_CHECKING:
 
 class DailyGoal(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    quantity: int
-    block_size: int
+    total_minutes: int
     is_selected: bool = Field(default=False)
     created_at: datetime = Field(
         sa_column=Column(DateTime(timezone=True)),
@@ -25,9 +24,7 @@ class DailyGoal(SQLModel, table=True):
     study_blocks: List["StudyBlock"] = Relationship(back_populates="daily_goal")
 
     __table_args__ = (
-        UniqueConstraint(
-            "user_id", "quantity", "block_size", name="uq_user_quantity_block_size"
-        ),
+        UniqueConstraint("user_id", "total_minutes", name="uq_user_total_minutes"),
     )
 
 
