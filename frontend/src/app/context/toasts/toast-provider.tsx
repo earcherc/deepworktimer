@@ -89,8 +89,8 @@ export default function ToastProvider({ children }: { children: React.ReactNode 
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast, pauseToast, resumeToast }}>
       {children}
-      <div className="fixed left-0 right-0 top-0 z-50 flex flex-col items-center space-y-1">
-        {toasts.map((toast: Toast) => (
+      <div className="fixed top-0 right-0 z-[100] flex flex-col items-end p-1 pr-2 space-y-2 max-w-sm">
+        {toasts.slice(0, 3).map((toast: Toast) => (
           <Toast key={toast.id} toast={toast} />
         ))}
       </div>

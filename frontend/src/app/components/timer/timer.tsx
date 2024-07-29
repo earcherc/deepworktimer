@@ -269,7 +269,16 @@ const Timer: React.FC = () => {
         time: minutesToSeconds(breakDuration),
       }));
     },
-    [activeSessionCounter, activeTimeSettings, playChime, updateSessionCounterMutation, createSessionCounterMutation],
+    [
+      playChime,
+      sendNotification,
+      activeSessionCounter,
+      activeTimeSettings?.long_break_interval,
+      activeTimeSettings?.long_break_duration,
+      activeTimeSettings?.short_break_duration,
+      updateSessionCounterMutation,
+      createSessionCounterMutation,
+    ],
   );
 
   const completeDueStudyBlock = useCallback(
@@ -302,10 +311,6 @@ const Timer: React.FC = () => {
           id: timerState.studyBlockId,
           block: { end_time: getCurrentUTC() },
         });
-      }
-
-      if (completed) {
-        sendNotification('Break Finished', 'Time to start working!');
       }
 
       if (!completed) {
@@ -364,6 +369,7 @@ const Timer: React.FC = () => {
       if (mode === TimerMode.Countdown && newTime === 0) {
         if (prev.isBreakMode) {
           stopTimer();
+          sendNotification('Break Finished', 'Time to start working!');
           playChime('break');
         } else {
           stopTimer(true);
@@ -372,7 +378,15 @@ const Timer: React.FC = () => {
 
       return { ...prev, time: newTime };
     });
-  }, [mode, activeTimeSettings, stopTimer, playChime]);
+  }, [
+    mode,
+    activeTimeSettings?.sound_interval,
+    activeTimeSettings?.is_sound,
+    activeTimeSettings?.duration,
+    playChime,
+    stopTimer,
+    sendNotification,
+  ]);
 
   useEffect(() => {
     if (workerRef.current) {

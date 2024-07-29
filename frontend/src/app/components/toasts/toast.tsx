@@ -49,7 +49,7 @@ const Toast = ({ toast }: { toast: Toast }) => {
     <div
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={classNames('relative mt-1 w-1/3 rounded-md p-3', bgColor)}
+      className={classNames('relative z-60 mt-1 w-full max-w-xs rounded-md p-3', bgColor)}
     >
       <div className="flex">
         <div className="flex-shrink-0">{icon}</div>
