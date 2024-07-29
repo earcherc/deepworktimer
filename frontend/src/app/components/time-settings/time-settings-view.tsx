@@ -154,7 +154,7 @@ const TimeSettingsModal: React.FC = () => {
             </div>
           ))
         ) : (
-          <p className="text-sm text-gray-700 font-semibold">You have no Time Settings</p>
+          <p className="text-sm text-center text-gray-700 font-semibold">You have no Time Settings</p>
         )}
       </div>
 

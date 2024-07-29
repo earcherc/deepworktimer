@@ -27,7 +27,7 @@ export default function Header() {
           </button>
         </div>
         {/* Desktop navigation */}
-        <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:items-center">
+        <div className="hidden lg:flex lg:flex-1 lg:ml-52 lg:justify-center lg:items-center">
           <div className="flex space-x-8">
             {navigation.map((item) => (
               <Link
