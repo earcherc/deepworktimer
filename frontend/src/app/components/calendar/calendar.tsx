@@ -119,7 +119,7 @@ const Calendar: React.FC<CalendarProps> = () => {
 
   return (
     <div className="flex flex-col h-full rounded-lg overflow-hidden relative bg-white dark:bg-gray-900">
-      <div className="absolute top-0 left-0 rounded-t-lg right-0 z-10 flex items-center justify-between py-1 px-4 bg-white dark:bg-gray-800">
+      <div className="absolute top-0 left-0 rounded-t-lg right-0 z-20 flex items-center justify-between py-1 px-4 bg-white dark:bg-gray-800">
         <button
           onClick={goToPreviousDay}
           className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
