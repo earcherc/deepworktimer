@@ -42,22 +42,20 @@ export default function Header() {
             ))}
           </div>
         </div>
-        {/* Desktop register and login buttons */}
-        <div className="hidden lg:flex lg:items-center">
-          <div className="absolute right-0 mr-6 flex items-center space-x-4">
-            <Link
-              href="/register"
-              className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Register
-            </Link>
-            <Link
-              href="/login"
-              className="px-4 py-2 text-sm font-semibold text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-            >
-              Sign in
-            </Link>
-          </div>
+        {/* Register and login buttons (visible on all screen sizes) */}
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <Link
+            href="/register"
+            className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Register
+          </Link>
+          <Link
+            href="/login"
+            className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
+          >
+            Sign in
+          </Link>
         </div>
       </nav>
       {/* Mobile menu */}
@@ -86,20 +84,6 @@ export default function Header() {
                     {item.name}
                   </Link>
                 ))}
-              </div>
-              <div className="py-6 space-y-4">
-                <Link
-                  href="/register"
-                  className="block w-full px-4 py-2 text-center text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  Register
-                </Link>
-                <Link
-                  href="/login"
-                  className="block w-full px-4 py-2 text-center text-sm font-semibold text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-                >
-                  Sign in
-                </Link>
               </div>
             </div>
           </div>
