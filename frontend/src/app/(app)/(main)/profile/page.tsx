@@ -30,7 +30,7 @@ const Profile = () => {
                 <div>
                   <h2 className="text-base font-semibold leading-7 text-gray-900 dark:text-white">Change password</h2>
                   <p className="mt-1 text-sm leading-6 text-gray-600 dark:text-gray-400">
-                    Update your password associated with your account.
+                    Update the password associated with your account.
                   </p>
                 </div>
                 <div className="md:col-span-2">
