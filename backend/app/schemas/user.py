@@ -12,6 +12,16 @@ class Gender(str, Enum):
     NOT_SPECIFIED = "NOT_SPECIFIED"
 
 
+class SocialProvider(str, Enum):
+    GITHUB = "GITHUB"
+    GOOGLE = "GOOGLE"
+    FACEBOOK = "FACEBOOK"
+    TWITTER = "TWITTER"
+    LINKEDIN = "LINKEDIN"
+    APPLE = "APPLE"
+    MICROSOFT = "MICROSOFT"
+
+
 class UserBase(BaseModel):
     username: str
     email: EmailStr
@@ -25,7 +35,9 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str
+    password: Optional[str] = None
+    social_provider: Optional[SocialProvider] = None
+    social_id: Optional[str] = None
 
 
 class UserUpdate(BaseModel):
@@ -43,6 +55,8 @@ class User(UserBase):
     id: int
     created_at: datetime
     is_active: bool
+    is_email_verified: bool
+    social_provider: Optional[SocialProvider] = None
 
     class Config:
         orm_mode = True

@@ -19,6 +19,7 @@ export type { RegistrationRequest } from './models/RegistrationRequest';
 export type { SessionCounter } from './models/SessionCounter';
 export type { SessionCounterCreate } from './models/SessionCounterCreate';
 export type { SessionCounterUpdate } from './models/SessionCounterUpdate';
+export { SocialProvider } from './models/SocialProvider';
 export type { StudyBlock } from './models/StudyBlock';
 export type { StudyBlockCreate } from './models/StudyBlockCreate';
 export type { StudyBlockQuery } from './models/StudyBlockQuery';

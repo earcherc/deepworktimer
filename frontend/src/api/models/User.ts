@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Gender } from './Gender';
+import type { SocialProvider } from './SocialProvider';
 export type User = {
     username: string;
     email: string;
@@ -16,5 +17,7 @@ export type User = {
     id: number;
     created_at: string;
     is_active: boolean;
+    is_email_verified: boolean;
+    social_provider?: SocialProvider;
 };
 
