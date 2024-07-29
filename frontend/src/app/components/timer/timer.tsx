@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Cog6ToothIcon } from '@heroicons/react/20/solid';
@@ -58,6 +56,15 @@ const Timer: React.FC = () => {
   const { showModal } = useModalContext();
   const queryClient = useQueryClient();
   const dateRange = useMemo(() => getTodayDateRange(), []);
+  const [audio, setAudio] = useState<{
+    break: HTMLAudioElement | null;
+    interval: HTMLAudioElement | null;
+    end: HTMLAudioElement | null;
+  }>({
+    break: null,
+    interval: null,
+    end: null,
+  });
 
   const [mode, setMode] = useAtom(timerModeAtom);
   const [timerState, setTimerState] = useState<TimerState>({
@@ -68,12 +75,6 @@ const Timer: React.FC = () => {
     dummyActive: false,
   });
   const [initialTimeSet, setInitialTimeSet] = useState(false);
-
-  const audioRef = useRef<{ break: HTMLAudioElement; interval: HTMLAudioElement; end: HTMLAudioElement }>({
-    break: new Audio('/audio/break_chime.mp3'),
-    interval: new Audio('/audio/interval_chime.mp3'),
-    end: new Audio('/audio/end_chime.mp3'),
-  });
 
   const workerRef = useRef<Worker | null>(null);
 
@@ -182,12 +183,31 @@ const Timer: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    setAudio({
+      break: new Audio('/audio/break_chime.mp3'),
+      interval: new Audio('/audio/interval_chime.mp3'),
+      end: new Audio('/audio/end_chime.mp3'),
+    });
+
+    return () => {
+      Object.values(audio).forEach((audioElement) => {
+        if (audioElement) {
+          audioElement.pause();
+          audioElement.currentTime = 0;
+        }
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const playChime = useCallback(
     (type: 'break' | 'interval' | 'end') => {
-      if (activeTimeSettings?.is_sound === false) return;
-      audioRef.current[type].play().catch((error) => console.error(`Error playing ${type} audio:`, error));
+      if (audio[type] && activeTimeSettings?.is_sound !== false) {
+        audio[type]?.play().catch((error) => console.error(`Error playing ${type} audio:`, error));
+      }
     },
-    [activeTimeSettings?.is_sound],
+    [audio, activeTimeSettings?.is_sound],
   );
 
   const handleTimerFinished = useCallback(
