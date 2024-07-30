@@ -1,4 +1,4 @@
-from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, SecretStr
+from pydantic import AnyHttpUrl, BaseSettings, EmailStr, PostgresDsn, SecretStr
 
 
 class Settings(BaseSettings):
@@ -34,6 +34,18 @@ class Settings(BaseSettings):
         "127.0.0.1",
         "host.docker.internal",
     ]
+
+    BREVO_API_KEY: SecretStr
+    BREVO_SENDER_EMAIL: EmailStr = "noreply@deepworktimer.io"
+    BREVO_SENDER_NAME: str = "Deep Work Timer"
+
+    # Frontend URL
+    FRONTEND_URL: AnyHttpUrl
+
+    # OAuth settings
+    GITHUB_CLIENT_ID: str
+    GITHUB_CLIENT_SECRET: SecretStr
+    GOOGLE_CLIENT_ID: str
 
     class Config:
         env_file = ".env"
