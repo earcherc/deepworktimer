@@ -3,13 +3,13 @@
 /* tslint:disable */
 /* eslint-disable */
 export type TimeSettingsUpdate = {
-    is_countdown?: boolean;
-    is_selected?: boolean;
-    duration?: number;
-    short_break_duration?: number;
-    long_break_duration?: number;
-    long_break_interval?: number;
-    is_sound?: boolean;
-    sound_interval?: number;
+    is_countdown?: (boolean | null);
+    is_selected?: (boolean | null);
+    duration?: (number | null);
+    short_break_duration?: (number | null);
+    long_break_duration?: (number | null);
+    long_break_interval?: (number | null);
+    is_sound?: (boolean | null);
+    sound_interval?: (number | null);
 };
 

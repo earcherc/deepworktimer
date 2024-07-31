@@ -7,15 +7,15 @@ import type { SocialProvider } from './SocialProvider';
 export type UserCreate = {
     username: string;
     email: string;
-    bio?: string;
-    date_of_birth?: string;
-    first_name?: string;
-    last_name?: string;
-    gender?: Gender;
-    profile_photo_key?: string;
-    profile_photo_urls?: Record<string, string>;
-    password?: string;
-    social_provider?: SocialProvider;
-    social_id?: string;
+    bio?: (string | null);
+    date_of_birth?: (string | null);
+    first_name?: (string | null);
+    last_name?: (string | null);
+    gender?: (Gender | null);
+    profile_photo_key?: (string | null);
+    profile_photo_urls?: (Record<string, (string | null)> | null);
+    password?: (string | null);
+    social_provider?: (SocialProvider | null);
+    social_id?: (string | null);
 };
 

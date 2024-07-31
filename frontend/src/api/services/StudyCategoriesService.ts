@@ -10,6 +10,25 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class StudyCategoriesService {
     /**
+     * Create Study Category
+     * @param requestBody
+     * @returns StudyCategory Successful Response
+     * @throws ApiError
+     */
+    public static createStudyCategoryStudyCategoriesPost(
+        requestBody: StudyCategoryCreate,
+    ): CancelablePromise<StudyCategory> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/study-categories/',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
      * Read Study Categories
      * @param skip
      * @param limit
@@ -33,25 +52,6 @@ export class StudyCategoriesService {
         });
     }
     /**
-     * Create Study Category
-     * @param requestBody
-     * @returns StudyCategory Successful Response
-     * @throws ApiError
-     */
-    public static createStudyCategoryStudyCategoriesPost(
-        requestBody: StudyCategoryCreate,
-    ): CancelablePromise<StudyCategory> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/study-categories/',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
      * Read Study Category
      * @param studyCategoryId
      * @returns StudyCategory Successful Response
@@ -62,26 +62,6 @@ export class StudyCategoriesService {
     ): CancelablePromise<StudyCategory> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/study-categories/{study_category_id}',
-            path: {
-                'study_category_id': studyCategoryId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Delete Study Category
-     * @param studyCategoryId
-     * @returns boolean Successful Response
-     * @throws ApiError
-     */
-    public static deleteStudyCategoryStudyCategoriesStudyCategoryIdDelete(
-        studyCategoryId: number,
-    ): CancelablePromise<boolean> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
             url: '/study-categories/{study_category_id}',
             path: {
                 'study_category_id': studyCategoryId,
@@ -110,6 +90,26 @@ export class StudyCategoriesService {
             },
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Delete Study Category
+     * @param studyCategoryId
+     * @returns boolean Successful Response
+     * @throws ApiError
+     */
+    public static deleteStudyCategoryStudyCategoriesStudyCategoryIdDelete(
+        studyCategoryId: number,
+    ): CancelablePromise<boolean> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/study-categories/{study_category_id}',
+            path: {
+                'study_category_id': studyCategoryId,
+            },
             errors: {
                 422: `Validation Error`,
             },

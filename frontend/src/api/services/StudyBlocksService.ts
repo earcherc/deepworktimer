@@ -50,26 +50,6 @@ export class StudyBlocksService {
         });
     }
     /**
-     * Delete Study Block
-     * @param studyBlockId
-     * @returns boolean Successful Response
-     * @throws ApiError
-     */
-    public static deleteStudyBlockStudyBlocksStudyBlockIdDelete(
-        studyBlockId: number,
-    ): CancelablePromise<boolean> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/study-blocks/{study_block_id}',
-            path: {
-                'study_block_id': studyBlockId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
      * Update Study Block
      * @param studyBlockId
      * @param requestBody
@@ -88,6 +68,26 @@ export class StudyBlocksService {
             },
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Delete Study Block
+     * @param studyBlockId
+     * @returns boolean Successful Response
+     * @throws ApiError
+     */
+    public static deleteStudyBlockStudyBlocksStudyBlockIdDelete(
+        studyBlockId: number,
+    ): CancelablePromise<boolean> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/study-blocks/{study_block_id}',
+            path: {
+                'study_block_id': studyBlockId,
+            },
             errors: {
                 422: `Validation Error`,
             },

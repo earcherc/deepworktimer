@@ -5,6 +5,6 @@
 export type SessionCounterCreate = {
     target: number;
     is_selected?: boolean;
-    completed?: number;
+    completed?: (number | null);
 };
 

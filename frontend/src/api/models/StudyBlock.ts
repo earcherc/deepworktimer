@@ -6,10 +6,10 @@ export type StudyBlock = {
     is_countdown?: boolean;
     id: number;
     start_time: string;
-    end_time?: string;
-    rating?: number;
+    end_time?: (string | null);
+    rating?: (number | null);
     user_id: number;
-    daily_goal_id?: number;
-    study_category_id?: number;
+    daily_goal_id?: (number | null);
+    study_category_id?: (number | null);
 };
 

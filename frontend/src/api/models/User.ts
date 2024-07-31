@@ -7,17 +7,17 @@ import type { SocialProvider } from './SocialProvider';
 export type User = {
     username: string;
     email: string;
-    bio?: string;
-    date_of_birth?: string;
-    first_name?: string;
-    last_name?: string;
-    gender?: Gender;
-    profile_photo_key?: string;
-    profile_photo_urls?: Record<string, string>;
+    bio?: (string | null);
+    date_of_birth?: (string | null);
+    first_name?: (string | null);
+    last_name?: (string | null);
+    gender?: (Gender | null);
+    profile_photo_key?: (string | null);
+    profile_photo_urls?: (Record<string, (string | null)> | null);
     id: number;
     created_at: string;
     is_active: boolean;
     is_email_verified: boolean;
-    social_provider?: SocialProvider;
+    social_provider?: (SocialProvider | null);
 };
 

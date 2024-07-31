@@ -10,6 +10,25 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class TimeSettingsService {
     /**
+     * Create Time Settings
+     * @param requestBody
+     * @returns TimeSettings Successful Response
+     * @throws ApiError
+     */
+    public static createTimeSettingsTimeSetttingsPost(
+        requestBody: TimeSettingsCreate,
+    ): CancelablePromise<TimeSettings> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/time-setttings/',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
      * Read Time Settings List
      * @param skip
      * @param limit
@@ -33,25 +52,6 @@ export class TimeSettingsService {
         });
     }
     /**
-     * Create Time Settings
-     * @param requestBody
-     * @returns TimeSettings Successful Response
-     * @throws ApiError
-     */
-    public static createTimeSettingsTimeSetttingsPost(
-        requestBody: TimeSettingsCreate,
-    ): CancelablePromise<TimeSettings> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/time-setttings/',
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
      * Read Time Settings
      * @param timeSettingsId
      * @returns TimeSettings Successful Response
@@ -62,26 +62,6 @@ export class TimeSettingsService {
     ): CancelablePromise<TimeSettings> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/time-setttings/{time_settings_id}',
-            path: {
-                'time_settings_id': timeSettingsId,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Delete Time Settings
-     * @param timeSettingsId
-     * @returns boolean Successful Response
-     * @throws ApiError
-     */
-    public static deleteTimeSettingsTimeSetttingsTimeSettingsIdDelete(
-        timeSettingsId: number,
-    ): CancelablePromise<boolean> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
             url: '/time-setttings/{time_settings_id}',
             path: {
                 'time_settings_id': timeSettingsId,
@@ -110,6 +90,26 @@ export class TimeSettingsService {
             },
             body: requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Delete Time Settings
+     * @param timeSettingsId
+     * @returns boolean Successful Response
+     * @throws ApiError
+     */
+    public static deleteTimeSettingsTimeSetttingsTimeSettingsIdDelete(
+        timeSettingsId: number,
+    ): CancelablePromise<boolean> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/time-setttings/{time_settings_id}',
+            path: {
+                'time_settings_id': timeSettingsId,
+            },
             errors: {
                 422: `Validation Error`,
             },

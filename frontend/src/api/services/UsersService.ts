@@ -10,6 +10,25 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class UsersService {
     /**
+     * Create User
+     * @param requestBody
+     * @returns User Successful Response
+     * @throws ApiError
+     */
+    public static createUserUsersPost(
+        requestBody: UserCreate,
+    ): CancelablePromise<User> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/users/',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
      * Read Users
      * @param skip
      * @param limit
@@ -27,25 +46,6 @@ export class UsersService {
                 'skip': skip,
                 'limit': limit,
             },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Create User
-     * @param requestBody
-     * @returns User Successful Response
-     * @throws ApiError
-     */
-    public static createUserUsersPost(
-        requestBody: UserCreate,
-    ): CancelablePromise<User> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/users/',
-            body: requestBody,
-            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

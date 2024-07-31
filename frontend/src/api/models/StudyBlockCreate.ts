@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type StudyBlockCreate = {
     is_countdown?: boolean;
-    daily_goal_id?: number;
-    study_category_id?: number;
+    daily_goal_id?: (number | null);
+    study_category_id?: (number | null);
 };
 

@@ -4,13 +4,13 @@
 /* eslint-disable */
 import type { Gender } from './Gender';
 export type UserUpdate = {
-    username?: string;
-    email?: string;
-    bio?: string;
-    date_of_birth?: string;
-    first_name?: string;
-    last_name?: string;
-    gender?: Gender;
-    profile_photo_key?: string;
+    username?: (string | null);
+    email?: (string | null);
+    bio?: (string | null);
+    date_of_birth?: (string | null);
+    first_name?: (string | null);
+    last_name?: (string | null);
+    gender?: (Gender | null);
+    profile_photo_key?: (string | null);
 };
 

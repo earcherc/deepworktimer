@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type SessionCounterUpdate = {
-    target?: number;
-    is_selected?: boolean;
-    completed?: number;
+    target?: (number | null);
+    is_selected?: (boolean | null);
+    completed?: (number | null);
 };
 
