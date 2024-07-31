@@ -12,7 +12,7 @@ const SocialLogins = () => {
   const handleGithubLogin = async () => {
     setIsLoading(true);
     try {
-      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/github-login`;
+      window.location.href = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/auth/github-login`;
     } catch (error) {
       addToast({ type: 'error', content: 'Failed to initiate GitHub login' });
     } finally {
@@ -34,7 +34,7 @@ const SocialLogins = () => {
       const idToken = googleUser.getAuthResponse().id_token;
 
       // Send the token to your backend
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google-login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_FRONTEND_URL}/auth/google-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

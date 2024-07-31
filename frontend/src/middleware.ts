@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_MIDDLEWARE_API_URL;
 const SESSION_VALIDATION_ENDPOINT = `${API_URL}/auth/validate-session`;
 
 async function validateSessionToken(sessionId: string): Promise<boolean> {

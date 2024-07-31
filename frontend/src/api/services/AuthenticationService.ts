@@ -52,18 +52,18 @@ export class AuthenticationService {
     }
     /**
      * Google Login
-     * @param idToken
+     * @param accessToken Google access token
      * @returns any Successful Response
      * @throws ApiError
      */
     public static googleLoginAuthGoogleLoginPost(
-        idToken: string,
+        accessToken: string,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/auth/google-login',
             query: {
-                'id_token': idToken,
+                'access_token': accessToken,
             },
             errors: {
                 422: `Validation Error`,

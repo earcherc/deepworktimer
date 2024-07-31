@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+import logging
+
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, logger
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from httpx import AsyncClient
-from jose import jwt
-from pydantic import EmailStr
+from pydantic import BaseModel, EmailStr
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -172,53 +174,71 @@ async def github_login(
     return user_data
 
 
+logger = logging.getLogger(__name__)
+
+
 @router.post("/google-login")
 async def google_login(
     response: Response,
-    id_token: str,
     redis: Redis = Depends(get_redis),
     session: AsyncSession = Depends(get_session),
+    access_token: str = Query(..., description="Google access token"),
 ):
     try:
-        idinfo = jwt.decode(id_token, options={"verify_signature": False})
+        # Fetch user info from Google
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+            resp.raise_for_status()
+            user_info = resp.json()
 
-        if idinfo["aud"] not in [settings.GOOGLE_CLIENT_ID]:
-            raise ValueError("Could not verify audience.")
+        # Extract necessary information
+        userid = user_info["sub"]
+        email = user_info["email"]
+        name = user_info.get("name", email.split("@")[0])
 
-        if idinfo["iss"] not in ["accounts.google.com", "https://accounts.google.com"]:
-            raise ValueError("Wrong issuer.")
+        if not email:
+            raise HTTPException(status_code=400, detail="Email not provided by Google")
 
-        # ID token is valid. Get the user's Google Account ID from the decoded token.
-        userid = idinfo["sub"]
-        email = idinfo["email"]
-        name = idinfo["name"]
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid ID token")
+        # Get or create user
+        user = await get_or_create_user(
+            session,
+            email=email,
+            username=name,
+            social_provider="GOOGLE",
+            social_id=userid,
+        )
 
-    user = await get_or_create_user(
-        session,
-        email=email,
-        username=name,
-        social_provider="GOOGLE",
-        social_id=userid,
-    )
+        # Create session
+        session_id = await create_session(redis, user.id, expiry=30 * 24 * 3600)
+        response.set_cookie(
+            key="session_id",
+            value=session_id,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+            max_age=30 * 24 * 3600,
+        )
 
-    session_id = await create_session(redis, user.id, expiry=30 * 24 * 3600)
-    response.set_cookie(
-        key="session_id",
-        value=session_id,
-        httponly=True,
-        secure=True,
-        samesite="lax",
-        max_age=30 * 24 * 3600,
-    )
+        # Prepare user data for response
+        user_data = user.__dict__
+        user_data.pop("hashed_password", None)
+        user_data["profile_photo_urls"] = await get_profile_photo_urls(
+            user.profile_photo_key
+        )
 
-    user_data = user.__dict__
-    user_data.pop("hashed_password", None)
-    user_data["profile_photo_urls"] = await get_profile_photo_urls(
-        user.profile_photo_key
-    )
-    return user_data
+        return user_data
+
+    except httpx.HTTPError as e:
+        raise HTTPException(
+            status_code=400, detail=f"Failed to fetch user info from Google: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"An unexpected error occurred: {str(e)}"
+        )
 
 
 @router.post("/register")

@@ -21,7 +21,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: new URL(process.env.NEXT_PUBLIC_API_URL).hostname,
+        hostname: new URL(process.env.NEXT_PUBLIC_MIDDLEWARE_API_URL).hostname,
       },
     ].filter(Boolean),
   },
