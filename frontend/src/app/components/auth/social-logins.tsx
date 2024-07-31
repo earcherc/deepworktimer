@@ -1,13 +1,25 @@
 'use client';
 
+import { handleGoogleLogin, loadGoogleSignInAPI } from './utils';
 import useToast from '@context/toasts/toast-context';
+import { AuthenticationService } from '@api';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const SocialLogins = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { addToast } = useToast();
+
+  useEffect(() => {
+    loadGoogleSignInAPI()
+      .then(() => {
+        console.log('Google API loaded successfully');
+      })
+      .catch((error) => {
+        console.error('Failed to load Google API:', error);
+      });
+  }, []);
 
   const handleGithubLogin = async () => {
     setIsLoading(true);
@@ -20,34 +32,18 @@ const SocialLogins = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLoginClick = async () => {
     setIsLoading(true);
     try {
-      // Load the Google Sign-In API
-      await loadGoogleSignInAPI();
-
-      // Initialize Google Sign-In
-      const auth2 = gapi.auth2.getAuthInstance();
-      const googleUser = await auth2.signIn();
-
-      // Get the ID token
-      const idToken = googleUser.getAuthResponse().id_token;
-
-      // Send the token to your backend
-      const response = await fetch(`${process.env.NEXT_PUBLIC_FRONTEND_URL}/auth/google-login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id_token: idToken }),
-      });
-
-      if (response.ok) {
+      const accessToken = await handleGoogleLogin();
+      const response = await AuthenticationService.googleLoginAuthGoogleLoginPost(accessToken);
+      if (response) {
         router.push('/dashboard');
       } else {
         throw new Error('Google login failed');
       }
     } catch (error) {
+      console.error('Google login error:', error);
       addToast({ type: 'error', content: 'Failed to login with Google' });
     } finally {
       setIsLoading(false);
@@ -75,7 +71,7 @@ const SocialLogins = () => {
 
       <div>
         <button
-          onClick={handleGoogleLogin}
+          onClick={handleGoogleLoginClick}
           disabled={isLoading}
           className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
         >
@@ -90,22 +86,3 @@ const SocialLogins = () => {
 };
 
 export default SocialLogins;
-
-// Helper function to load Google Sign-In API
-function loadGoogleSignInAPI(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = 'https://apis.google.com/js/platform.js';
-    script.onload = () => {
-      gapi.load('auth2', () => {
-        gapi.auth2
-          .init({
-            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-          })
-          .then(() => resolve(), reject);
-      });
-    };
-    script.onerror = reject;
-    document.body.appendChild(script);
-  });
-}

@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// auth-utils.ts
-
 declare global {
   interface Window {
     google: any;
@@ -25,6 +23,7 @@ export async function handleGoogleLogin(): Promise<string> {
       reject(new Error('Google API not loaded'));
       return;
     }
+
     const client = window.google.accounts.oauth2.initTokenClient({
       client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
       scope: 'email profile',
@@ -36,6 +35,7 @@ export async function handleGoogleLogin(): Promise<string> {
         }
       },
     });
+
     client.requestAccessToken();
   });
 }
