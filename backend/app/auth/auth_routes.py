@@ -339,6 +339,8 @@ async def change_password(
 @router.post("/test-email")
 async def test_email(email: EmailStr):
     await send_email(
-        email, "Test Email", "<h1>This is a test email from DeepWork Timer</h1>"
+        email,
+        "Deep Work Timer Validation",
+        "<h1>This is an email to validate Deep Work Timer</h1>",
     )
     return {"message": "Test email sent"}

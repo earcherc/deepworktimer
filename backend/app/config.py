@@ -1,4 +1,5 @@
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, PostgresDsn, SecretStr
+from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, SecretStr, computed_field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -9,9 +10,8 @@ class Settings(BaseSettings):
     # Database settings
     POSTGRES_USER: str = "docker"
     POSTGRES_PASSWORD: SecretStr = "docker"
-    DATABASE_HOST: str = "docker"
+    DATABASE_HOST: str = "db"
     DATABASE_NAME: str = "docker"
-    DATABASE_URL: PostgresDsn = None
 
     # AWS settings
     AWS_ACCESS_KEY_ID: str
@@ -37,7 +37,7 @@ class Settings(BaseSettings):
 
     BREVO_API_KEY: SecretStr
     BREVO_SENDER_EMAIL: EmailStr = "noreply@deepworktimer.io"
-    BREVO_SENDER_NAME: str = "Deep Work Timer"
+    BREVO_SENDER_NAME: str = "Ethan Cavill"
 
     # Frontend URL
     FRONTEND_URL: AnyHttpUrl
@@ -47,20 +47,19 @@ class Settings(BaseSettings):
     GITHUB_CLIENT_SECRET: SecretStr
     GOOGLE_CLIENT_ID: str
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        if not self.DATABASE_URL:
-            self.DATABASE_URL = PostgresDsn.build(
-                scheme="postgresql+asyncpg",
-                user=self.POSTGRES_USER,
-                password=self.POSTGRES_PASSWORD.get_secret_value(),
-                host=self.DATABASE_HOST,
-                path=f"/{self.DATABASE_NAME}",
-            )
+    @computed_field
+    @property
+    def DATABASE_URL(self) -> PostgresDsn:
+        url = PostgresDsn.build(
+            scheme="postgresql+asyncpg",
+            username=self.POSTGRES_USER,
+            password=self.POSTGRES_PASSWORD.get_secret_value(),
+            host=self.DATABASE_HOST,
+            path=f"{self.DATABASE_NAME}",
+        )
+        return url
 
 
 settings = Settings()

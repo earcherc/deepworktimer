@@ -8,7 +8,7 @@ from ..config import settings
 
 # Configure API key authorization
 configuration = sib_api_v3_sdk.Configuration()
-configuration.api_key["api-key"] = settings.BREVO_API_KEY
+configuration.api_key["api-key"] = settings.BREVO_API_KEY.get_secret_value()
 
 # Create an instance of the API class
 api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
@@ -20,7 +20,7 @@ async def send_email(
     to_email: EmailStr,
     subject: str,
     html_content: str,
-    sender_name: str = "Deep Work Timer",
+    sender_name: str = "Ethan Cavill",
 ):
     sender = {"name": sender_name, "email": "noreply@deepworktimer.io"}
     to = [{"email": to_email}]

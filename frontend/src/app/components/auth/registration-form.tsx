@@ -1,3 +1,4 @@
+// RegistrationForm.tsx
 'use client';
 
 import { ApiError, AuthenticationService } from '@api';
@@ -5,6 +6,7 @@ import useToast from '@context/toasts/toast-context';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
+import SocialLogins from './social-logins';
 import classNames from 'classnames';
 
 const RegistrationForm = () => {
@@ -22,8 +24,12 @@ const RegistrationForm = () => {
       return response;
     },
     onSuccess: () => {
-      router.push('/login');
+      addToast({
+        type: 'success',
+        content: 'Registration successful. Please check your email to verify your account.',
+      });
       setErrorMessage(null);
+      router.push('/login');
     },
     onError: (error: unknown) => {
       let errorMessage = 'An error occurred while registering';
@@ -43,7 +49,7 @@ const RegistrationForm = () => {
   };
 
   return (
-    <>
+    <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
@@ -51,34 +57,32 @@ const RegistrationForm = () => {
           </label>
           <div className="mt-2">
             <input
-              id="newUsername"
-              name="newUsername"
+              id="username"
+              name="username"
               type="text"
-              autoComplete="new-username"
-              placeholder="johndoe"
+              autoComplete="username"
+              required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              required
-              className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
 
         <div>
           <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
-            Email
+            Email address
           </label>
           <div className="mt-2">
             <input
-              id="newEmail"
-              name="newEmail"
+              id="email"
+              name="email"
               type="email"
-              autoComplete="new-email"
-              placeholder="email@example.com"
+              autoComplete="email"
+              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
-              className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -93,23 +97,23 @@ const RegistrationForm = () => {
               name="password"
               type="password"
               autoComplete="new-password"
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
-              className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
 
         <div>
           <button
-            disabled={!username || !email || !password || registrationMutation.isPending}
             type="submit"
+            disabled={registrationMutation.isPending}
             className={classNames(
-              'flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600',
+              'flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600',
               {
-                'cursor-not-allowed bg-blue-300': !username || !email || !password || registrationMutation.isPending,
-                'bg-blue-600 hover:bg-blue-500': username && email && password && !registrationMutation.isPending,
+                'bg-indigo-600 hover:bg-indigo-500': !registrationMutation.isPending,
+                'bg-indigo-400 cursor-not-allowed': registrationMutation.isPending,
               },
             )}
           >
@@ -117,8 +121,22 @@ const RegistrationForm = () => {
           </button>
         </div>
       </form>
-      {errorMessage && <div className="mt-2 text-red-500">{errorMessage}</div>}
-    </>
+
+      {errorMessage && <div className="mt-4 text-red-500 text-center">{errorMessage}</div>}
+
+      <div className="mt-6">
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="bg-white px-2 text-gray-500">Or continue with</span>
+          </div>
+        </div>
+
+        <SocialLogins />
+      </div>
+    </div>
   );
 };
 
