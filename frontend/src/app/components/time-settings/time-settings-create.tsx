@@ -16,8 +16,8 @@ import { useModalContext } from '@context/modal/modal-context';
 import { Control, Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import useToast from '@context/toasts/toast-context';
+import React, { useEffect, useMemo } from 'react';
 import { Switch } from '@headlessui/react';
-import React, { useEffect } from 'react';
 import { Tooltip } from 'react-tooltip';
 import * as yup from 'yup';
 
@@ -109,15 +109,18 @@ const TimeSettingsCreate: React.FC = () => {
   const { addToast } = useToast();
   const queryClient = useQueryClient();
 
-  const defaultValues: TimeSettingsCreateType = {
-    is_countdown: true,
-    duration: 50,
-    short_break_duration: 2,
-    long_break_duration: 30,
-    long_break_interval: 4,
-    is_sound: true,
-    sound_interval: undefined,
-  };
+  const defaultValues = useMemo<TimeSettingsCreateType>(
+    () => ({
+      is_countdown: true,
+      duration: 50,
+      short_break_duration: 2,
+      long_break_duration: 30,
+      long_break_interval: 4,
+      is_sound: true,
+      sound_interval: undefined,
+    }),
+    [],
+  );
 
   const { control, handleSubmit, watch, setValue, reset } = useForm<TimeSettingsCreateType>({
     resolver: yupResolver(schema),
@@ -145,7 +148,7 @@ const TimeSettingsCreate: React.FC = () => {
         sound_interval: 20,
       });
     }
-  }, [isCountdown, reset]);
+  }, [defaultValues, isCountdown, reset]);
 
   const createTimeSettingsMutation = useMutation({
     mutationFn: (newSettings: TimeSettingsCreateType) =>
