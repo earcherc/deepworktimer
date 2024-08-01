@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Cog6ToothIcon } from '@heroicons/react/20/solid';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import classNames from 'classnames';
 import { useAtom } from 'jotai';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   DailyGoal,
@@ -17,14 +17,14 @@ import {
   TimeSettings,
   TimeSettingsService,
 } from '@api';
-import { getCurrentUTC, getTodayDateRange, toLocalTime, toUTC } from '@utils/dateUtils';
-import SessionCounterModal from '../session-counter/session-counter-modal';
-import TimeSettingsModal from '../time-settings/time-settings-view';
 import { useModalContext } from '@app/context/modal/modal-context';
-import SessionCounter from '../session-counter/session-counter';
+import useToast from '@context/toasts/toast-context';
+import { getCurrentUTC, getTodayDateRange, toLocalTime, toUTC } from '@utils/dateUtils';
 import { createMutationErrorHandler } from '@utils/httpUtils';
 import { TimerMode, timerModeAtom } from '../../store/atoms';
-import useToast from '@context/toasts/toast-context';
+import SessionCounter from '../session-counter/session-counter';
+import SessionCounterModal from '../session-counter/session-counter-modal';
+import TimeSettingsModal from '../time-settings/time-settings-view';
 
 // Constants and utility functions
 const QUERY_KEYS = {
@@ -306,7 +306,7 @@ const Timer: React.FC = () => {
 
   const stopTimer = useCallback(
     async (completed = false) => {
-      if (timerState.studyBlockId) {
+      if (timerState.studyBlockId && !timerState.isBreakMode && completed) {
         await updateStudyBlockMutation.mutateAsync({
           id: timerState.studyBlockId,
           block: { end_time: getCurrentUTC() },
@@ -336,6 +336,7 @@ const Timer: React.FC = () => {
     },
     [
       timerState.studyBlockId,
+      timerState.isBreakMode,
       activeSessionCounter,
       mode,
       updateStudyBlockMutation,
