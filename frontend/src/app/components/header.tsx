@@ -45,16 +45,16 @@ export default function Header() {
         {/* Register and login buttons (visible on all screen sizes) */}
         <div className="flex items-center space-x-2 sm:space-x-4">
           <Link
-            href="/register"
-            className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Register
-          </Link>
-          <Link
             href="/login"
             className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
           >
             Sign in
+          </Link>
+          <Link
+            href="/register"
+            className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Register
           </Link>
         </div>
       </nav>
