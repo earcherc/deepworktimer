@@ -10,7 +10,7 @@ from sqlalchemy.future import select
 
 from ..database import get_session
 from ..dependencies import get_redis
-from ..email.email_service import send_email
+from ..email.email_service import send_email, send_verification_email
 from ..models.user import User as UserModel
 from ..uploads.upload_services import get_profile_photo_urls
 from .auth_schemas import (
@@ -27,7 +27,6 @@ from .auth_utils import (
     generate_verification_token,
     get_user_id_from_session,
     hash_password,
-    send_verification_email,
     verify_email_token,
     verify_password,
 )

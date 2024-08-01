@@ -1,9 +1,6 @@
-# app/email/email_service.py
-
 import sib_api_v3_sdk
 from pydantic import EmailStr
 from sib_api_v3_sdk.rest import ApiException
-
 from ..config import settings
 
 # Configure API key authorization
@@ -27,7 +24,6 @@ async def send_email(
     send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
         to=to, html_content=html_content, sender=sender, subject=subject
     )
-
     try:
         api_response = api_instance.send_transac_email(send_smtp_email)
         print(api_response)
