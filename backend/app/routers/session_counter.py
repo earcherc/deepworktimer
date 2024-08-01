@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select, update, and_
+from sqlmodel import desc, select, update, and_
 
 from ..database import get_session
 from ..models.session_counter import SessionCounter
@@ -64,6 +64,7 @@ async def read_session_counters(
     result = await db.execute(
         select(SessionCounter)
         .where(SessionCounter.user_id == user_id)
+        .order_by(desc(SessionCounter.id))
         .offset(skip)
         .limit(limit)
     )

@@ -348,8 +348,6 @@ const Timer: React.FC = () => {
   const handleTick = useCallback(() => {
     setTimerState((prev) => {
       const newTime = mode === TimerMode.Countdown ? Math.max(prev.time - 1, 0) : prev.time + 1;
-
-      // Check for interval sound
       if (
         prev.isActive &&
         !prev.isBreakMode &&
