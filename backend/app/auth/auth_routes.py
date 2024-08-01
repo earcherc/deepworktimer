@@ -1,16 +1,13 @@
-import logging
 import random
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, logger
 from fastapi.security import OAuth2AuthorizationCodeBearer
-from httpx import AsyncClient
-from pydantic import BaseModel, EmailStr
+from pydantic import EmailStr
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from ..config import settings
 from ..database import get_session
 from ..dependencies import get_redis
 from ..email.email_service import send_email
@@ -22,7 +19,7 @@ from .auth_schemas import (
     PasswordChangeRequest,
     RegistrationRequest,
     ResendVerificationEmailRequest,
-    SocialLoginRequest,
+    SocialProvider,
 )
 from .auth_utils import (
     create_session,
@@ -90,31 +87,31 @@ async def login(
     return user_data
 
 
-async def generate_unique_username(
-    session: AsyncSession, given_name: str, family_name: str
-) -> str:
-    base_username = (given_name[:3] + family_name[:3]).lower()
+async def generate_unique_username(session: AsyncSession, first_name: str) -> str:
+    # Use the full first name as the base
+    base_username = first_name.lower()
 
     if not base_username:
         base_username = "user"
 
-    username = base_username
     while True:
+        random_suffix = "".join([str(random.randint(0, 9)) for _ in range(5)])
+        username = f"{base_username}{random_suffix}"
+
         result = await session.execute(
             select(UserModel).where(UserModel.username == username)
         )
         if not result.scalar_one_or_none():
             return username
-        # Add 4 random digits
-        random_suffix = "".join([str(random.randint(0, 9)) for _ in range(4)])
-        username = f"{base_username}{random_suffix}"
 
 
 async def get_or_create_user(
     session: AsyncSession,
     email: str,
     username: str,
-    social_provider: str,
+    first_name: str,
+    last_name: str,
+    social_provider: SocialProvider,
     social_id: str,
 ) -> UserModel:
     result = await session.execute(select(UserModel).where(UserModel.email == email))
@@ -123,10 +120,14 @@ async def get_or_create_user(
         user.social_provider = social_provider
         user.social_id = social_id
         user.is_email_verified = True
+        user.first_name = first_name
+        user.last_name = last_name
     else:
         user = UserModel(
             email=email,
             username=username,
+            first_name=first_name,
+            last_name=last_name,
             social_provider=social_provider,
             social_id=social_id,
             is_email_verified=True,
@@ -157,21 +158,23 @@ async def google_login(
         # Extract necessary information
         userid = user_info["sub"]
         email = user_info["email"]
-        given_name = user_info.get("given_name", "")
-        family_name = user_info.get("family_name", "")
+        first_name = user_info.get("given_name", "")
+        last_name = user_info.get("family_name", "")
 
         if not email:
             raise HTTPException(status_code=400, detail="Email not provided by Google")
 
         # Generate a unique username
-        username = await generate_unique_username(session, given_name, family_name)
+        username = await generate_unique_username(session, first_name)
 
         # Get or create user
         user = await get_or_create_user(
             session,
             email=email,
             username=username,
-            social_provider="GOOGLE",
+            first_name=first_name,
+            last_name=last_name,
+            social_provider=SocialProvider.GOOGLE,
             social_id=userid,
         )
 
