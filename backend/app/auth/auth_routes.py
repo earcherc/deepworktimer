@@ -116,67 +116,6 @@ async def login(
     return user_data
 
 
-@router.post("/github-login")
-async def github_login(
-    response: Response,
-    code: str,
-    redis: Redis = Depends(get_redis),
-    session: AsyncSession = Depends(get_session),
-):
-    # Exchange code for access token
-    async with AsyncClient() as client:
-        token_response = await client.post(
-            "https://github.com/login/oauth/access_token",
-            data={
-                "client_id": settings.GITHUB_CLIENT_ID,
-                "client_secret": settings.GITHUB_CLIENT_SECRET,
-                "code": code,
-            },
-            headers={"Accept": "application/json"},
-        )
-    token_data = token_response.json()
-    access_token = token_data.get("access_token")
-
-    if not access_token:
-        raise HTTPException(status_code=400, detail="Failed to obtain access token")
-
-    # Get user info from GitHub
-    async with AsyncClient() as client:
-        user_response = await client.get(
-            "https://api.github.com/user",
-            headers={"Authorization": f"token {access_token}"},
-        )
-    github_user = user_response.json()
-
-    user = await get_or_create_user(
-        session,
-        email=github_user["email"],
-        username=github_user["login"],
-        social_provider="GITHUB",
-        social_id=str(github_user["id"]),
-    )
-
-    session_id = await create_session(redis, user.id, expiry=30 * 24 * 3600)
-    response.set_cookie(
-        key="session_id",
-        value=session_id,
-        httponly=True,
-        secure=True,
-        samesite="lax",
-        max_age=30 * 24 * 3600,
-    )
-
-    user_data = user.__dict__
-    user_data.pop("hashed_password", None)
-    user_data["profile_photo_urls"] = await get_profile_photo_urls(
-        user.profile_photo_key
-    )
-    return user_data
-
-
-logger = logging.getLogger(__name__)
-
-
 @router.post("/google-login")
 async def google_login(
     response: Response,
