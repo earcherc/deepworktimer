@@ -31,26 +31,6 @@ export class AuthenticationService {
         });
     }
     /**
-     * Github Login
-     * @param code
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static githubLoginAuthGithubLoginPost(
-        code: string,
-    ): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/auth/github-login',
-            query: {
-                'code': code,
-            },
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
      * Google Login
      * @param accessToken Google access token
      * @returns any Successful Response
