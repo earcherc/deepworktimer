@@ -1,4 +1,5 @@
 import logging
+import random
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, logger
@@ -54,33 +55,6 @@ async def authenticate_user(
     return None
 
 
-async def get_or_create_user(
-    session: AsyncSession,
-    email: str,
-    username: str,
-    social_provider: str,
-    social_id: str,
-) -> UserModel:
-    result = await session.execute(select(UserModel).where(UserModel.email == email))
-    user = result.scalar_one_or_none()
-    if user:
-        user.social_provider = social_provider
-        user.social_id = social_id
-        user.is_email_verified = True
-    else:
-        user = UserModel(
-            email=email,
-            username=username,
-            social_provider=social_provider,
-            social_id=social_id,
-            is_email_verified=True,
-        )
-        session.add(user)
-    await session.commit()
-    await session.refresh(user)
-    return user
-
-
 @router.post("/login")
 async def login(
     response: Response,
@@ -116,6 +90,53 @@ async def login(
     return user_data
 
 
+async def generate_unique_username(
+    session: AsyncSession, given_name: str, family_name: str
+) -> str:
+    base_username = (given_name[:3] + family_name[:3]).lower()
+
+    if not base_username:
+        base_username = "user"
+
+    username = base_username
+    while True:
+        result = await session.execute(
+            select(UserModel).where(UserModel.username == username)
+        )
+        if not result.scalar_one_or_none():
+            return username
+        # Add 4 random digits
+        random_suffix = "".join([str(random.randint(0, 9)) for _ in range(4)])
+        username = f"{base_username}{random_suffix}"
+
+
+async def get_or_create_user(
+    session: AsyncSession,
+    email: str,
+    username: str,
+    social_provider: str,
+    social_id: str,
+) -> UserModel:
+    result = await session.execute(select(UserModel).where(UserModel.email == email))
+    user = result.scalar_one_or_none()
+    if user:
+        user.social_provider = social_provider
+        user.social_id = social_id
+        user.is_email_verified = True
+    else:
+        user = UserModel(
+            email=email,
+            username=username,
+            social_provider=social_provider,
+            social_id=social_id,
+            is_email_verified=True,
+        )
+        session.add(user)
+    await session.commit()
+    await session.refresh(user)
+    return user
+
+
 @router.post("/google-login")
 async def google_login(
     response: Response,
@@ -136,16 +157,20 @@ async def google_login(
         # Extract necessary information
         userid = user_info["sub"]
         email = user_info["email"]
-        name = user_info.get("name", email.split("@")[0])
+        given_name = user_info.get("given_name", "")
+        family_name = user_info.get("family_name", "")
 
         if not email:
             raise HTTPException(status_code=400, detail="Email not provided by Google")
+
+        # Generate a unique username
+        username = await generate_unique_username(session, given_name, family_name)
 
         # Get or create user
         user = await get_or_create_user(
             session,
             email=email,
-            username=name,
+            username=username,
             social_provider="GOOGLE",
             social_id=userid,
         )
