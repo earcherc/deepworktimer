@@ -255,22 +255,22 @@ async def verify_email(
 
 @router.post("/resend-verification-email")
 async def resend_verification_email(
-    request: ResendVerificationEmailRequest,
-    session: AsyncSession = Depends(get_session),
+    username: str,
+    session: AsyncSession = Depends(get_session)
 ):
     result = await session.execute(
-        select(UserModel).where(UserModel.email == request.email)
+        select(UserModel).where(UserModel.username == username)
     )
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if user.is_email_verified:
         raise HTTPException(status_code=400, detail="Email already verified")
-
+    
     verification_token = await generate_verification_token()
     user.email_verification_token = verification_token
     await session.commit()
-
+    
     await send_verification_email(user.email, verification_token)
     return {"message": "Verification email sent"}
 

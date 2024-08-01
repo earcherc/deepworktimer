@@ -1,6 +1,6 @@
 'use client';
 
-import { ApiError, AuthenticationService, ResendVerificationEmailRequest } from '@api';
+import { ApiError, AuthenticationService } from '@api';
 import useToast from '@context/toasts/toast-context';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -41,9 +41,8 @@ const LoginForm = () => {
   });
 
   const resendVerificationMutation = useMutation({
-    mutationFn: async (email: string) => {
-      const request: ResendVerificationEmailRequest = { email };
-      return AuthenticationService.resendVerificationEmailAuthResendVerificationEmailPost(request);
+    mutationFn: async (username: string) => {
+      return AuthenticationService.resendVerificationEmailAuthResendVerificationEmailPost(username);
     },
     onSuccess: () => {
       addToast({ type: 'success', content: 'Verification email sent. Please check your inbox.' });
@@ -121,7 +120,7 @@ const LoginForm = () => {
               },
             )}
           >
-            Sign in
+            {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
           </button>
         </div>
       </form>
@@ -129,10 +128,21 @@ const LoginForm = () => {
       {errorMessage && <div className="mt-2 text-red-500">{errorMessage}</div>}
 
       {showResendVerification && (
-        <div className="mt-4">
-          <p>Your email is not verified. Would you like to resend the verification email?</p>
-          <button onClick={handleResendVerification} className="mt-2 text-blue-600 hover:text-blue-800">
-            Resend Verification Email
+        <div className="mt-4 p-4 bg-blue-50 rounded-md border border-blue-200">
+          <p className="text-sm text-blue-700">
+            Your email is not verified. Would you like to resend the verification email?
+          </p>
+          <button
+            onClick={handleResendVerification}
+            className={classNames(
+              'mt-2 w-full text-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
+              {
+                'opacity-50 cursor-not-allowed': resendVerificationMutation.isPending,
+              },
+            )}
+            disabled={resendVerificationMutation.isPending}
+          >
+            {resendVerificationMutation.isPending ? 'Sending...' : 'Resend Verification Email'}
           </button>
         </div>
       )}

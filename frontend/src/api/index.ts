@@ -17,7 +17,6 @@ export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { LoginRequest } from './models/LoginRequest';
 export type { PasswordChangeRequest } from './models/PasswordChangeRequest';
 export type { RegistrationRequest } from './models/RegistrationRequest';
-export type { ResendVerificationEmailRequest } from './models/ResendVerificationEmailRequest';
 export type { SessionCounter } from './models/SessionCounter';
 export type { SessionCounterCreate } from './models/SessionCounterCreate';
 export type { SessionCounterUpdate } from './models/SessionCounterUpdate';

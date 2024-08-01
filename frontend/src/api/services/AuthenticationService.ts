@@ -6,7 +6,6 @@ import type { EmailVerificationRequest } from '../models/EmailVerificationReques
 import type { LoginRequest } from '../models/LoginRequest';
 import type { PasswordChangeRequest } from '../models/PasswordChangeRequest';
 import type { RegistrationRequest } from '../models/RegistrationRequest';
-import type { ResendVerificationEmailRequest } from '../models/ResendVerificationEmailRequest';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -90,18 +89,19 @@ export class AuthenticationService {
     }
     /**
      * Resend Verification Email
-     * @param requestBody
+     * @param username
      * @returns any Successful Response
      * @throws ApiError
      */
     public static resendVerificationEmailAuthResendVerificationEmailPost(
-        requestBody: ResendVerificationEmailRequest,
+        username: string,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/auth/resend-verification-email',
-            body: requestBody,
-            mediaType: 'application/json',
+            query: {
+                'username': username,
+            },
             errors: {
                 422: `Validation Error`,
             },
