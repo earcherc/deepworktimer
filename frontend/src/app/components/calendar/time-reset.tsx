@@ -2,7 +2,7 @@
 
 import { useTimeManagement } from '@hooks/useTimeManagement';
 
-const TimeReset = ({ currentDate, onClick }: { currentDate: Date | null, onClick: () => void }) => {
+const TimeReset = ({ currentDate, onClick }: { currentDate: Date | null; onClick: () => void }) => {
   const { formattedTime } = useTimeManagement(currentDate);
 
   if (!currentDate) return null;
