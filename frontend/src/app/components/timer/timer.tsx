@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Cog6ToothIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
@@ -47,15 +47,14 @@ type TimerState = {
   isActive: boolean;
   isBreakMode: boolean;
   studyBlockId: number | null;
-  dummyActive: boolean;
 };
 
 const Timer: React.FC = () => {
   const { addToast } = useToast();
-  const handleMutationError = createMutationErrorHandler(addToast);
   const { showModal } = useModalContext();
+  const handleMutationError = createMutationErrorHandler(addToast);
   const queryClient = useQueryClient();
-  const dateRange = useMemo(() => getTodayDateRange(), []);
+  const dateRange = getTodayDateRange();
   const [audio, setAudio] = useState<{
     break: HTMLAudioElement | null;
     interval: HTMLAudioElement | null;
@@ -72,7 +71,6 @@ const Timer: React.FC = () => {
     isActive: false,
     isBreakMode: false,
     studyBlockId: null,
-    dummyActive: false,
   });
   const [initialTimeSet, setInitialTimeSet] = useState(false);
 
@@ -104,19 +102,11 @@ const Timer: React.FC = () => {
     queryFn: () => TimeSettingsService.readTimeSettingsListTimeSetttingsGet(),
   });
 
-  // Memoized values
-  const activeCategory = useMemo(() => categoriesData?.find((cat) => cat.is_selected), [categoriesData]);
-  const activeDailyGoal = useMemo(() => dailyGoalsData?.find((goal) => goal.is_selected), [dailyGoalsData]);
-  const activeSessionCounter = useMemo(
-    () => sessionCountersData.find((counter) => counter.is_selected),
-    [sessionCountersData],
-  );
-  const activeTimeSettings = useMemo(
-    () => timeSettingsData?.find((settings) => settings.is_selected),
-    [timeSettingsData],
-  );
+  const activeCategory = categoriesData?.find((cat) => cat.is_selected);
+  const activeDailyGoal = dailyGoalsData?.find((goal) => goal.is_selected);
+  const activeSessionCounter = sessionCountersData?.find((counter) => counter.is_selected);
+  const activeTimeSettings = timeSettingsData?.find((settings) => settings.is_selected);
 
-  // Mutations
   const createStudyBlockMutation = useMutation({
     mutationFn: StudyBlocksService.createStudyBlockStudyBlocksPost,
     onSuccess: (data) => {
@@ -184,7 +174,6 @@ const Timer: React.FC = () => {
     }
   }, []);
 
-  // Effects and callbacks
   useEffect(() => {
     const workerCode = `
       let interval = null;
@@ -227,7 +216,6 @@ const Timer: React.FC = () => {
         }
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const playChime = useCallback(
@@ -248,12 +236,6 @@ const Timer: React.FC = () => {
         await updateSessionCounterMutation.mutateAsync({
           id: activeSessionCounter.id,
           completed: newCompleted,
-        });
-      } else {
-        await createSessionCounterMutation.mutateAsync({
-          completed: newCompleted,
-          target: 5,
-          is_selected: true,
         });
       }
 
@@ -277,7 +259,6 @@ const Timer: React.FC = () => {
       activeTimeSettings?.long_break_duration,
       activeTimeSettings?.short_break_duration,
       updateSessionCounterMutation,
-      createSessionCounterMutation,
     ],
   );
 
@@ -293,15 +274,9 @@ const Timer: React.FC = () => {
           id: activeSessionCounter.id,
           completed: activeSessionCounter.completed + 1,
         });
-      } else {
-        await createSessionCounterMutation.mutateAsync({
-          completed: 1,
-          target: 5,
-          is_selected: true,
-        });
       }
     },
-    [updateStudyBlockMutation, activeSessionCounter, updateSessionCounterMutation, createSessionCounterMutation],
+    [updateStudyBlockMutation, activeSessionCounter, updateSessionCounterMutation],
   );
 
   const stopTimer = useCallback(
@@ -435,7 +410,6 @@ const Timer: React.FC = () => {
         studyBlockId: incompleteBlock.id,
         time: millisecondsToSeconds(newTime),
         isActive: true,
-        dummyActive: !activeSessionCounter,
       }));
       setMode(incompleteBlock.is_countdown ? TimerMode.Countdown : TimerMode.OpenSession);
       if (workerRef.current) workerRef.current.postMessage('start');
@@ -486,19 +460,27 @@ const Timer: React.FC = () => {
       await Notification.requestPermission();
     }
 
+    if (!activeSessionCounter) {
+      await createSessionCounterMutation.mutateAsync({
+        completed: 0,
+        target: 5,
+        is_selected: true,
+      });
+    }
+
     const newBlock = await createStudyBlockMutation.mutateAsync({
       is_countdown: mode === TimerMode.Countdown,
       daily_goal_id: activeDailyGoal?.id,
       study_category_id: activeCategory?.id,
     });
 
+    if (workerRef.current) workerRef.current.postMessage('start');
+
     setTimerState((prev) => ({
       ...prev,
       isActive: true,
       studyBlockId: newBlock.id,
-      dummyActive: !activeSessionCounter,
     }));
-    if (workerRef.current) workerRef.current.postMessage('start');
   };
 
   const toggleMode = () => {
@@ -582,8 +564,7 @@ const Timer: React.FC = () => {
           <SessionCounter
             target={activeSessionCounter ? activeSessionCounter.target : 5}
             completed={activeSessionCounter ? activeSessionCounter.completed : 0}
-            isActive={activeSessionCounter ? timerState.isActive : timerState.dummyActive}
-            isDummy={!activeSessionCounter}
+            isActive={!!activeSessionCounter}
             onReset={resetSessionCounter}
             onClick={openSessionsModal}
           />
