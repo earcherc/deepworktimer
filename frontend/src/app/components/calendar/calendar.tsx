@@ -2,7 +2,7 @@
 
 import { ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { addDays, endOfDay, format, formatISO, isAfter, isToday, startOfDay, subDays } from 'date-fns';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useModalContext } from '@context/modal/modal-context';
 import CurrentTimeIndicator from './current-time-indicator';
 import { calculateGridPosition } from '@utils/timeUtils';
@@ -18,9 +18,12 @@ const ZOOM_STEP = 0.5;
 const MINUTES_PER_DAY = 1440;
 const HOURS_PER_DAY = 24;
 
-interface CalendarProps {}
+type DateRange = {
+  start_time: string;
+  end_time: string;
+};
 
-const Calendar: React.FC<CalendarProps> = () => {
+const Calendar: React.FC = () => {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,7 +33,15 @@ const Calendar: React.FC<CalendarProps> = () => {
     setCurrentDate(new Date());
   }, []);
 
-  const dateRange = useMemo(() => {
+  useEffect(() => {
+    scrollToCurrentTime();
+  }, []);
+
+  const resetDate = () => {
+    setCurrentDate(new Date());
+  };
+
+  const getDateRange = (currentDate: Date | null): DateRange | null => {
     if (!currentDate) return null;
     const startDate = startOfDay(currentDate);
     const endDate = endOfDay(currentDate);
@@ -38,7 +49,9 @@ const Calendar: React.FC<CalendarProps> = () => {
       start_time: formatISO(startDate),
       end_time: formatISO(endDate),
     };
-  }, [currentDate]);
+  };
+
+  const dateRange = getDateRange(currentDate);
 
   const { data: studyBlocksData } = useQuery<StudyBlock[]>({
     queryKey: ['studyBlocks', dateRange?.start_time, dateRange?.end_time],
@@ -47,15 +60,11 @@ const Calendar: React.FC<CalendarProps> = () => {
     enabled: !!dateRange,
   });
 
-  const sortedStudyBlocks = useMemo(() => {
+  const sortedStudyBlocks = (): StudyBlock[] => {
     return [...(studyBlocksData || [])].sort(
       (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
     );
-  }, [studyBlocksData]);
-
-  const resetDate = () => {
-    setCurrentDate(new Date());
-  };
+  }
 
   const scrollToCurrentTime = () => {
     if (containerRef.current) {
@@ -66,10 +75,6 @@ const Calendar: React.FC<CalendarProps> = () => {
         scrollRatio * containerRef.current.scrollHeight - containerRef.current.clientHeight / 2;
     }
   };
-
-  useEffect(() => {
-    scrollToCurrentTime();
-  }, []);
 
   const calculateCenter = () => {
     if (containerRef.current) {
@@ -169,7 +174,7 @@ const Calendar: React.FC<CalendarProps> = () => {
                   ))}
                 </div>
                 <ol className="col-start-1 col-end-2 row-start-1 relative h-full">
-                  {sortedStudyBlocks?.map((block) => (
+                  {sortedStudyBlocks().map((block) => (
                     <StudyBlockComponent
                       key={block.id}
                       block={block}
