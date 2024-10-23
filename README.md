@@ -10,14 +10,11 @@ This 'Deep Work' companion app is designed to help users achieve optimal deep wo
 
 - **Next.js**: Utilized within a development Docker container for a consistent development environment and seamless SSR/SSG capabilities.
 - **Jotai**: For efficient and straightforward state management.
-- **React Hook Form**: To manage form states with minimal re-rendering.
-- **URQL**: For handling GraphQL data fetching and caching.
 - **TailwindCSS**: For a utility-first approach to styling.
-- **GraphQL**: Used as the querying language to communicate with the backend.
+- **React Query**: For network requests, state management, caching.
 
 ### Backend
 
-- **GraphQL**: Serves as the main API endpoint for front-end data querying.
 - **FastAPI**: Running inside a development Docker container, providing a high-performance, easy-to-use framework for APIs.
 - **Redis**: Used for caching and session management.
 - **Session-Based Authentication**: To securely manage user sessions.
@@ -31,19 +28,3 @@ This 'Deep Work' companion app is designed to help users achieve optimal deep wo
 - **Metrics Tracking**: Insights into productivity patterns and focus sessions.
 - **Friend Connectivity**: Connect with friends, share progress, and stay motivated.
 - **Customizable Routines**: Tailor your deep work routine to fit your personal preferences and schedule.
-
-
-### Nginx Commands
-
-- Start Nginx: sudo systemctl start nginx
-- Stop Nginx: sudo systemctl stop nginx
-- Restart Nginx: sudo systemctl restart nginx
-- Reload Nginx configuration: sudo systemctl reload nginx
-- Test Nginx configuration: sudo nginx -t
-- View Nginx status: sudo systemctl status nginx
-- View Nginx error log: sudo tail -f /var/log/nginx/error.log
-- View Nginx access log: sudo tail -f /var/log/nginx/access.log
-- Edit Nginx main configuration: sudo nano /etc/nginx/nginx.conf
-- List enabled sites: ls -l /etc/nginx/sites-enabled/
-- Enable a site: sudo ln -s /etc/nginx/sites-available/site /etc/nginx/sites-enabled/
-- Disable a site: sudo rm /etc/nginx/sites-enabled/site
