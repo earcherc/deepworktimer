@@ -1,6 +1,6 @@
 'use client';
 
-import { ApiError, AuthenticationService } from '@api';
+import { ApiError, AuthenticationService, RegistrationRequest } from '@api';
 import useToast from '@context/toasts/toast-context';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -18,7 +18,7 @@ const RegistrationForm = () => {
   const router = useRouter();
 
   const registrationMutation = useMutation({
-    mutationFn: async (userData: { username: string; email: string; password: string }) => {
+    mutationFn: async (userData: RegistrationRequest) => {
       const response = await AuthenticationService.registerAuthRegisterPost(userData);
       return response;
     },
