@@ -5,17 +5,15 @@ import React from 'react';
 interface SessionCounterProps {
   target: number;
   completed: number;
-  isActive: boolean;
-  isDummy?: boolean;
-  onReset?: () => void;
-  onClick?: () => void;
+  isActive: boolean | undefined;
+  onReset: () => void;
+  onClick: () => void;
 }
 
 const SessionCounter: React.FC<SessionCounterProps> = ({
   target,
   completed,
   isActive,
-  isDummy = false,
   onReset,
   onClick,
 }) => {
