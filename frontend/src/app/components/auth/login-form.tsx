@@ -1,6 +1,6 @@
 'use client';
 
-import { ApiError, AuthenticationService } from '@api';
+import { ApiError, AuthenticationService, LoginRequest } from '@api';
 import useToast from '@context/toasts/toast-context';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -17,7 +17,7 @@ const LoginForm = () => {
   const router = useRouter();
 
   const loginMutation = useMutation({
-    mutationFn: async (credentials: { username: string; password: string }) => {
+    mutationFn: async (credentials: LoginRequest) => {
       const response = await AuthenticationService.loginAuthLoginPost(credentials);
       return response;
     },
