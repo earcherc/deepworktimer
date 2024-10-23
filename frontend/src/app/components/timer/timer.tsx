@@ -564,7 +564,7 @@ const Timer: React.FC = () => {
           <SessionCounter
             target={activeSessionCounter ? activeSessionCounter.target : 5}
             completed={activeSessionCounter ? activeSessionCounter.completed : 0}
-            isActive={!!activeSessionCounter}
+            isActive={timerState.isActive}
             onReset={resetSessionCounter}
             onClick={openSessionsModal}
           />
