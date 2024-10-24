@@ -131,14 +131,15 @@ const Calendar: React.FC = () => {
         >
           <ChevronLeftIcon className="w-5 h-5" />
         </button>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
           {(!currentDate || !isToday(currentDate)) && (
             <button
               onClick={resetDate}
-              className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="flex items-center items-center flex-nowrap p-1 px-2 rounded bg-gray-100 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
               title="Reset to today"
             >
-              <ArrowPathIcon className="w-5 h-5" />
+              <ArrowPathIcon className="w-4 h-4 mr-1" />
+              <span className='text-xs font-semibold'>Today</span>
             </button>
           )}
           <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
