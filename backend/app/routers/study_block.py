@@ -1,9 +1,10 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import and_, or_
 
 
 from ..database import get_session
@@ -64,23 +65,37 @@ async def query_study_blocks(
     db: AsyncSession = Depends(get_session),
     user_id: int = Depends(get_current_user_id),
 ):
-    db_query = select(StudyBlock).where(StudyBlock.user_id == user_id)
-
+    conditions = [StudyBlock.user_id == user_id]
+    
     if query.start_time:
         start_time = datetime.fromisoformat(query.start_time)
-        db_query = db_query.where(StudyBlock.start_time >= start_time)
+        conditions.append(
+            or_(
+                StudyBlock.start_time >= start_time,
+                StudyBlock.end_time == None
+            )
+        )
     if query.end_time:
         end_time = datetime.fromisoformat(query.end_time)
-        db_query = db_query.where(StudyBlock.start_time <= end_time)
+        conditions.append(
+            or_(
+                StudyBlock.start_time <= end_time,
+                StudyBlock.end_time == None
+            )
+        )
 
-    db_query = db_query.order_by(StudyBlock.start_time.desc())
+    final_query = (
+        select(StudyBlock)
+        .where(and_(*conditions))
+        .order_by(StudyBlock.start_time.desc())
+    )
 
     if query.skip is not None:
-        db_query = db_query.offset(query.skip)
+        final_query = final_query.offset(query.skip)
     if query.limit is not None:
-        db_query = db_query.limit(query.limit)
+        final_query = final_query.limit(query.limit)
 
-    result = await db.execute(db_query)
+    result = await db.execute(final_query)
     return result.scalars().all()
 
 
